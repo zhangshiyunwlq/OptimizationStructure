@@ -1,0 +1,51 @@
+{
+    "Section_types": {
+        "0": null,
+        "1": {
+            "type_name": "Channel",
+            "section_number": {
+                "0": null,
+                "1": "待你补充，把关键参数写出来，例如b3w2t5等等"
+            },
+            "section_properties": {
+                "0": null,
+                "Area": "后续有空，可以把截面相应的属性补充上"
+            }
+        },
+        "2": {
+            "type_name": "Rectangular",
+            "section_numbers": {
+                "0": null,
+                "1": "待你补充，把关键参数写出来，例如b3w2t5等等"
+            },
+            "section_properties": {
+                "0": null,
+                "1": "后续有空，可以把截面相应的属性补充上"
+            }
+        },
+        "3": {
+            "type_name": "I-type",
+            "section_numbers": {
+                "0": null,
+                "1": "待你补充，把关键参数写出来，例如b3w2t5等等"
+            },
+            "section_properties": {
+                "0": null,
+                "1": "后续有空，可以把截面相应的属性补充上"
+            }
+        }
+    },
+    "Materials": {
+        "0": null,
+        "1": {
+            "name": "Q355",
+            "properties": {
+                "E": 1111,
+                "r": 1111,
+                "density": 1111,
+                "Others": "待丰富"
+            }
+        }
+    }
+
+}
