@@ -253,7 +253,8 @@ def output_GA_in(info,var_num,num_room_type,num):
         outzhongqun.write(loc, 0, f'{[i]}')
         for j in range(len(pop_zhongqun_all[i])):
             loc += 1
-            outzhongqun.write(loc, 0, f'{pop_zhongqun_all[i][j]}')
+            for z in range(len(pop_zhongqun_all[i][j])):
+                outzhongqun.write(loc, z, pop_zhongqun_all[i][j][z])
         loc += 1
     outzhongqunall = wb1.add_sheet('pop_zhongqun_all_2')
     loc = 0
@@ -261,7 +262,8 @@ def output_GA_in(info,var_num,num_room_type,num):
         outzhongqunall.write(loc, 0, f'{[i]}')
         for j in range(len(pop_zhongqun_all_2[i])):
             loc += 1
-            outzhongqunall.write(loc, 0, f'{pop_zhongqun_all_2[i][j]}')
+            for z in range(len(pop_zhongqun_all_2[i][j])):
+                outzhongqunall.write(loc, z, pop_zhongqun_all_2[i][j][z])
         loc += 1
 
     outpopfitness = wb1.add_sheet('pop_firness_all')
@@ -271,7 +273,7 @@ def output_GA_in(info,var_num,num_room_type,num):
         loc += 1
         for j in range(len(pop_all_fitness[0])):
 
-            outpopfitness.write(loc, j, f'{pop_all_fitness[i][j]}')
+            outpopfitness.write(loc, j, pop_all_fitness[i][j])
         loc += 1
 
     outpopweight = wb1.add_sheet('pop_weight_all')
@@ -298,19 +300,19 @@ def output_GA_in(info,var_num,num_room_type,num):
         for z in range(len(beam_up_all[0])):
             loc += 1
             for j in range(len(beam_up_all[0][0])):
-                outpopbeam.write(loc, j, f'{beam_up_all[i][z][j]}')
+                outpopbeam.write(loc, j, beam_up_all[i][z][j])
         loc += 1
     outmaxfitness = wb1.add_sheet('max_fitness')
     loc = 0
     outmaxfitness.write(loc, 0, 'max_fitness_all')
     loc += 1
     for i in range(len(max_ru)):
-        outmaxfitness.write(loc, i, f'{max_ru[i]}')
+        outmaxfitness.write(loc, i, max_ru[i])
     loc += 1
     outmaxfitness.write(loc, 0, 'min_weight_all')
     loc += 1
     for i in range(len(weight_min)):
-        outmaxfitness.write(loc, i, f'{weight_min[i]}')
+        outmaxfitness.write(loc, i, weight_min[i])
 
     wb1.save(f'out_sap_run_{var_num}_{num_room_type}_{num}.xls')
 
@@ -590,8 +592,7 @@ def mulitrun_GA(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weigh
 
 def thread_sap(mySapObject_name,SapModel_name,ModelPath_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
 
-    # for i in range(2):
-    #     fit1, weight1,clo_up_val, beam_up_val = mulit_GA(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],[pop_room],[pop_room_label])
+
     pop_n = [0 for i in range(len(pop2[0]))]
     if len(memory_pools_all)==0:
         memory_pools_all.append(pop_n)
@@ -667,17 +668,17 @@ def Run_GA_allstory2_divided_mulit(POP_SIZE_1, DNA_SIZE_1, CROSSOVER_RATE_1, MUT
     pop8 = copy.deepcopy(pop2)
 
 
-    wb2_examine = openpyxl.Workbook()
-    # wb2_examine = openpyxl.load_workbook('examine_run.xlsx')
-    wb2_pop1_all = wb2_examine.create_sheet('pop1_all', index=0)
-    wb2_pop3_all = wb2_examine.create_sheet('pop3_all', index=1)
-
-    loc_2 = 1
-    for i in range(len(pop1)):
-        _ = wb2_pop1_all.cell(row=loc_2, column=1, value=f'{pop1[i]}')
-        _ = wb2_pop3_all.cell(row=loc_2, column=1, value=f'{pop3[i]}')
-        loc_2 += 1
-    loc_2 += 1
+    # wb2_examine = openpyxl.Workbook()
+    # # wb2_examine = openpyxl.load_workbook('examine_run.xlsx')
+    # wb2_pop1_all = wb2_examine.create_sheet('pop1_all', index=0)
+    # wb2_pop3_all = wb2_examine.create_sheet('pop3_all', index=1)
+    #
+    # loc_2 = 1
+    # for i in range(len(pop1)):
+    #     _ = wb2_pop1_all.cell(row=loc_2, column=1, value=f'{pop1[i]}')
+    #     _ = wb2_pop3_all.cell(row=loc_2, column=1, value=f'{pop3[i]}')
+    #     loc_2 += 1
+    # loc_2 += 1
 
     memory_pools_all = []
     memory_pools_fit = []
@@ -729,12 +730,13 @@ def Run_GA_allstory2_divided_mulit(POP_SIZE_1, DNA_SIZE_1, CROSSOVER_RATE_1, MUT
         if run_time %5==0:
             print(run_time)
         pop1, pop3 = decoding(pop2, num_var, num_room_type, labels)
-        for i in range(len(pop1)):
-            _ = wb2_pop1_all.cell(row=loc_2, column=1, value=f'{pop1[i]}')
-            _ = wb2_pop3_all.cell(row=loc_2, column=1, value=f'{pop3[i]}')
-            loc_2 += 1
-        loc_2 += 1
-        wb2_examine.save('examine_run.xlsx')
+        # for i in range(len(pop1)):
+        #     _ = wb2_pop1_all.cell(row=loc_2, column=1, value=f'{pop1[i]}')
+        #     _ = wb2_pop3_all.cell(row=loc_2, column=1, value=f'{pop3[i]}')
+        #     loc_2 += 1
+        # loc_2 += 1
+        # wb2_examine.save('examine_run.xlsx')
+        #
         aaa = []
         aaa.append(pop1[0])
         pop3_ga = []
@@ -747,16 +749,16 @@ def Run_GA_allstory2_divided_mulit(POP_SIZE_1, DNA_SIZE_1, CROSSOVER_RATE_1, MUT
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
 
-    wb_clear_1 = openpyxl.load_workbook('examine_run.xlsx')
-    ws_clear_1 = wb_clear_1['pop1_all']
-    for row in ws_clear_1:
-        for cell in row:
-            cell.value = None
-    ws_clear_3 = wb_clear_1['pop3_all']
-    for row in ws_clear_3:
-        for cell in row:
-            cell.value = None
-    wb2_examine.save('examine_run.xlsx')
+    # wb_clear_1 = openpyxl.load_workbook('examine_run.xlsx')
+    # ws_clear_1 = wb_clear_1['pop1_all']
+    # for row in ws_clear_1:
+    #     for cell in row:
+    #         cell.value = None
+    # ws_clear_3 = wb_clear_1['pop3_all']
+    # for row in ws_clear_3:
+    #     for cell in row:
+    #         cell.value = None
+    # wb2_examine.save('examine_run.xlsx')
 
     print(f"最小值截面编码", pop1[0])
     print(f"最小值染色体", pop2[0])
