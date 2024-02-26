@@ -119,6 +119,26 @@ def mulitrun_GA(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_
             memory_pools_col.append(1)
             memory_pools_beam.append(1)
 
+#不加记忆池
+def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
+    while True:
+        if q.empty():
+            break
+
+        time = q.get()
+        pop = pop1[time]
+        pop_room_label = pop3[time]
+        pop2= pop_all[time]
+
+        res1, res2 = fun(pop,pop_room_label)
+
+        # num3 += 1
+        weight_1[time] = res2
+        col_up[time] = 1
+        beam_up[time] = 1
+        result[time] = res1
+
+
 def thread_sap(num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
 
 
@@ -135,7 +155,7 @@ def thread_sap(num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,memory_pools_al
     for i in range(len(pop1)):
         q.put(i)
     for i in range(num_thread):
-        t = threading.Thread(target=mulitrun_GA, args=(pop1,pop2,pop3,q,
+        t = threading.Thread(target=mulitrun_GA_1, args=(pop1,pop2,pop3,q,
                             result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam))
         t.start()
         threads.append(t)
@@ -156,7 +176,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
     for i in range(len(fit_ini)):
         list_new.append(lst[sort_num[i]])
     for i in range(len(list_new)):
-        list_new[i] = m.e ** (list_new[i] * 1.2)
+        list_new[i] = m.e ** (list_new[i] * 5)
     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
                            p=np.array(list_new) / (sum(list_new)))
     pop2 = np.zeros((POP_SIZE, len(pop[0])))
@@ -277,6 +297,7 @@ def run(num_var,num_room_type,x,labels):
 
         if run_time %5==0:
             print(run_time)
+            print(f'记忆池数量:{len(memory_pools_all)}')
         pop1, pop3 = decoding(pop2, num_var, num_room_type, labels)
 
         aaa = []
@@ -388,7 +409,7 @@ corridor_width = 4000
 POP_SIZE = 50
 DNA_SIZE = 2*story_num*3
 CROSSOVER_RATE = 0.35
-MUTATION_RATE = 0.4
+MUTATION_RATE = 0.1
 N_GENERATIONS = 100
 num_thread = 25
 min_genera = []
