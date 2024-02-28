@@ -255,7 +255,7 @@ def run(num_var,num_room_type,x,labels):
     pop_all_weight=[]
     pop_all_fitness=[]
     weight_min=[]
-    max_ru = []
+    min_ru = []
     sap_run_time = 0
     for run_time in range(N_GENERATIONS):
         pop_zhongqun_all.append(pop1)
@@ -281,7 +281,7 @@ def run(num_var,num_room_type,x,labels):
         mm2 = pop1[mm]# 最小值对应pop1编码
         mm2_all = pop2[mm]# 最小值对应pop2编码
         mm2_all3 = pop3[mm]  # 最小值对应pop2编码
-        max_ru.append(min(fitness2))# 统计历代最小值
+        min_ru.append(min(fitness2))# 统计历代最小值
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
@@ -311,7 +311,7 @@ def run(num_var,num_room_type,x,labels):
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
 
-    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,max_ru,weight_min,pop_all_fitness,pop_all_weight)
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight)
 
 
 
@@ -410,7 +410,7 @@ POP_SIZE = 50
 DNA_SIZE = 2*story_num*3
 CROSSOVER_RATE = 0.35
 MUTATION_RATE = 0.1
-N_GENERATIONS = 100
+N_GENERATIONS = 10
 num_thread = 25
 min_genera = []
 
@@ -424,3 +424,8 @@ for i in range(12):
     labels.extend(label)
 
 zhan,jia,qi=run(num_var,num_room_type,x,labels)
+
+
+
+
+

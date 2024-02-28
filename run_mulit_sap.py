@@ -628,7 +628,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
     for i in range(len(fit_ini)):
         list_new.append(lst[sort_num[i]])
     for i in range(len(list_new)):
-        list_new[i] = m.e ** (list_new[i] * 1.2)
+        list_new[i] = m.e ** (list_new[i] * 0.6)
     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
                            p=np.array(list_new) / (sum(list_new)))
     pop2 = np.zeros((POP_SIZE, len(pop[0])))
@@ -834,8 +834,8 @@ room_indx = model_data[6]
 # case 1 按照区域分组优化
 POP_SIZE = 50
 DNA_SIZE = 2*story_num*3
-CROSSOVER_RATE = 0.35
-MUTATION_RATE = 0.4
+CROSSOVER_RATE = 0.25
+MUTATION_RATE = 0.1
 N_GENERATIONS = 100
 num_thread = 10
 min_genera = []
@@ -844,7 +844,7 @@ min_genera = []
 # num_room_type = 1
 x = np.linspace(0, 12, 13)
 for i in range(3):
-    for num_var in [3,4,5,6]:
+    for num_var in [8]:
         for num_room_type in [1]:
             # 创建多线程sap
             mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
