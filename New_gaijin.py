@@ -8,10 +8,15 @@ import threading
 import queue
 import math as m
 import os
+import sys
 import xlrd
 import matplotlib.pyplot as plt
-
-
+import data_to_json as dj
+import modular_utils as md
+import model_to_sap as ms
+import sap_run as sr
+import configparser
+import comtypes.client
 def fun(a,b):
     pop_1=copy.deepcopy(a)
     pop_2=copy.deepcopy(b)
@@ -121,8 +126,85 @@ def mulitrun_GA(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_
             memory_pools_col.append(1)
             memory_pools_beam.append(1)
 
+def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
+
+    sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                      cfg_file_name="Steel_section_data.ini")
+    modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
+    # 按房间分好节点
+    modulars_of_building = modular_building.building_modulars
+    modular_nums = len(labels)
+    modular_infos = {}
+    # 每个房间定义梁柱截面信息
+    sr.run_column_room_story5(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    #
+    for i in range(len(modulars_of_building)):
+        modulars_of_building[i].Add_Info_And_Update_Modular(
+            # modular_infos[modulars_of_building[i].modular_label - 1])
+            modular_infos[i])
+    modular_building.Building_Assembling(modulars_of_building)
+
+    all_data = ms.Run_GA_sap_2(mySapObject, ModelPath, SapModel, modular_building,pop_room_label,200,modular_length_num,story_num)
+    aa, bb, cc, dd, ee, ff, gg, hh, ii = all_data
+
+    ret = SapModel.SetModelIsLocked(False)
+    return aa,bb,cc,dd,ee,ff,gg,hh,ii
+
+def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
+    g_col_all = 0
+    g_beam_all = 0
+    Y_dis_radio_all = 0
+    Y_interdis_all = 0
+    Y_interdis_radio_all = 0
+    floor_radio = 0
+    for i in range(len(g_col)):
+        if g_col[i]<= 0:
+            g_col[i] = 0
+        else:
+            g_col[i] = g_col[i]
+        g_col_all += g_col[i]
+    for i in range(len(g_beam)):
+        if g_beam[i]<= 0:
+            g_beam[i] = 0
+        else:
+            g_beam[i] = g_beam[i]
+        g_beam_all += g_beam[i]
+    #y dis ratio
+    for i in range(len(dis_all[5])):
+        if dis_all[5][i] <= 1.5 and dis_all[5][i] >= -1.5:
+            dis_all[5][i] = 0
+        else:
+            dis_all[5][i] = dis_all[5][i]
+        Y_dis_radio_all += dis_all[5][i]
+    # y interdis max
+    for i in range(len(dis_all[7])):
+        if dis_all[7][i] <= 0.004 and dis_all[7][i] >= -0.004:
+            dis_all[7][i] = 0
+        else:
+            dis_all[7][i] = dis_all[7][i]
+        Y_interdis_all += dis_all[7][i]
+    # y interdis radio
+    for i in range(len(dis_all[11])):
+        if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
+            dis_all[11][i] = 0
+        else:
+            dis_all[11][i] = dis_all[11][i]
+        Y_interdis_radio_all += dis_all[11][i]
+    # x interdis ratio
+    for i in range(len(all_force[10])):
+        if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
+            all_force[10][i] = 0
+        else:
+            all_force[10][i] = all_force[10][i]
+        floor_radio += all_force[10][i]
+
+    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
+    result = weight + G_value
+
+    return result,weight
+
 #不加记忆池
-def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
+def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up):
     while True:
         if q.empty():
             break
@@ -132,33 +214,27 @@ def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pool
         pop_room_label = pop3[time]
         pop2= pop_all[time]
 
-        res1, res2 = fun(pop,pop_room_label)
-
+        we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel, pop,
+                                                                                 pop_room_label)
+        res1, res2 = Fun_1(we, co, be, dis_all, force_all, 10000)
         # num3 += 1
         weight_1[time] = res2
-        col_up[time] = 1
-        beam_up[time] = 1
+        col_up[time] = co
+        beam_up[time] = be
         result[time] = res1
 
 
-def thread_sap(num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
+def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up):
 
 
     pop_n = [0 for i in range(len(pop2[0]))]
-    if len(memory_pools_all)==0:
-        memory_pools_all.append(pop_n)
-        memory_pools_fit.append(100000)
-        memory_pools_weight.append(100000)
-        memory_pools_col.append(100000)
-        memory_pools_beam.append(100000)
 
     q = queue.Queue()
     threads = []
     for i in range(len(pop1)):
         q.put(i)
     for i in range(num_thread):
-        t = threading.Thread(target=mulitrun_GA_1, args=(pop1,pop2,pop3,q,
-                            result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam))
+        t = threading.Thread(target=mulitrun_GA_1, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up))
         t.start()
         threads.append(t)
     for i in threads:
@@ -238,8 +314,75 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,3)
 
+def mulit_get_sap(num_thread):
+    case_name = []
+    APIPath_name = []
+    mySapObject_name = []
+    SapModel_name = []
+    ModelPath_name = []
+    for i in range(num_thread):
+        case_name.append(f"cases{i}")
+        APIPath_name.append(os.path.join(os.getcwd(), f"cases{i}"))
+        mySapObject_name.append(f"mySapObject{i}")
+        SapModel_name.append(f"SapModel{i}")
+        ModelPath_name.append(f"ModelPath{i}")
+        mySapObject_name[i], ModelPath_name[i], SapModel_name[i] = SAPanalysis_GA_run2(APIPath_name[i])
+    return mySapObject_name,ModelPath_name,SapModel_name
+def SAPanalysis_GA_run2(APIPath):
 
-def run(num_var,num_room_type,x,labels):
+
+    cfg = configparser.ConfigParser()
+    cfg.read("Configuration.ini", encoding='utf-8')
+    ProgramPath = cfg['SAP2000PATH']['dirpath']
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+
+    AttachToInstance = False
+    SpecifyPath = True
+
+    # ModelPath = os.path.join(APIPath, 'API_1-001.sdb')
+    helper = comtypes.client.CreateObject('SAP2000v1.Helper')
+    helper = helper.QueryInterface(comtypes.gen.SAP2000v1.cHelper)
+    if AttachToInstance:
+        # attach to a running instance of SAP2000
+        try:
+            # get the active SapObject
+            mySapObject = helper.Getobject("CSI.SAP2000.API.SapObject")
+        except (OSError, comtypes.COMError):
+            print("No running instance of the program found or failed to attach.")
+            sys.exit(-1)
+    else:
+        if SpecifyPath:
+            try:
+                # 'create an instance of the SAPObject from the specified path
+                mySapObject = helper.CreateObject(ProgramPath)
+            except (OSError, comtypes.COMError):
+                print("Cannot start a new instance of the program from" + ProgramPath)
+                sys.exit(-1)
+        else:
+            try:
+                # create an instance of the SapObject from the latest installed SAP2000
+                mySapObject = helper.CreateObjectProgID("CSI.SAP2000.API.SapObject")
+            except (OSError, comtypes.COMError):
+                print("Cannot start a new instance of the program")
+                sys.exit(-1)
+
+        # start SAP2000 application
+        mySapObject.ApplicationStart()
+
+    # create SapModel object
+    SapModel = mySapObject.SapModel
+    # initialize model
+    SapModel.InitializeNewModel()
+    ModelPath = os.path.join(APIPath, 'API_1-001.sdb')
+    # create new blank model
+    return mySapObject,ModelPath, SapModel
+
+
+def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels):
     pop2= generate_DNA_coding_story5(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
     pop1,pop3 = decoding(pop_decoe_1,num_var,num_room_type,labels)
@@ -269,8 +412,7 @@ def run(num_var,num_room_type,x,labels):
         weight = [0 for i in range(len(pop2))]
         clo_val = [0 for i in range(len(pop2))]
         beam_val = [0 for i in range(len(pop2))]
-        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val, memory_pools_all, memory_pools_fit,
-                   memory_pools_weight, memory_pools_col, memory_pools_beam)
+        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
 
         col_up_all.append(clo_up_1)
         beam_up_all.append(beam_up_1)
@@ -438,7 +580,8 @@ def draw_picture(name,title_name):
     plt.show()
 
 
-modular_length_num = 8
+'''model data'''
+# modular size
 modular_length = 8000
 modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
@@ -447,13 +590,27 @@ modular_dis = 400
 story_num = 6
 corridor_width = 4000
 
+# steel section information
+sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                  cfg_file_name="Steel_section_data.ini")
 
-POP_SIZE = 50
+# generate model
+model_data = dj.generate_model_data(modular_length,modular_width,modular_heigth,modular_length_num,modular_dis,story_num,corridor_width)
+nodes = model_data[0]
+edges_all = model_data[1]
+labels = model_data[2]
+cor_edges = model_data[3]
+joint_hor = model_data[4]
+joint_ver = model_data[5]
+room_indx = model_data[6]
+
+
+POP_SIZE = 3
 DNA_SIZE = 2*story_num*3
 CROSSOVER_RATE = 0.35
 MUTATION_RATE = 0.3
-N_GENERATIONS = 100
-num_thread = 25
+N_GENERATIONS = 3
+num_thread = 2
 min_genera = []
 
 x = np.linspace(0, 12, 13)
@@ -464,8 +621,8 @@ label=[1,1,1,1,2,2,2,2]
 labels = []
 for i in range(12):
     labels.extend(label)
+mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels)
 
-zhan,jia,qi=run(num_var,num_room_type,x,labels)
 
-
-draw_picture('name','title')
+# draw_picture('name','title')
