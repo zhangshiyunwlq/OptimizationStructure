@@ -17,6 +17,7 @@ import model_to_sap as ms
 import sap_run as sr
 import configparser
 import comtypes.client
+import gc
 def fun(a,b):
     pop_1=copy.deepcopy(a)
     pop_2=copy.deepcopy(b)
@@ -382,7 +383,7 @@ def SAPanalysis_GA_run2(APIPath):
     return mySapObject,ModelPath, SapModel
 
 
-def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels):
+def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_DNA_coding_story5(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
     pop1,pop3 = decoding(pop_decoe_1,num_var,num_room_type,labels)
@@ -454,14 +455,19 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
             pop1[0] = mm2
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
+    for i in range(len(mySapObject_name)):
+        ret = mySapObject_name[i].ApplicationExit(False)
+        SapModel_name[i] = None
+        mySapObject_name[i] = None
 
-    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight)
+
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
 
 
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
-def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight):
+def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight,time):
     wb1 = xlwt.Workbook()
     out_pop1_all = wb1.add_sheet('pop1_all')
     loc = 0
@@ -534,7 +540,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, 'run_infor')
+    path1 = os.path.join(APIPath, f'run_infor_{time}')
 
 
     wb1.save(f'{path1}.xls')
@@ -621,8 +627,9 @@ label=[1,1,1,1,2,2,2,2]
 labels = []
 for i in range(12):
     labels.extend(label)
-mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels)
-
+for time in range(2):
+    mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+    zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+    gc.collect()
 
 # draw_picture('name','title')
