@@ -18,6 +18,8 @@ import sap_run as sr
 import configparser
 import comtypes.client
 import gc
+import openpyxl
+
 def fun(a,b):
     pop_1=copy.deepcopy(a)
     pop_2=copy.deepcopy(b)
@@ -382,6 +384,80 @@ def SAPanalysis_GA_run2(APIPath):
     # create new blank model
     return mySapObject,ModelPath, SapModel
 
+def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
+    result = []
+    num1 = 0
+    num2 = 0
+    num3 = 0
+    weight_1 = []
+    col_up = []
+    beam_up = []
+    # if len(pop_all) ==0:
+    #     for time in range(len(pop1)):
+    #         pop = pop1[time]
+    #         pop_all.append(pop)
+    #         we,co,be,r1,r2,r3,r4 =Sap_analy(pop)
+    #         res1,res2 = Fun(we, co, be, 10000)
+    #         num3 += 1
+    #         weight_1.append(res2)
+    #         result.append(res1)
+    #         pop_fun_all.append(res1)
+    #         pop_weight_all.append(res2)
+    # else:
+    #     for time in range(len(pop1)):
+    #         pop = pop1[time]
+    #         for i in range(len(pop_all)):
+    #             if all(pop == pop_all[i]):
+    #                 num1 = 1
+    #                 num2 = i
+    #                 # result.append(pop_fun_all[i])
+    #         if num1 == 0:
+    #             pop_all.append(pop)
+    #             we, co, be, r1, r2, r3, r4 = Sap_analy(pop)
+    #             res1, res2 = Fun(we, co, be, 10000)
+    #             num3 += 1
+    #             weight_1.append(res2)
+    #             pop_weight_all.append(res2)
+    #             result.append(res1)
+    #             pop_fun_all.append(res1)
+    #         elif num1 == 1:
+    #             result.append(pop_fun_all[num2])
+    #             weight_1.append(pop_weight_all[num2])
+    wb2_examine_ind = openpyxl.Workbook()
+    # wb2_examine_ind = openpyxl.load_workbook('examine_individual.xlsx')
+    wb2_pop1_indivi = wb2_examine_ind.create_sheet('pop1_indivi', index=0)
+    wb2_pop3_indivi = wb2_examine_ind.create_sheet('pop3_indivi', index=1)
+    loc_3 = 1
+    for time in range(len(pop1)):
+        pop = pop1[time]
+        pop_room_label = pop3[time]
+        _ = wb2_pop1_indivi.cell(row=loc_3, column=1, value=f'{pop1[time]}')
+        _ = wb2_pop3_indivi.cell(row=loc_3, column=1, value=f'{pop3[time]}')
+        loc_3 += 1
+        wb2_examine_ind.save('examine_individual.xlsx')
+        # pop_all.append(pop)
+        we,co,be,r1,r2,r3,r4,dis_all,force_all =mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop,pop_room_label)
+        res1,res2 = Fun_1(we, co, be,dis_all,force_all, 10000)
+        # num3 += 1
+        weight_1.append(res2)
+        col_up.append(co)
+        beam_up.append(be)
+        result.append(res1)
+        # pop_fun_all.append(res1)
+        # pop_weight_all.append(res2)
+
+    wb_clear_in1 = openpyxl.load_workbook('examine_individual.xlsx')
+    ws_clear_in1 = wb_clear_in1['pop1_indivi']
+    for row in ws_clear_in1:
+        for cell in row:
+            cell.value = None
+    ws_clear_in3 = wb_clear_in1['pop3_indivi']
+    for row in ws_clear_in3:
+        for cell in row:
+            cell.value = None
+    wb2_examine_ind.save('examine_individual.xlsx')
+    return result,weight_1,col_up,beam_up
+
 
 def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_DNA_coding_story5(num_var, num_room_type, x)
@@ -450,11 +526,12 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
         pop3_ga = []
         pop3_ga.append(pop3[0])
         # if max1 <= m.log(GA(aaa,pop3_ga)[0][0]):
-        if min1 <=fun(pop1[0], pop3[0])[0]:
+        if min1 <=GA_examine(ModelPath_name[0],mySapObject_name[0], SapModel_name[0],aaa, pop3_ga)[0][0]:
             sap_run_time += 1
             pop1[0] = mm2
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
+
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
         SapModel_name[i] = None
