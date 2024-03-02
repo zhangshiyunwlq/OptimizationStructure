@@ -98,7 +98,7 @@ def run_column_room_story5(building_room_labels, pop_room_label, modular_all_num
             j = int(building_room_labels[i])-1
             modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', top_edge=sections_data_c1[
                 pop_num[z * 2 * 3 + 3 * j + 0]],bottom_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 1]],
-                column_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 2]])
+                column_edge=sections_data_c1[int(pop_num[z * 2 * 3 + 3 * j + 2]+7)])
 
             # elif pop_room_label[i] == 4 or pop_room_label[i] == 8 or pop_room_label[i] == 12 or pop_room_label[i] == 16:
             #     modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', column=sections_data_c1[

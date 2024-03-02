@@ -456,7 +456,7 @@ N_GENERATIONS = 100
 num_thread = 25
 min_genera = []
 
-x = np.linspace(0, 12, 13)
+x = np.linspace(0, 6, 7)
 num_var = 8
 num_room_type=1
 

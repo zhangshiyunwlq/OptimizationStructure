@@ -624,6 +624,9 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
 
 def draw_picture(name,title_name):
     value_str = []
+    # filename = f'E:\wlq_room\optimization of structure\out_all_infor\\run_infor_0.xls',
+    # formatting_info = True)
+
     wb = xlrd.open_workbook(
         filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor.xls',
         formatting_info=True)
