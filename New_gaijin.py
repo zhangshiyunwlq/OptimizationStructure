@@ -173,12 +173,12 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
             g_beam[i] = g_beam[i]
         g_beam_all += g_beam[i]
     #y dis ratio
-    for i in range(len(dis_all[5])):
-        if dis_all[5][i] <= 1.5 and dis_all[5][i] >= -1.5:
-            dis_all[5][i] = 0
-        else:
-            dis_all[5][i] = dis_all[5][i]
-        Y_dis_radio_all += dis_all[5][i]
+    # for i in range(len(dis_all[5])):
+    #     if dis_all[5][i] <= 1.5 and dis_all[5][i] >= -1.5:
+    #         dis_all[5][i] = 0
+    #     else:
+    #         dis_all[5][i] = dis_all[5][i]
+    #     Y_dis_radio_all += dis_all[5][i]
     # y interdis max
     for i in range(len(dis_all[7])):
         if dis_all[7][i] <= 0.004 and dis_all[7][i] >= -0.004:
@@ -186,20 +186,20 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         else:
             dis_all[7][i] = dis_all[7][i]
         Y_interdis_all += dis_all[7][i]
-    # y interdis radio
-    for i in range(len(dis_all[11])):
-        if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
-            dis_all[11][i] = 0
-        else:
-            dis_all[11][i] = dis_all[11][i]
-        Y_interdis_radio_all += dis_all[11][i]
-    # x interdis ratio
-    for i in range(len(all_force[10])):
-        if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
-            all_force[10][i] = 0
-        else:
-            all_force[10][i] = all_force[10][i]
-        floor_radio += all_force[10][i]
+    # # y interdis radio
+    # for i in range(len(dis_all[11])):
+    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
+    #         dis_all[11][i] = 0
+    #     else:
+    #         dis_all[11][i] = dis_all[11][i]
+    #     Y_interdis_radio_all += dis_all[11][i]
+    # # x interdis ratio
+    # for i in range(len(all_force[10])):
+    #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
+    #         all_force[10][i] = 0
+    #     else:
+    #         all_force[10][i] = all_force[10][i]
+    #     floor_radio += all_force[10][i]
 
     G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
     result = weight + G_value
@@ -257,7 +257,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
     for i in range(len(fit_ini)):
         list_new.append(lst[sort_num[i]])
     for i in range(len(list_new)):
-        list_new[i] = m.e ** (list_new[i] * 1)
+        list_new[i] = m.e ** (list_new[i] * 1.5)
     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
                            p=np.array(list_new) / (sum(list_new)))
     pop2 = np.zeros((POP_SIZE, len(pop[0])))
@@ -691,23 +691,23 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 
 
-POP_SIZE = 3
+POP_SIZE =50
 DNA_SIZE = 2*story_num*3
 CROSSOVER_RATE = 0.35
-MUTATION_RATE = 0.3
-N_GENERATIONS = 3
-num_thread = 2
+MUTATION_RATE = 0.15
+N_GENERATIONS = 100
+num_thread = 10
 min_genera = []
 
-x = np.linspace(0, 12, 13)
-num_var = 8
+x = np.linspace(0, 13, 14)
+num_var = 2
 num_room_type=1
 
 label=[1,1,1,1,2,2,2,2]
 labels = []
 for i in range(12):
     labels.extend(label)
-for time in range(2):
+for time in range(1):
     mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
     zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
     gc.collect()

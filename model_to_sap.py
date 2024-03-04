@@ -1370,21 +1370,11 @@ def Run_GA_sap(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_label,
     ret = SapModel.PropMaterial.SetMassSource(2, 2, LoadPat_mass, MySF_mass)
 
     #定义隔膜约束
-    ret = SapModel.ConstraintDef.SetDiaphragm("Diaph1",3)
 
     # 添加风荷载
 
     """ set load case """
-    # wind
-    # ret = SapModel.LoadCases.StaticLinear.SetCase("Wind")
-    # MyLoadType = ["Load", "Load"]
-    # MyLoadName = ["WX", "WY"]
-    # MySF = [1,1]
-    # ret = SapModel.LoadCases.StaticLinear.SetLoads("Wind", 2, MyLoadType, MyLoadName, MySF)
-    # Quake
-    # ResponseSpectrum
     ret = SapModel.Func.FuncRS.SetChinese2010("RS-1", 0.16, 4, 0.36, 1, 0.04)
-
     ret = SapModel.LoadCases.ResponseSpectrum.SetCase("Quake")
     ret = SapModel.LoadCases.ResponseSpectrum.SetModalCase("Quake", "MODAL")
     ret = SapModel.LoadCases.ResponseSpectrum.SetModalComb("Quake", 2)
@@ -1400,10 +1390,10 @@ def Run_GA_sap(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_label,
     ret = SapModel.RespCombo.Add("COMB1", 0)
     ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "DEAD", 1.3)
     ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "LIVE", 1.5)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDX", 1.0)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDY", 1.0)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EX", 1.0)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EY", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDX", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDY", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EX", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EY", 1.0)
     """ define True """
     # to be added
     res1 = [True, True, True, True, True, True]
@@ -2088,10 +2078,10 @@ def Run_GA_sap_2(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     ret = SapModel.RespCombo.Add("COMB1", 0)
     ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "DEAD", 1.3)
     ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "LIVE", 1.5)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDX", 1.0)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDY", 1.0)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EX", 1.0)
-    # ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EY", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDX", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDY", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EX", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EY", 1.0)
     """ define True """
     # to be added
     res1 = [True, True, True, True, True, True]

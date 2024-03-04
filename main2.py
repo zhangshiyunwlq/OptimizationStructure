@@ -2794,11 +2794,33 @@ x = np.linspace(0, 12, 13)
 
 pop_room = []
 pop_room_label = []
+wb = xlrd.open_workbook(
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_0.xls',
+    formatting_info=True)
+sheet1 = wb.sheet_by_index(0)
+for z in range(36):
+    rows = sheet1.row_values(52)[z]
+    pop_room.append(rows)
+sheet1 = wb.sheet_by_index(2)
+for z in range(96):
+    rows = sheet1.row_values(52)[z]
+    pop_room_label.append(rows)
+
+
+print(value_str[0])
+
+
+
+
+pop_room = []
+pop_room_label = []
 for i in range(2*story_num*3):
     pop_room.append(1)
 # pop_room = all_GA_infor[0]
 for i in range(96):
     pop_room_label.append(0)
+
+
 
 
 # #
@@ -2816,38 +2838,38 @@ weight1,g_col,g_beam,reaction_all,section_all,all_up_name,all_up_data,Joint_dis,
 # model_up_vis(model_data,all_force[11][1])
 #
 #
-# X_dis = Joint_dis[0]
-# Y_dis = Joint_dis[1]
-# X_dis_ave = Joint_dis[2]
-# Y_dis_ave = Joint_dis[3]
-# X_dis_radio = Joint_dis[4]
-# Y_dis_radio = Joint_dis[5]
-# X_interdis = Joint_dis[6]
-# Y_interdis = Joint_dis[7]
-# X_interdis_ave = Joint_dis[8]
-# Y_interdis_ave = Joint_dis[9]
-# X_interdis_radio = Joint_dis[10]
-# Y_interdis_radio = Joint_dis[11]
-# floor_mass = all_force[9]
-# floor_mass_radio = all_force[10]
-# for i in range(len(floor_mass_radio)):
-#     floor_mass_radio[i] = round(floor_mass_radio[i], 3)
-# max_floor_radio = max(floor_mass_radio)
-# max_floor_label =floor_mass_radio.index(max(floor_mass_radio))
-# word_infor = []
-# word_1th = []
-# word_1th.append(weight1)
-# word_1th.append(max_floor_radio)
-# word_1th.append(max_floor_label)
-# word_1th.append(max(Y_interdis_radio))
-# word_1th.append(Y_interdis_radio.index(max(Y_interdis_radio)))
-# word_3th = []
-# word_3th.append(Y_dis)
-# word_3th.append(Y_interdis)
-# word_3th.append(Y_interdis_ave)
-# word_3th.append(Y_interdis_radio)
-# word_infor.append(word_1th)
-# word_infor.append(word_3th)
+X_dis = Joint_dis[0]
+Y_dis = Joint_dis[1]
+X_dis_ave = Joint_dis[2]
+Y_dis_ave = Joint_dis[3]
+X_dis_radio = Joint_dis[4]
+Y_dis_radio = Joint_dis[5]
+X_interdis = Joint_dis[6]
+Y_interdis = Joint_dis[7]
+X_interdis_ave = Joint_dis[8]
+Y_interdis_ave = Joint_dis[9]
+X_interdis_radio = Joint_dis[10]
+Y_interdis_radio = Joint_dis[11]
+floor_mass = all_force[9]
+floor_mass_radio = all_force[10]
+for i in range(len(floor_mass_radio)):
+    floor_mass_radio[i] = round(floor_mass_radio[i], 3)
+max_floor_radio = max(floor_mass_radio)
+max_floor_label =floor_mass_radio.index(max(floor_mass_radio))
+word_infor = []
+word_1th = []
+word_1th.append(weight1)
+word_1th.append(max_floor_radio)
+word_1th.append(max_floor_label)
+word_1th.append(max(Y_interdis_radio))
+word_1th.append(Y_interdis_radio.index(max(Y_interdis_radio)))
+word_3th = []
+word_3th.append(Y_dis)
+word_3th.append(Y_interdis)
+word_3th.append(Y_interdis_ave)
+word_3th.append(Y_interdis_radio)
+word_infor.append(word_1th)
+word_infor.append(word_3th)
 
 # yangtingting = [i for i in range(50)]
 # luyiwen = []

@@ -96,14 +96,14 @@ def run_column_room_story5(building_room_labels, pop_room_label, modular_all_num
             #房间标签
             pop_room_label = list(map(int, pop_room_label))
             j = int(building_room_labels[i])-1
+            # modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', top_edge=sections_data_c1[
+            #     pop_num[z * 2 * 3 + 3 * j + 0]],bottom_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 1]],
+            #     column_edge=sections_data_c1[int(pop_num[z * 2 * 3 + 3 * j + 2]+7)])
+
             modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', top_edge=sections_data_c1[
                 pop_num[z * 2 * 3 + 3 * j + 0]],bottom_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 1]],
-                column_edge=sections_data_c1[int(pop_num[z * 2 * 3 + 3 * j + 2]+7)])
+                column_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 2]])
 
-            # elif pop_room_label[i] == 4 or pop_room_label[i] == 8 or pop_room_label[i] == 12 or pop_room_label[i] == 16:
-            #     modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', column=sections_data_c1[
-            #         pop_num[z * 5 * 3 + 3 * 0 + 0]],short_member=sections_data_c1[pop_num[z * 5 * 3 + 3 * j + 1]],
-            #         long_member=sections_data_c1[pop_num[z * 5 * 3 + 3 * j + 2]])
 
 
 #storey(2)+room
