@@ -62,12 +62,14 @@ def generate_DNA_coding_story5(num_var,num_room_type,x):
         for j in range(num_var):
             pop[i][j] = sec[j]
         for j in range(num_var,num_var+num_room_type):
-            pop[i][j] = randint(0,3)
+            pop[i][j] = randint(1,3)
         for j in range(num_var+num_room_type,num_var+num_room_type+2*story_num*3):
             pop[i][j] = randint(0,num_var-1)
         for j in range(num_var+num_room_type+2*story_num*3,num_var+num_room_type+2*story_num*5):
             pop[i][j] = randint(0,1)
     return pop
+
+#固定截面尺寸生成编码
 
 def decoding(pop,num_var,num_room_type,labels):
     pop1_jiequ = pop[:,num_var+num_room_type:num_var+num_room_type+2*story_num*3]
@@ -82,8 +84,9 @@ def decoding(pop,num_var,num_room_type,labels):
         for z in range(story_num):
             for j in range(z*modular_length_num*2,(z+1)*modular_length_num*2):
                 posi = int(pop1_method[i][z*2+int(labels[j])-1])
-                if posi == 0:
+                if posi == 0 and np.random.rand() < MUTATION_RATE*2.5:
                     pop_room_label[i][j] = 0
+                    # pop_room_label[i][j] = randint(0,3)
                 else:
                     pop_room_label[i][j] = pop[i][num_var]
     return pop_all,pop_room_label
@@ -173,12 +176,12 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
             g_beam[i] = g_beam[i]
         g_beam_all += g_beam[i]
     #y dis ratio
-    # for i in range(len(dis_all[5])):
-    #     if dis_all[5][i] <= 1.5 and dis_all[5][i] >= -1.5:
-    #         dis_all[5][i] = 0
-    #     else:
-    #         dis_all[5][i] = dis_all[5][i]
-    #     Y_dis_radio_all += dis_all[5][i]
+    for i in range(len(dis_all[5])):
+        if dis_all[5][i] <= 1.5 and dis_all[5][i] >= -1.5:
+            dis_all[5][i] = 0
+        else:
+            dis_all[5][i] = dis_all[5][i]
+        Y_dis_radio_all += dis_all[5][i]
     # y interdis max
     for i in range(len(dis_all[7])):
         if dis_all[7][i] <= 0.004 and dis_all[7][i] >= -0.004:
@@ -186,13 +189,14 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         else:
             dis_all[7][i] = dis_all[7][i]
         Y_interdis_all += dis_all[7][i]
+    Y_interdis_all = Y_interdis_all*100
     # # y interdis radio
-    # for i in range(len(dis_all[11])):
-    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
-    #         dis_all[11][i] = 0
-    #     else:
-    #         dis_all[11][i] = dis_all[11][i]
-    #     Y_interdis_radio_all += dis_all[11][i]
+    for i in range(len(dis_all[11])):
+        if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
+            dis_all[11][i] = 0
+        else:
+            dis_all[11][i] = dis_all[11][i]
+        Y_interdis_radio_all += dis_all[11][i]
     # # x interdis ratio
     # for i in range(len(all_force[10])):
     #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
@@ -267,7 +271,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
 def crossover_and_mutation_coding_story5(pop2,num_var,num_room_type,CROSSOVER_RATE):
     pop = pop2
-    room_nu = np.linspace(1, 12, 12)
+
     new_pop = np.zeros((len(pop),len(pop[0])))
     for i in range(len(pop)):
         father = pop[i]
@@ -303,19 +307,20 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
     num_var = int(num_var)
     room_nu = np.linspace(1, 12, 12)
     num_room_type = int(num_room_type)
-    for mutate_point in range(num_var):
-        x_var = list(map(int, x.tolist()))
-        for mutate_point_1 in range(num_var):
-            if child[mutate_point_1] in x_var:
-                x_var.remove(child[mutate_point_1])
-        if np.random.rand() < MUTATION_RATE:  # 以MUTATION_RATE的概率进行变异
-            child[mutate_point] = np.random.choice(x_var)
+    if num_var!=len(x):
+        for mutate_point in range(num_var):
+            x_var = list(map(int, x.tolist()))
+            for mutate_point_1 in range(num_var):
+                if child[mutate_point_1] in x_var:
+                    x_var.remove(child[mutate_point_1])
+            if np.random.rand() < MUTATION_RATE:  # 以MUTATION_RATE的概率进行变异
+                child[mutate_point] = np.random.choice(x_var)
     for j in range(num_room_type + num_var, num_room_type + num_var + DNA_SIZE):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
     for j in range(num_var, num_room_type + num_var ):
-        if np.random.rand() < MUTATION_RATE:
-            child[j] = randint(0,3)
+        if np.random.rand() < MUTATION_RATE*2.5:
+            child[j] = randint(1,3)
 
 def mulit_get_sap(num_thread):
     case_name = []
@@ -617,7 +622,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'run_infor_{time}')
+    path1 = os.path.join(APIPath, f'run_infor_{num_var}_{time}')
 
 
     wb1.save(f'{path1}.xls')
@@ -700,6 +705,7 @@ num_thread = 10
 min_genera = []
 
 x = np.linspace(0, 13, 14)
+# x = np.array([2,4,6,8,10,12])
 num_var = 2
 num_room_type=1
 
@@ -707,9 +713,10 @@ label=[1,1,1,1,2,2,2,2]
 labels = []
 for i in range(12):
     labels.extend(label)
-for time in range(1):
-    mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-    zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-    gc.collect()
+for num_var in [6]:
+    for time in range(2):
+        mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+        zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        gc.collect()
 
 # draw_picture('name','title')

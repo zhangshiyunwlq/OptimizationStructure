@@ -766,13 +766,19 @@ def output_dis(Nodes,SapModel,modulars,ModularBuilding,modular_length_num,story_
     Y_interdis_radio = []
     for i in range(len(Y_interdis_ave)):
         if Y_interdis_ave[i]==0:
-            Y_interdis_ave[i]+=0.0001
+            Y_interdis_ave[i]+=0.00001
     for i in range(len(X_interdis_ave)):
         if X_interdis_ave[i]==0:
-            X_interdis_ave[i]+=0.0001
+            X_interdis_ave[i]+=0.00001
     for i in range(len(Y_interdis_max)):
-        X_interdis_radio.append(X_interdis_max[i] / X_interdis_ave[i])
-        Y_interdis_radio.append(Y_interdis_max[i] / Y_interdis_ave[i])
+        if X_interdis_max[i] <= 0.001:
+            X_interdis_radio.append(1)
+        else:
+            X_interdis_radio.append(X_interdis_max[i] / X_interdis_ave[i])
+        if Y_interdis_max[i] <= 0.001:
+            Y_interdis_radio.append(1)
+        else:
+            Y_interdis_radio.append(Y_interdis_max[i] / Y_interdis_ave[i])
 
     # 计算欧式距离
     ou_all_dis = []

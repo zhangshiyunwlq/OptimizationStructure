@@ -2795,31 +2795,29 @@ x = np.linspace(0, 12, 13)
 pop_room = []
 pop_room_label = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_0.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_0.xls',
     formatting_info=True)
 sheet1 = wb.sheet_by_index(0)
 for z in range(36):
-    rows = sheet1.row_values(52)[z]
+    rows = sheet1.row_values(5050)[z]
     pop_room.append(rows)
 sheet1 = wb.sheet_by_index(2)
 for z in range(96):
-    rows = sheet1.row_values(52)[z]
+    rows = sheet1.row_values(5050)[z]
     pop_room_label.append(rows)
 
 
-print(value_str[0])
 
 
 
-
-pop_room = []
+# pop_room = []
 pop_room_label = []
-for i in range(2*story_num*3):
-    pop_room.append(1)
-# pop_room = all_GA_infor[0]
+# for i in range(2*story_num*3):
+#     pop_room.append(1)
+# # pop_room = all_GA_infor[0]
 for i in range(96):
-    pop_room_label.append(0)
-
+    pop_room_label.append(1)
+#
 
 
 
@@ -2886,40 +2884,40 @@ word_infor.append(word_3th)
 #     zhanhuang.append(luyiwen[i]/zhanjiaqi)
 #
 
-POP_SIZE = 50
-pop = [[] for i in range(50)]
-fitness = []
-for i in range(50):
-    pop[i].append(i*i)
-
-    fitness.append(i)
-
-
-def select_2(pop, fitness):  # nature selection wrt pop's fitness
-
-    fit_ini = fitness
-    luyi = fitness
-    luyi.sort(reverse=True)
-    sort_num = []
-    lst = list(range(1, len(fit_ini)+1))
-    list_new = []
-    for i in range(len(fit_ini)):
-        sort_num.append(fit_ini.index(luyi[i]))
-    for i in range(len(fit_ini)):
-        list_new.append(lst[sort_num[i]])
-    for i in range(len(list_new)):
-        list_new[i] = m.e ** (list_new[i] * 1.2)
-    idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
-                           p=np.array(list_new) / (sum(list_new)))
-    pop2 = np.zeros((POP_SIZE, len(pop[0])))
-    for i in range(len(pop2)):
-        pop2[i] = pop[int(idx[i])]
-    return pop2
-yangtingting = select_2(pop, fitness)
-zhanhuang= yangtingting.tolist()
-zhanjiahuang = []
-for i in range(len(zhanhuang)):
-    zhanjiahuang.append(zhanhuang[i][0])
-zhanjiaqi = Counter(zhanjiahuang)
-
+# POP_SIZE = 50
+# pop = [[] for i in range(50)]
+# fitness = []
+# for i in range(50):
+#     pop[i].append(i*i)
+#
+#     fitness.append(i)
+#
+#
+# def select_2(pop, fitness):  # nature selection wrt pop's fitness
+#
+#     fit_ini = fitness
+#     luyi = fitness
+#     luyi.sort(reverse=True)
+#     sort_num = []
+#     lst = list(range(1, len(fit_ini)+1))
+#     list_new = []
+#     for i in range(len(fit_ini)):
+#         sort_num.append(fit_ini.index(luyi[i]))
+#     for i in range(len(fit_ini)):
+#         list_new.append(lst[sort_num[i]])
+#     for i in range(len(list_new)):
+#         list_new[i] = m.e ** (list_new[i] * 1.2)
+#     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
+#                            p=np.array(list_new) / (sum(list_new)))
+#     pop2 = np.zeros((POP_SIZE, len(pop[0])))
+#     for i in range(len(pop2)):
+#         pop2[i] = pop[int(idx[i])]
+#     return pop2
+# yangtingting = select_2(pop, fitness)
+# zhanhuang= yangtingting.tolist()
+# zhanjiahuang = []
+# for i in range(len(zhanhuang)):
+#     zhanjiahuang.append(zhanhuang[i][0])
+# zhanjiaqi = Counter(zhanjiahuang)
+#
 
