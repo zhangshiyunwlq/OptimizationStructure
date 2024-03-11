@@ -7,8 +7,11 @@ def get_info(name1):
     all_value_str = []
     for i in range(len(name1)):
         value_str = []
+        # wb = xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)
         wb = xlrd.open_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
             formatting_info=True)
         sheet1 = wb.sheet_by_index(5)
         for z in range(name1[i][0]):
@@ -64,9 +67,11 @@ def draw_plot_picture(info2,data_infor):
     # plt.title("历年天猫双11总成交额", fontdict={'size': 20})
     plt.show()
 
-data_info = [[50,3,1],[50,5,0],[50,6,0],[50,8,0],[50,9,0]]
+
+
+data_info = [[50,6,0],[50,6,1],[50,6,2],[50,6,3],[50,6,4]]
 infor_all = get_info(data_info)
-infor_name = ['3','5','6','8','9']
+infor_name = ['6_0','6_1','6_2','6_3','6_4']
 title_name = 'Fitness'
 
 draw_picture(infor_all,infor_name,title_name)
