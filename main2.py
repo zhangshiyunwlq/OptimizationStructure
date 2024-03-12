@@ -2795,15 +2795,15 @@ x = np.linspace(0, 12, 13)
 pop_room = []
 pop_room_label = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_0.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_1.xls',
     formatting_info=True)
 sheet1 = wb.sheet_by_index(0)
 for z in range(36):
-    rows = sheet1.row_values(5050)[z]
+    rows = sheet1.row_values(5051)[z]
     pop_room.append(rows)
 sheet1 = wb.sheet_by_index(2)
 for z in range(96):
-    rows = sheet1.row_values(5050)[z]
+    rows = sheet1.row_values(5051)[z]
     pop_room_label.append(rows)
 
 
@@ -2811,14 +2811,16 @@ for z in range(96):
 
 
 # pop_room = []
-pop_room_label = []
+# pop_room_label = []
 # for i in range(2*story_num*3):
 #     pop_room.append(1)
 # # pop_room = all_GA_infor[0]
-for i in range(96):
-    pop_room_label.append(1)
-#
-
+# for i in range(32):
+#     pop_room_label.append(1)
+# for i in range(32,48):
+#     pop_room_label.append(0)
+# for i in range(48,96):
+#     pop_room_label.append(1)
 
 
 # #

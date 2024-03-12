@@ -725,8 +725,15 @@ def output_dis(Nodes,SapModel,modulars,ModularBuilding,modular_length_num,story_
     X_dis_radio = []
     Y_dis_radio = []
     for i in range(len(Y_dis_max)):
-        X_dis_radio.append(X_dis_max[i] / X_dis_ave[i])
-        Y_dis_radio.append(Y_dis_max[i] / Y_dis_ave[i])
+        if Y_dis_max[i]<=1:
+            Y_dis_radio.append(1)
+        else:
+            Y_dis_radio.append(Y_dis_max[i] / Y_dis_ave[i])
+        if X_dis_max[i]<=1:
+            X_dis_radio.append(1)
+        else:
+            X_dis_radio.append(X_dis_max[i] / X_dis_ave[i])
+
     #输出层间位移
     X_interdis_top = []
     Y_interdis_top = []
