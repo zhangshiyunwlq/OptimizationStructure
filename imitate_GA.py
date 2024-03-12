@@ -42,6 +42,46 @@ def fun(a,b):
         result+=pop_2[i]
     return result,0.5*result
 
+def generate_DNA_coding_story1(num_var,num_room_type,x):
+    all_room_num = story_num*4
+    room_nu =np.linspace(1, 3, 3)
+    pop = np.zeros((POP_SIZE,num_var+num_room_type+all_room_num))
+    for i in range(len(pop)):
+        sec = list(map(int,random.sample(x.tolist(), num_var)))
+        sec.sort()
+        room_ty = list(map(int,random.sample(room_nu.tolist(), num_room_type)))
+        room_ty.sort()
+        for j in range(num_var):
+            pop[i][j] = sec[j]
+        for j in range(num_var,num_var+num_room_type):
+            pop[i][j] = randint(1,3)
+        for j in range(num_var+num_room_type,num_var+num_room_type+story_num*3):
+            pop[i][j] = randint(0,num_var-1)
+        for j in range(num_var+num_room_type+story_num*3,num_var+num_room_type+story_num*4):
+            pop[i][j] = randint(0,1)
+    return pop
+
+def decoding1(pop,num_var,num_room_type,labels):
+    pop1_jiequ = pop[:,num_var+num_room_type:num_var+num_room_type+story_num*3]
+    pop1_method = pop[:, num_var+num_room_type+story_num*3:num_var+num_room_type+story_num*4]
+    pop_all = np.zeros((POP_SIZE,DNA_SIZE))
+    pop_room_label = np.zeros((POP_SIZE, len(labels)))
+    for i in range(POP_SIZE):
+        for j in range(len(pop1_jiequ[0])):
+            posi = int(pop1_jiequ[i][j])
+            pop_all[i][j] = pop[i][posi]
+    for i in range(POP_SIZE):
+        for z in range(story_num):
+            for j in range(z*modular_length_num*2,(z+1)*modular_length_num*2):
+                posi = int(pop1_method[i][z+int(labels[j])-1])
+                if posi == 0:
+                    pop_room_label[i][j] = 0
+                else:
+                    pop_room_label[i][j] = pop[i][num_var]
+    return pop_all,pop_room_label
+
+
+
 def generate_DNA_coding_story5(num_var,num_room_type,x):
     all_room_num = 2*story_num*5
     room_nu =np.linspace(1, 3, 3)
@@ -449,7 +489,7 @@ corridor_width = 4000
 
 
 POP_SIZE = 50
-DNA_SIZE = 2*story_num*3
+DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.35
 MUTATION_RATE = 0.3
 N_GENERATIONS = 100
@@ -460,12 +500,15 @@ x = np.linspace(0, 6, 7)
 num_var = 8
 num_room_type=1
 
-label=[1,1,1,1,2,2,2,2]
+# label=[1,1,1,1,2,2,2,2]
+# labels = []
+# for i in range(12):
+#     labels.extend(label)
 labels = []
-for i in range(12):
-    labels.extend(label)
-
+for i in range(1,7):
+    for j in range(16):
+        labels.append(i)
 zhan,jia,qi=run(num_var,num_room_type,x,labels)
 
 
-draw_picture('name','title')
+# draw_picture('name','title')

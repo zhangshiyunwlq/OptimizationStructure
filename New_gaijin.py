@@ -319,7 +319,7 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
     for j in range(num_var, num_room_type + num_var ):
-        if np.random.rand() < MUTATION_RATE*2.5:
+        if np.random.rand() < MUTATION_RATE:
             child[j] = randint(1,3)
 
 def mulit_get_sap(num_thread):
@@ -465,9 +465,9 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
 
 
 def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
-    pop2= generate_DNA_coding_story5(num_var, num_room_type, x)
+    pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
-    pop1,pop3 = decoding(pop_decoe_1,num_var,num_room_type,labels)
+    pop1,pop3 = decoding1(pop_decoe_1,num_var,num_room_type,labels)
 
     pop_zhongqun_all = []  # 记录每代种群（不重复）
     pop_zhongqun_all_2 = []#记录种群所有
@@ -516,7 +516,7 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
         # 引入新个体
         run_time +=1
         if run_time % 5 == 0:
-            pop2_new = generate_DNA_coding_story5(num_var, num_room_type, x)
+            pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
@@ -524,7 +524,7 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
         if run_time %5==0:
             print(run_time)
             print(f'记忆池数量:{len(memory_pools_all)}')
-        pop1, pop3 = decoding(pop2, num_var, num_room_type, labels)
+        pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
 
         aaa = []
         aaa.append(pop1[0])
@@ -669,6 +669,45 @@ def draw_picture(name,title_name):
     ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
 
     plt.show()
+
+#每层一种变量
+def generate_DNA_coding_story1(num_var,num_room_type,x):
+    all_room_num = story_num*4
+    room_nu =np.linspace(1, 3, 3)
+    pop = np.zeros((POP_SIZE,num_var+num_room_type+all_room_num))
+    for i in range(len(pop)):
+        sec = list(map(int,random.sample(x.tolist(), num_var)))
+        sec.sort()
+        room_ty = list(map(int,random.sample(room_nu.tolist(), num_room_type)))
+        room_ty.sort()
+        for j in range(num_var):
+            pop[i][j] = sec[j]
+        for j in range(num_var,num_var+num_room_type):
+            pop[i][j] = randint(1,3)
+        for j in range(num_var+num_room_type,num_var+num_room_type+story_num*3):
+            pop[i][j] = randint(0,num_var-1)
+        for j in range(num_var+num_room_type+story_num*3,num_var+num_room_type+story_num*4):
+            pop[i][j] = randint(0,1)
+    return pop
+
+def decoding1(pop,num_var,num_room_type,labels):
+    pop1_jiequ = pop[:,num_var+num_room_type:num_var+num_room_type+story_num*3]
+    pop1_method = pop[:, num_var+num_room_type+story_num*3:num_var+num_room_type+story_num*4]
+    pop_all = np.zeros((POP_SIZE,DNA_SIZE))
+    pop_room_label = np.zeros((POP_SIZE, len(labels)))
+    for i in range(POP_SIZE):
+        for j in range(len(pop1_jiequ[0])):
+            posi = int(pop1_jiequ[i][j])
+            pop_all[i][j] = pop[i][posi]
+    for i in range(POP_SIZE):
+        for z in range(story_num):
+            for j in range(z*modular_length_num*2,(z+1)*modular_length_num*2):
+                posi = int(pop1_method[i][z+int(labels[j])-1])
+                if posi == 0:
+                    pop_room_label[i][j] = 0
+                else:
+                    pop_room_label[i][j] = pop[i][num_var]
+    return pop_all,pop_room_label
 
 
 '''model data'''
