@@ -10,8 +10,11 @@ def get_info(name1):
         # wb = xlrd.open_workbook(
         #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
         #     formatting_info=True)
+        # wb = xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)E:\C盘默认文件\run\OptimizationStructure\分析数据\不限定范围\run_infor_6_0.xls
         wb = xlrd.open_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+            filename=f'E:\C盘默认文件\\run\OptimizationStructure\分析数据\限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
             formatting_info=True)
         sheet1 = wb.sheet_by_index(5)
         for z in range(name1[i][0]):
@@ -69,10 +72,10 @@ def draw_plot_picture(info2,data_infor):
 
 
 
-data_info = [[50,6,0],[50,6,1],[50,6,2],[50,6,3],[50,6,4]]
+data_info = [[50,6,2],[50,6,3],[50,6,4]]
 infor_all = get_info(data_info)
-infor_name = ['6_0','6_1','6_2','6_3','6_4']
+infor_name = ['6_2','6_3','6_4']
 title_name = 'Fitness'
 
 draw_picture(infor_all,infor_name,title_name)
-draw_plot_picture(infor_all,data_info)
+# draw_plot_picture(infor_all,data_info)
