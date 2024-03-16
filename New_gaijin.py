@@ -142,7 +142,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
     modular_nums = len(labels)
     modular_infos = {}
     # 每个房间定义梁柱截面信息
-    sr.run_column_room_story5(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
     #
     for i in range(len(modulars_of_building)):
         modulars_of_building[i].Add_Info_And_Update_Modular(
@@ -177,7 +177,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         g_beam_all += g_beam[i]
     #y dis ratio
     for i in range(len(dis_all[5])):
-        if dis_all[5][i] <= 1.5 and dis_all[5][i] >= -1.5:
+        if dis_all[5][i] <= 0.001 and dis_all[5][i] >= -0.001:
             dis_all[5][i] = 0
         else:
             dis_all[5][i] = dis_all[5][i]
@@ -191,12 +191,12 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         Y_interdis_all += dis_all[7][i]
     Y_interdis_all = Y_interdis_all*100
     # # y interdis radio
-    for i in range(len(dis_all[11])):
-        if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
-            dis_all[11][i] = 0
-        else:
-            dis_all[11][i] = dis_all[11][i]
-        Y_interdis_radio_all += dis_all[11][i]
+    # for i in range(len(dis_all[11])):
+    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
+    #         dis_all[11][i] = 0
+    #     else:
+    #         dis_all[11][i] = dis_all[11][i]
+    #     Y_interdis_radio_all += dis_all[11][i]
     # # x interdis ratio
     # for i in range(len(all_force[10])):
     #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
@@ -241,6 +241,12 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
     for i in range(len(pop1)):
         q.put(i)
     for i in range(num_thread):
+        if len(ModelPath_name)!=num_thread:
+            for j in range(len(ModelPath_name),num_thread):
+                mySapObject_name.append(f"mySapObject{j}")
+                SapModel_name.append(f"SapModel{j}")
+                ModelPath_name.append(f"ModelPath{j}")
+                mySapObject_name[j], ModelPath_name[j], SapModel_name[j] = SAPanalysis_GA_run2(os.path.join(os.getcwd(), f"cases{j}"))
         t = threading.Thread(target=mulitrun_GA_1, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up))
         t.start()
         threads.append(t)
@@ -336,6 +342,7 @@ def mulit_get_sap(num_thread):
         ModelPath_name.append(f"ModelPath{i}")
         mySapObject_name[i], ModelPath_name[i], SapModel_name[i] = SAPanalysis_GA_run2(APIPath_name[i])
     return mySapObject_name,ModelPath_name,SapModel_name
+
 def SAPanalysis_GA_run2(APIPath):
 
 
@@ -702,7 +709,7 @@ def decoding1(pop,num_var,num_room_type,labels):
     for i in range(POP_SIZE):
         for z in range(story_num):
             for j in range(z*modular_length_num*2,(z+1)*modular_length_num*2):
-                posi = int(pop1_method[i][z+int(labels[j])-1])
+                posi = int(pop1_method[i][int(labels[j])-1])
                 if posi == 0:
                     pop_room_label[i][j] = 0
                 else:
@@ -736,26 +743,36 @@ room_indx = model_data[6]
 
 
 POP_SIZE =50
-DNA_SIZE = 2*story_num*3
+DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.35
 MUTATION_RATE = 0.15
 N_GENERATIONS = 100
 num_thread = 10
 min_genera = []
 
-x = np.linspace(0, 13, 14)
-# x = np.array([2,4,6,8,10,12])
+# x = np.linspace(0, 13, 14)
+x = np.array([2,4,6,8,10,12])
 num_var = 2
 num_room_type=1
 
-label=[1,1,1,1,2,2,2,2]
+
+
+
+# label=[1,1,1,1,2,2,2,2]
+# labels = []
+# for i in range(12):
+#     labels.extend(label)
 labels = []
-for i in range(12):
-    labels.extend(label)
+for i in range(1,7):
+    for j in range(16):
+        labels.append(i)
+
+
 for num_var in [6]:
-    for time in range(2):
+    for time in range(1,5):
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         gc.collect()
 
 # draw_picture('name','title')
+

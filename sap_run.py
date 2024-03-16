@@ -104,6 +104,24 @@ def run_column_room_story5(building_room_labels, pop_room_label, modular_all_num
                 pop_num[z * 2 * 3 + 3 * j + 0]],bottom_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 1]],
                 column_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 2]])
 
+def run_column_room_story1(building_room_labels, pop_room_label, modular_all_num, sections_data_c1,
+                       modular_infos2, pop_num):
+    edges_labels = [['top_edge', 'bottom_edge', 'column_edge'], ['left_member', 'right_member', 'short_member'],
+                    ['front_member', 'back_member', 'long_member'], ['column', 'short_member', 'long_member']]
+
+    for z in range(6):
+        for i in range(int(z * (modular_all_num / 6)), int((z + 1) * (modular_all_num / 6))):
+            #房间标签
+            pop_room_label = list(map(int, pop_room_label))
+            j = int(building_room_labels[i])-1
+            # modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', top_edge=sections_data_c1[
+            #     pop_num[z * 2 * 3 + 3 * j + 0]],bottom_edge=sections_data_c1[pop_num[z * 2 * 3 + 3 * j + 1]],
+            #     column_edge=sections_data_c1[int(pop_num[z * 2 * 3 + 3 * j + 2]+7)])
+
+            modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', top_edge=sections_data_c1[
+                pop_num[z * 3 + 0]],bottom_edge=sections_data_c1[pop_num[z * 3 + 1]],
+                column_edge=sections_data_c1[pop_num[z * 3 + 2]])
+
 
 
 #storey(2)+room

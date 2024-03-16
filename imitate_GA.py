@@ -73,7 +73,7 @@ def decoding1(pop,num_var,num_room_type,labels):
     for i in range(POP_SIZE):
         for z in range(story_num):
             for j in range(z*modular_length_num*2,(z+1)*modular_length_num*2):
-                posi = int(pop1_method[i][z+int(labels[j])-1])
+                posi = int(pop1_method[i][int(labels[j])-1])
                 if posi == 0:
                     pop_room_label[i][j] = 0
                 else:
@@ -280,9 +280,9 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
 
 
 def run(num_var,num_room_type,x,labels):
-    pop2= generate_DNA_coding_story5(num_var, num_room_type, x)
+    pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
-    pop1,pop3 = decoding(pop_decoe_1,num_var,num_room_type,labels)
+    pop1,pop3 = decoding1(pop_decoe_1,num_var,num_room_type,labels)
 
     pop_zhongqun_all = []  # 记录每代种群（不重复）
     pop_zhongqun_all_2 = []#记录种群所有
@@ -497,7 +497,7 @@ num_thread = 25
 min_genera = []
 
 x = np.linspace(0, 6, 7)
-num_var = 8
+num_var = 5
 num_room_type=1
 
 # label=[1,1,1,1,2,2,2,2]
@@ -508,6 +508,7 @@ labels = []
 for i in range(1,7):
     for j in range(16):
         labels.append(i)
+
 zhan,jia,qi=run(num_var,num_room_type,x,labels)
 
 

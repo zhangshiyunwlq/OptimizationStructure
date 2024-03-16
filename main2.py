@@ -1143,7 +1143,7 @@ def Sap_analy_allroom(pop_room,pop_room_label):
     modular_nums = len(labels)
     modular_infos = {}
     # 每个房间定义梁柱截面信息
-    sr.run_column_room_story5(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
     #
     for i in range(len(modulars_of_building)):
         modulars_of_building[i].Add_Info_And_Update_Modular(
@@ -2795,15 +2795,15 @@ x = np.linspace(0, 12, 13)
 pop_room = []
 pop_room_label = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_1.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_0.xls',
     formatting_info=True)
 sheet1 = wb.sheet_by_index(0)
-for z in range(36):
-    rows = sheet1.row_values(5051)[z]
+for z in range(18):
+    rows = sheet1.row_values(5)[z]
     pop_room.append(rows)
 sheet1 = wb.sheet_by_index(2)
 for z in range(96):
-    rows = sheet1.row_values(5051)[z]
+    rows = sheet1.row_values(5)[z]
     pop_room_label.append(rows)
 
 
