@@ -7,12 +7,12 @@ def get_info(name1):
     all_value_str = []
     for i in range(len(name1)):
         value_str = []
-        # wb = xlrd.open_workbook(
-        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
-        #     formatting_info=True)
         wb = xlrd.open_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
             formatting_info=True)
+        # wb = xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)
         # wb = xlrd.open_workbook(
         #     filename=f'E:\C盘默认文件\\run\OptimizationStructure\分析数据\限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
         #     formatting_info=True)
@@ -25,7 +25,7 @@ def get_info(name1):
 
 def draw_picture(info2,name,title_name):
     num1 = 0.8
-    num2 = 0.75
+    num2 = 0.60
     num3 = 3
     num4 = 0
     fig2 = plt.figure(num=1, figsize=(23, 30))
@@ -72,10 +72,16 @@ def draw_plot_picture(info2,data_infor):
 
 
 
-data_info = [[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4]]
+# data_info = [[100,2,0],[100,3,0],[100,3,1],[100,4,0],[100,4,1],[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4],[100,8,0],[100,8,1],[100,8,2],[100,9,0],[100,9,1],[100,9,2],[100,10,0],[100,10,1]]
+# infor_all = get_info(data_info)
+# infor_name = ['2_0','3_0','3_1','4_0','4_1','6_0','6_1','6_2','6_3','6_4','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
+# title_name = 'Fitness'
+
+data_info = [[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4],[100,8,0],[100,8,1],[100,8,2]]
 infor_all = get_info(data_info)
-infor_name = ['6_0','6_1','6_2','6_3','6_4']
+infor_name = ['6_0','6_1','6_2','6_3','6_4','8_0','8_1','8_2']
 title_name = 'Fitness'
+
 
 draw_picture(infor_all,infor_name,title_name)
 # draw_plot_picture(infor_all,data_info)
