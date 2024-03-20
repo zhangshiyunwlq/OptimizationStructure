@@ -70,18 +70,31 @@ def draw_plot_picture(info2,data_infor):
     # plt.title("历年天猫双11总成交额", fontdict={'size': 20})
     plt.show()
 
-
-
+def static_braced(name1):
+    braced_st = []
+    for i in range(len(name1)):
+        pop_room = []
+        pop_room_label = []
+        wb = xlrd.open_workbook(
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+            formatting_info=True)
+        sheet1 = wb.sheet_by_index(2)
+        for z in range(6):
+            rows = sheet1.row_values(5050)[z*16]
+            pop_room.append(rows)
+        braced_st.append(pop_room)
+    return  braced_st
 # data_info = [[100,2,0],[100,3,0],[100,3,1],[100,4,0],[100,4,1],[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4],[100,8,0],[100,8,1],[100,8,2],[100,9,0],[100,9,1],[100,9,2],[100,10,0],[100,10,1]]
 # infor_all = get_info(data_info)
 # infor_name = ['2_0','3_0','3_1','4_0','4_1','6_0','6_1','6_2','6_3','6_4','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
 # title_name = 'Fitness'
 
-data_info = [[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4],[100,8,0],[100,8,1],[100,8,2]]
+data_info = [[100,2,0],[100,3,0],[100,3,1],[100,4,0],[100,4,1],[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4]]
 infor_all = get_info(data_info)
 infor_name = ['6_0','6_1','6_2','6_3','6_4','8_0','8_1','8_2']
 title_name = 'Fitness'
 
 
-draw_picture(infor_all,infor_name,title_name)
+# draw_picture(infor_all,infor_name,title_name)
 # draw_plot_picture(infor_all,data_info)
+static_braced(data_info)

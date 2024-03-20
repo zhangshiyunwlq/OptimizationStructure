@@ -1151,7 +1151,7 @@ def Sap_analy_allroom(pop_room,pop_room_label):
             modular_infos[i])
     modular_building.Building_Assembling(modulars_of_building)
 
-    all_data = ms.Run_GA_sap_2(mySapObject, ModelPath, SapModel, modular_building,pop_room_label,200,modular_length_num,story_num)
+    all_data = ms.Run_GA_sap_3(mySapObject, ModelPath, SapModel, modular_building,pop_room_label,200,modular_length_num,story_num)
     aa, bb, cc, dd, ee, ff, gg, hh, ii = all_data
 
     ret = SapModel.SetModelIsLocked(False)
@@ -2792,31 +2792,31 @@ x = np.linspace(0, 12, 13)
 # beam_up_all= all_GA_infor[9]
 # pop_room = weight_fin
 
-pop_room = []
-pop_room_label = []
-wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_0.xls',
-    formatting_info=True)
-sheet1 = wb.sheet_by_index(0)
-for z in range(18):
-    rows = sheet1.row_values(5)[z]
-    pop_room.append(rows)
-sheet1 = wb.sheet_by_index(2)
-for z in range(96):
-    rows = sheet1.row_values(5)[z]
-    pop_room_label.append(rows)
-
-
-
-
-
 # pop_room = []
 # pop_room_label = []
-# for i in range(2*story_num*3):
-#     pop_room.append(1)
-# # pop_room = all_GA_infor[0]
-# for i in range(32):
-#     pop_room_label.append(1)
+# wb = xlrd.open_workbook(
+#     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_6_0.xls',
+#     formatting_info=True)
+# sheet1 = wb.sheet_by_index(0)
+# for z in range(18):
+#     rows = sheet1.row_values(5)[z]
+#     pop_room.append(rows)
+# sheet1 = wb.sheet_by_index(2)
+# for z in range(96):
+#     rows = sheet1.row_values(5)[z]
+#     pop_room_label.append(rows)
+#
+
+
+
+
+pop_room = []
+pop_room_label = []
+for i in range(18):
+    pop_room.append(3)
+# pop_room = all_GA_infor[0]
+for i in range(96):
+    pop_room_label.append(0)
 # for i in range(32,48):
 #     pop_room_label.append(0)
 # for i in range(48,96):

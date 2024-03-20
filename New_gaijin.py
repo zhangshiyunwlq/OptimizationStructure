@@ -768,8 +768,8 @@ for i in range(1,7):
         labels.append(i)
 
 
-for num_var in [8,9]:
-    for time in range(3):
+for num_var in [10]:
+    for time in range(2):
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         gc.collect()
