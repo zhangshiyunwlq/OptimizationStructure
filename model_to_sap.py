@@ -2330,13 +2330,13 @@ def Run_GA_sap_3(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     #弹簧单元
     MyDof_linearhor = [True, True, True, False, False, False]
     MyFixed_linearhor = [False, False, False, False, False, False]
-    MyKe_linearhor = [11000000, 3900000, 24000000,0,0,0]
+    MyKe_linearhor = [110000, 39000, 240000,0,0,0]
     MyCe_linearhor = [0.05,0.05,0.05,0,0,0]
     ret = SapModel.PropLink.Setlinear("LINEARHOR1", MyDof_linearhor, MyFixed_linearhor, MyKe_linearhor, MyCe_linearhor, 0, 0)
 
     MyDof_linearver = [True, True, True, False, False, False]
     MyFixed_linearver = [False, False, False, False, False, False]
-    MyKe_linearver = [1500000, 3000000, 12900000,0,0,0]
+    MyKe_linearver = [15000, 3000, 129000,0,0,0]
     MyCe_linearver = [0.05,0.05,0.05,0,0,0]
     ret = SapModel.PropLink.Setlinear("LINEARVER1", MyDof_linearver, MyFixed_linearver, MyKe_linearver, MyCe_linearver, 0, 0)
 
@@ -2512,6 +2512,639 @@ def Run_GA_sap_3(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
         Point2 = "nodes" + str(indx2)
         name = "verlink_" + str(j_indx)
         ret = SapModel.LinkObj.AddByPoint(Point1, Point2, name, False, "LINEARVER1")
+    ''' 4th adding corridor_beams '''
+    for co_beam_indx in range(len(Corr_beams)):
+        indx1, indx2 = Corr_beams[co_beam_indx]
+        Point1 = "nodes" + str(indx1)
+        Point2 = "nodes" + str(indx2)
+        name = "frame_" + str(co_beam_indx) + '_' + str(edge_indx)
+        section_name = "frame_section_" + str(modular_indx) + '_' + str(edge_indx)
+        ret = SapModel.FrameObj.AddByPoint(Point1, Point2, " ", joint_sec, name)
+
+    # node_change = copy.deepcopy(Nodes)
+    # num_points = int(len(Corr_beams)/(story_num*2))
+    # cor_joint_data = []
+    # for i in range(story_num*2):
+    #     cor_joint_floor = []
+    #     for j in range(i*num_points,(i+1)*num_points):
+    #         indx1=Corr_beams[j][0]
+    #         cor_joint_floor.append(node_change[indx1].tolist())
+    #
+    #     for j in range((i + 1) * num_points-1,i * num_points-1, -1):
+    #         indx2 = Corr_beams[j][1]
+    #         cor_joint_floor.append(node_change[indx2].tolist())
+    #
+    #     cor_joint_data.append(cor_joint_floor)
+    # cor_joint_data=np.array(cor_joint_data)
+
+    node_change = copy.deepcopy(Nodes)
+    num_points = int(len(Corr_beams)/(story_num*2))
+    cor_joint_data = []
+    for i in range(story_num*2):
+        cor_joint_floor = []
+        for j in range(i*num_points,(i+1)*num_points):
+            indx1=Corr_beams[j][0]
+            cor_joint_floor.append('nodes' + str(indx1))
+
+        for j in range((i + 1) * num_points-1,i * num_points-1, -1):
+            indx2 = Corr_beams[j][1]
+            cor_joint_floor.append('nodes' + str(indx2))
+
+        cor_joint_data.append(cor_joint_floor)
+    # cor_joint_data=np.array(cor_joint_data)
+
+
+
+
+    ret = SapModel.File.Save(ModelPath)
+
+
+    # import pdb;
+    # pdb.set_trace()
+    # import pdb;
+    # pdb.set_trace()
+
+    """ define load """
+    force_info = get_label_info()
+    line_load_pattern_name = "LineLoad"
+    # ret = SapModel.LoadPatterns.Add(line_load_pattern_name, 1, 0.001, True)
+    area_load_pattern_name = "AreaLoad"
+    # ret = SapModel.LoadPatterns.Add(area_load_pattern_name, 1, 0.001, True)
+    live_load_pattern_name = "LIVE"
+    ret = SapModel.LoadPatterns.Add("WINDX", 8, 0, True)
+    ret = SapModel.LoadPatterns.Add("WINDY", 8, 0, True)
+    ret = SapModel.LoadPatterns.Add(live_load_pattern_name, 3, 0, True)
+    ret = SapModel.PropArea.SetShell_1("Plane0", 1, True, "4000Psi", 0, 0, 0)
+    # ret = SapModel.PropArea.SetShellDesign("Plane0", "4000Psi", 2, 2, 3, 2.5, 3.5)
+    # 添加面（顶面+底面）
+    # 添加地面荷载
+    for i in range(len(modulars)):
+        for j in range(len(modulars[i].modular_bottom_edges)):
+            node_bottom = modulars[i].modular_nodes[modulars[i].modular_bottom_edges[j]]
+            node_bottem_x = np.array(node_bottom)[:, 0]
+            node_bottem_y = np.array(node_bottom)[:, 1]
+            node_bottem_z = np.array(node_bottom)[:, 2]
+            ret = SapModel.AreaObj.AddByCoord(len(node_bottom), node_bottem_x, node_bottem_y,
+                                              node_bottem_z, 'Plane0', "Default", f"plane_{modulars[i].modular_label}_{i}_{j}bottom", "Global")
+
+            ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_{modulars[i].modular_label}_{i}_{j}bottom", "DEAD", -0.0012, 9, 2, True, "Global")
+            ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_{modulars[i].modular_label}_{i}_{j}bottom", "LIVE", -0.0015, 9, 2, True, "Global")
+        for j in range(4,8):
+            ret = SapModel.FrameObj.SetLoadDistributed(f"frame_{i}_{j}", "DEAD", 1, 10, 0, 1, 4.2, 4.2)
+    # 添加屋顶荷载
+    # for i in range(int(5*(len(modulars))/6),len(modulars)):
+    for i in range(len(modulars)):
+        for j in range(len(modulars[i].modular_top_edges)):
+            node_top = modulars[i].modular_nodes[modulars[i].modular_top_edges[j]]
+            node_top_x = np.array(node_top)[:, 0]
+            node_top_y = np.array(node_top)[:, 1]
+            node_top_z = np.array(node_top)[:, 2]
+            # if (i) % 26 >= 5:
+            ret = SapModel.AreaObj.AddByCoord(len(modulars[i].modular_top_edges[j]), node_top_x, node_top_y, node_top_z,
+                                                  'Plane0', "Default", f"plane_{modulars[i].modular_label}_{i}_{j}top", "Global")
+            ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_{modulars[i].modular_label}_{i}_{j}top", "DEAD", -0.001, 9, 2, True, "Global")
+            # ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_{modulars[i].modular_label}_{i}_{j}top", "LIVE", -force_info[1][4], 9, 2, True, "Global")
+
+    # for i in range(int(len(cor_joint_data)/2)):
+    #     nodes_floor_cor = cor_joint_data[i]
+    #     node_top_x = np.array(nodes_floor_cor)[:, 0]
+    #     node_top_y = np.array(nodes_floor_cor)[:, 1]
+    #     node_top_z = np.array(nodes_floor_cor)[:, 2]
+    #     ret = SapModel.AreaObj.AddByCoord(num_points*2, node_top_x, node_top_y, node_top_z,
+    #                                       'Plane0', "Default", f"plane_corrid{i}top",
+    #                                       "Global")
+    #     ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_corrid{i}top", "DEAD", -0.0012, 9,
+    #                                                  2, True, "Global")
+    #     ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_corrid{i}top", "LIVE", -0.0015, 9,
+    #                                                  2, True, "Global")
+
+    # Point = ['nodes0','nodes3','nodes7','nodes4']
+    for i in range(int(len(cor_joint_data)/2)):
+        ret = SapModel.AreaObj.AddByPoint(len(cor_joint_data[0]), cor_joint_data[0], 'Plane0', "Default",  f"plane_corrid{0}bottom")
+        ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_corrid{i}bottom", "DEAD", -0.0012, 9,2, True, "Global")
+        ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_corrid{i}bottom", "LIVE", -0.0015, 9,2, True, "Global")
+
+    for i in range(int(len(cor_joint_data) / 2), len(cor_joint_data)):
+        ret = SapModel.AreaObj.AddByPoint(len(cor_joint_data[i]), cor_joint_data[i], 'Plane0', "Default",  f"plane_corrid{i}top")
+        ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_corrid{i}top", "DEAD", -0.001, 9,2, True, "Global")
+
+    # for i in range(int(len(cor_joint_data) / 2),len(cor_joint_data)):
+    #     nodes_floor_cor = cor_joint_data[i]
+    #     node_top_x = np.array(nodes_floor_cor)[:, 0]
+    #     node_top_y = np.array(nodes_floor_cor)[:, 1]
+    #     node_top_z = np.array(nodes_floor_cor)[:, 2]
+    #     ret = SapModel.AreaObj.AddByCoord(num_points * 2, node_top_x, node_top_y, node_top_z,
+    #                                       'Plane0', "Default", f"plane_corrid{i}bottom",
+    #                                       "Global")
+    #     ret = SapModel.AreaObj.SetLoadUniformToFrame(f"plane_corrid{i}bottom", "DEAD", -0.001, 9,
+    #                                                  2, True, "Global")
+
+
+
+    #添加风荷载下的围覆面
+    a = modulars[0].modular_planes
+    ret = SapModel.PropArea.SetShell_1("Cladding1", 1, True, "4000Psi", 0, 0, 0)
+
+    #添加Y向风荷载
+    # 一层
+    Wind_Load_Y(ModularBuilding, modulars, SapModel, 1, 1, 1.3, 0, 1, 0.00055, modular_length_num)
+    # 二层
+    Wind_Load_Y(ModularBuilding, modulars, SapModel, 2, 1, 1.3, 1, 1.09, 0.00055, modular_length_num)
+    # 三层
+    Wind_Load_Y(ModularBuilding, modulars, SapModel, 3, 1, 1.3, 1.09, 1.09, 0.00055, modular_length_num)
+    # 四层
+    Wind_Load_Y(ModularBuilding, modulars, SapModel, 4, 1, 1.3, 1.09, 1.28, 0.00055, modular_length_num)
+    # 五层
+    Wind_Load_Y(ModularBuilding, modulars, SapModel, 5, 1, 1.3, 1.28, 1.42, 0.00055, modular_length_num)
+    # 六层
+    Wind_Load_Y(ModularBuilding, modulars, SapModel, 6, 1, 1.3, 1.42, 1.42, 0.00055, modular_length_num)
+
+    # 添加X向风荷载
+    # 一层
+    Wind_Load_X(ModularBuilding, modulars, SapModel, 1, 1, 1.3, 0, 1, 0.00055, modular_length_num)
+    # 二层
+    Wind_Load_X(ModularBuilding, modulars, SapModel, 2, 1, 1.3, 1, 1.09, 0.00055, modular_length_num)
+    # 三层
+    Wind_Load_X(ModularBuilding, modulars, SapModel, 3, 1, 1.3, 1.09, 1.09, 0.00055, modular_length_num)
+    # 四层
+    Wind_Load_X(ModularBuilding, modulars, SapModel, 4, 1, 1.3, 1.09, 1.28, 0.00055, modular_length_num)
+    # 五层
+    Wind_Load_X(ModularBuilding, modulars, SapModel, 5, 1, 1.3, 1.28, 1.42, 0.00055, modular_length_num)
+    # 六层
+    Wind_Load_X(ModularBuilding, modulars, SapModel, 6, 1, 1.3, 1.42, 1.42, 0.00055, modular_length_num)
+
+    ret = SapModel.LoadPatterns.Add("EX", 5)
+    ret = SapModel.LoadPatterns.Add("EY", 5)
+    ret = SapModel.LoadPatterns.AutoSeismic.SetChinese2002("EX", 1, 0.05, 2, 0, False, 0, 0, 0.04, 1, 0.05, 0.35, 1, 1)
+    ret = SapModel.LoadPatterns.AutoSeismic.SetChinese2002("EY", 2, 0.05, 2, 0, False, 0, 0, 0.04, 1, 0.05, 0.35, 1, 1)
+    EX_case_SF = [0.01]
+    EY_case_SF = [0.01]
+    ret = SapModel.LoadCases.StaticLinear.SetLoads("EX", 1, "Load", "EX", EX_case_SF)
+    ret = SapModel.LoadCases.StaticLinear.SetLoads("EY", 1, "Load", "EY", EY_case_SF)
+
+    """ set mass source """
+    LoadPat_mass = ["DEAD", "LIVE"]
+    MySF_mass = [1, 0.5]
+    ret = SapModel.PropMaterial.SetMassSource(2, 2, LoadPat_mass, MySF_mass)
+
+    #定义隔膜约束
+    ret = SapModel.ConstraintDef.SetDiaphragm("Diaph1",3)
+
+    # 添加风荷载
+
+    """ set load case """
+    # wind
+    # ret = SapModel.LoadCases.StaticLinear.SetCase("Wind")
+    # MyLoadType = ["Load", "Load"]
+    # MyLoadName = ["WX", "WY"]
+    # MySF = [1,1]
+    # ret = SapModel.LoadCases.StaticLinear.SetLoads("Wind", 2, MyLoadType, MyLoadName, MySF)
+    # Quake
+    # ResponseSpectrum
+    ret = SapModel.Func.FuncRS.SetChinese2010("RS-1", 0.16, 4, 0.36, 1, 0.04)
+
+    ret = SapModel.LoadCases.ResponseSpectrum.SetCase("Quake")
+    ret = SapModel.LoadCases.ResponseSpectrum.SetModalCase("Quake", "MODAL")
+    ret = SapModel.LoadCases.ResponseSpectrum.SetModalComb("Quake", 2)
+    MyLoadName_quake = ["U1", "U2"]
+    MySF_quake = [9800, 9800]
+    MyCSys_quake = ["Global","Global"]
+    MyAng_quake = [10, 10]
+    MyFunc_quake = ["RS-1", "RS-1"]
+
+    ret = SapModel.LoadCases.ResponseSpectrum.SetLoads("Quake", 2, MyLoadName_quake, MyFunc_quake, MySF_quake, MyCSys_quake, MyAng_quake)
+    """ define load combination """
+
+    ret = SapModel.RespCombo.Add("COMB1", 0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "DEAD", 1.3)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "LIVE", 1.5)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDX", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "WINDY", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EX", 1.0)
+    ret = SapModel.RespCombo.SetCaseList("COMB1", 0, "EY", 1.0)
+    """ define True """
+    # to be added
+    res1 = [True, True, True, True, True, True]
+    res2 = [True, True, True, False, False, False]
+
+    for modular_indx in range(modular_length_num*2):
+        modular_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(4,8):
+            indx1, indx2 = modular_edges[edge_indx]
+            Point1 = "nodes" + str(indx1)
+            Point2 = "nodes" + str(indx2)
+            ret = SapModel.PointObj.setRestraint(Point1, res1)
+            ret = SapModel.PointObj.setRestraint(Point2, res1)
+
+    """ run the analysis """
+    # # save model
+    ret = SapModel.File.Save(ModelPath)
+    ret = SapModel.Analyze.RunAnalysis()
+
+    """ results output """
+    ret = SapModel.Results.Setup.DeselectAllCasesAndCombosForOutput()
+    # ret = SapModel.Results.Setup.SetCaseSelectedForOutput("DEAD")
+
+    ret = SapModel.Results.Setup.SetComboSelectedForOutput("COMB1")
+    # output displacement
+    weight_sap = 0.00
+    mass_sap = 0.00
+    # [weight_sap,mass_sap,ret] = SapModel.PropMaterial.GetWeightAndMass("Q355", weight_sap, mass_sap)
+
+    ou_all_dis, ou_mid_dis, displacements, mid_displacements, name_frame_mid, name_all_nodes, Joint_dis = output_dis(Nodes, SapModel, modulars, ModularBuilding,modular_length_num,story_num)
+
+    # 输出每层位移最大值
+    max_dis_story = []
+    for i in range(6):
+        all_1_dis = []
+        for j in range(modular_length_num*16*i,modular_length_num*16*(i+1)):
+            all_1_dis.append(ou_all_dis[j])
+        mm = max(all_1_dis)
+        max_dis_story.append(mm)
+        # print(f"第{i}层节点最大位移=",mm)
+    max_dis_mid = []
+    for i in range(6):
+        mid_1_dis = []
+        for j in range(modular_length_num*8*i,modular_length_num*8*(i+1)):
+            mid_1_dis.append(ou_mid_dis[j])
+        mm = max(mid_1_dis)
+        max_dis_mid.append(mm)
+        # print(f"第{i}层柱挠度最大位移=",mm)
+
+
+    # import pdb;
+    # pdb.set_trace()
+
+    # frame reactions
+    all_force_information = output_force(Nodes, SapModel, modulars, ModularBuilding, frame_section_info,frame_section_info000,modular_length_num,story_num)
+    frame_reactions = all_force_information[0]
+    name_re = all_force_information[1]
+    G_max = all_force_information[2]
+    G_max_beam = all_force_information[3]
+    frame_reactions_all = all_force_information[4]
+    all_up_fream_name = all_force_information[5]
+    all_up_fream_data = all_force_information[6]
+    weight_all1 = all_force_information[7] + weight_brace
+    all_up_num = all_force_information[11]
+    mmm = all_force_information[8]
+
+    all_data = [weight_all1, G_max, G_max_beam,frame_reactions_all,frame_section_info,all_up_fream_name,all_up_fream_data,Joint_dis,all_force_information]
+    return all_data
+#刚接
+def Run_GA_sap_4(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_label,width_joint,modular_length_num,story_num):
+
+    ret = SapModel.File.NewBlank()
+
+    # switch units
+    N_mm_C = 9
+    ret = SapModel.SetPresentUnits(N_mm_C)
+
+    """ material definition """
+    # to be added
+    conf = configparser.ConfigParser()
+    # print(type(conf))  # conf是类
+    conf.read('materials_data.ini')
+
+    sections = conf.sections()  # 获取配置文件中所有sections，sections是列表
+    # print(sections)
+    option = conf.options(conf.sections()[0])
+
+    # item = conf.items(sections[0])
+    # print(item[0][1])
+    material_title = []
+    material_info_all = []
+    pop_room_label = list(map(int, pop_room_label))
+    for i in range(len(sections)):
+        material_info = []
+        item = conf.items(sections[i])
+        ret = SapModel.PropMaterial.SetMaterial(f"{item[0][1]}", 1, -1)
+        ret = SapModel.PropMaterial.SetWeightAndMass(f"{item[0][1]}", 2, float(item[1][1]))
+        ret = SapModel.PropMaterial.SetMPIsotropic(f"{item[0][1]}", float(item[2][1]), float(item[3][1]), float(item[4][1]))
+        ret = SapModel.PropMaterial.SetOSteel_1(f"{item[0][1]}", float(item[5][1]), float(item[6][1]), float(item[7][1]),
+                                                float(item[8][1]), int(item[9][1]), int(item[10][1]), float(item[11][1]),
+                                                float(item[12][1]), float(item[13][1]), float(item[14][1]))
+        for i in range(14):
+            material_info.append(item[i][1])
+        material_info_all.append(material_info)
+        material_title.append(item[0][1])
+
+    """ cross section definition """
+    '''defination from the modular perspective'''
+    frame_section_name = []
+    frame_section_info = []
+    frame_section_info000 = []
+    modular_all_section = []
+    modulars = ModularBuilding.building_modulars
+    # modular_nodes_indx = ModularBuilding.nodes_indx
+    for modular_indx in range(len(modulars)):
+        modular_i_info = modulars[modular_indx].modular_info
+        modular_i_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(len(modular_i_edges)):
+            section_info = []
+            frame_section_info111 = []
+            section_name = "frame_section_" + str(modular_indx) + '_' + str(edge_indx)
+            material_name = f"{material_title[2]}"
+            section_data = modular_i_info[modulars[modular_indx].modular_edge_labels[edge_indx]]
+            # if pop_room_label[modular_indx] == 1 or pop_room_label[modular_indx] == 4 or pop_room_label[modular_indx] == 7 or pop_room_label[modular_indx] == 10:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels[edge_indx]]
+            # elif pop_room_label[modular_indx] == 2 or pop_room_label[modular_indx] == 5 or pop_room_label[modular_indx] == 8 or pop_room_label[modular_indx] == 11:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels_1[edge_indx]]
+            # elif pop_room_label[modular_indx] == 3 or pop_room_label[modular_indx] == 6 or pop_room_label[modular_indx] == 9 or pop_room_label[modular_indx] == 12:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels_2[edge_indx]]
+            # elif pop_room_label[modular_indx] == 4 or pop_room_label[modular_indx] == 8 or pop_room_label[modular_indx] == 12 or pop_room_label[modular_indx] == 16:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels_3[edge_indx]]
+
+            if section_data['type'] == 'c0':
+                ret = SapModel.PropFrame.SetChannel(section_name, material_name,
+                                                    section_data['outside_depth'], section_data['outside_flange_width'],
+                                                    section_data['flange_thickness'], section_data['web_thickness'], -1)
+                frame_section_name.append(section_name)
+                frame_section_info111.append( f"{material_title[0]}")
+                frame_section_info111.append("c0")
+                frame_section_info000.append(frame_section_info111)
+                section_info.append(section_data['outside_depth'])
+                section_info.append(section_data['outside_flange_width'])
+                section_info.append(section_data['flange_thickness'])
+                section_info.append(section_data['web_thickness'])
+                section_info.append(section_data['s22'])
+                section_info.append(section_data['s33'])
+                section_info.append(section_data['i22'])
+                section_info.append(section_data['i33'])
+                frame_section_info.append(section_info)
+            elif section_data['type'] == 'I0':
+                ret = SapModel.PropFrame.SetISection(section_name, material_name,
+                                                    section_data['heigth'], section_data['width'],
+                                                    section_data['tf'], section_data['tw'],section_data['width'],section_data['tf'],-1)
+                frame_section_name.append(section_name)
+                frame_section_info111.append( f"{material_title[0]}")
+                frame_section_info111.append("I0")
+                frame_section_info000.append(frame_section_info111)
+                section_info.append(section_data['heigth'])
+                section_info.append(section_data['width'])
+                section_info.append(section_data['tw'])
+                section_info.append(section_data['tf'])
+                section_info.append(section_data['s22'])
+                section_info.append(section_data['s33'])
+                section_info.append(section_data['i22'])
+                section_info.append(section_data['i33'])
+                frame_section_info.append(section_info)
+            elif section_data['type'] == 'b0':
+                ret = SapModel.PropFrame.SetTube(section_name, material_name,
+                                                    section_data['outside_depth'], section_data['outside_flange_width'],
+                                                    section_data['flange_thickness'], section_data['web_thickness'],-1)
+                frame_section_name.append(section_name)
+                frame_section_info111.append( f"{material_title[0]}")
+                frame_section_info111.append("b0")
+                frame_section_info000.append(frame_section_info111)
+                section_info.append(section_data['outside_depth'])
+                section_info.append(section_data['outside_flange_width'])
+                section_info.append(section_data['flange_thickness'])
+                section_info.append(section_data['web_thickness'])
+                section_info.append(section_data['s22'])
+                section_info.append(section_data['s33'])
+                section_info.append(section_data['i22'])
+                section_info.append(section_data['i33'])
+                frame_section_info.append(section_info)
+
+    """ connection definition """
+    # 设置连接性质
+    # 自由度
+    MyDof = [True, True, True, True, True, True]
+    # 固定
+    MyFixed = [False, False, False, False, False, False]
+    # 非线性
+    MyNonLinear = [True, True, True, True, True, True]
+    # 初始刚度
+    MyKe = [980000, 120000, 120000, 2200000000, 3400000000, 3400000000]
+    # 阻尼系数
+    MyCe = [0.05, 0.05, 0.05, 0.05, 0.05, 0.05]
+    MyF = [-12000000, -12000000, 0, 12000000, 12000000]
+    MyD = [-30, -5, 0, 5, 30]
+
+    ret = SapModel.PropLink.SetMultiLinearElastic("HOR1", MyDof, MyFixed, MyNonLinear, MyKe, MyCe, 2, 0)
+    ret = SapModel.PropLink.SetMultiLinearElastic("VER1", MyDof, MyFixed, MyNonLinear, MyKe, MyCe, 2, 0)
+    # 竖直连接力位移曲线
+    VERF_u1 = [-1.15e6, -1.15e6, 0, 1.07e6, 1.07e6]
+    VERD_u1 = [-2.34, -1.14, 0, 1.14, 2.34]
+    VERF_u23 = [-3.31e5, -3.31e5, 0, 3.31e5, 3.31e5]
+    VERD_u23 = [-5.42, -2.70, 0, 2.70, 5.42]
+    VERF_r1 = [-4.8e7, -4.8e7, -3.15e7, 0, 3.15e7, 4.8e7, 4.8e7]
+    VERD_r1 = [-0.073, -0.038, -0.015, 0, 0.015, 0.038, 0.073]
+    VERF_r23 = [-5.5e7, -5.5e7, -3.68e7, 0, 3.68e7, 5.38e7, 5.43e7]
+    VERD_r23 = [-0.055, -0.027, -0.011, 0, 0.011, 0.027, 0.055]
+
+    HORF_u1 = [-6.85e5, -6.90e5, 0, 6.90e5, 6.85e5]
+    HORD_u1 = [-0.45, -0.23, 0, 0.23, 0.45]
+    HORF_u23 = [-6.24e5, -6.24e5, 0, 6.30e5, 6.30e5]
+    HORD_u23 = [-0.23, -0.11, 0, 0.11, 0.23]
+    HORF_r1 = [-75000000, -75000000, -4.85e7, 0, 4.93e7, 75000000, 75000000]
+    HORD_r1 = [-0.012, -0.0063, -0.0024, 0, 0.0024, 0.0063, 0.012]
+    HORF_r2 = [-129000000, -129000000, -8.56e7, 0, 8.56e7, 1.29e8, 1.29e8]
+    HORD_r2 = [-0.022, -0.011, -0.0044, 0, 0.0041, 0.011, 0.0215]
+    HORF_r3 = [-3.40e7, -3.40e7, -2.31e7, 0, 2.22e7, 3.40e7, 3.40e7]
+    HORD_r3 = [-0.0060, -0.0032, -0.0014, 0, 0.0012, 0.0026, 0.0053]
+    # 多段连接塑性
+    # ret = SapModel.PropLink.SetMultiLinearPoints("MLE1", 2, 5, MyF, MyD, 3, 9, 12, 0.75, 0.8, .1)
+    # 多段连接弹性
+    ret = SapModel.PropLink.SetMultiLinearPoints("HOR1", 1, 5, HORF_u1, HORD_u1)
+    ret = SapModel.PropLink.SetMultiLinearPoints("HOR1", 2, 5, HORF_u23, HORD_u23)
+    ret = SapModel.PropLink.SetMultiLinearPoints("HOR1", 3, 5, HORF_u23, HORD_u23)
+    ret = SapModel.PropLink.SetMultiLinearPoints("HOR1", 4, 7, HORF_r1, HORD_r1)
+    ret = SapModel.PropLink.SetMultiLinearPoints("HOR1", 5, 7, HORF_r2, HORD_r2)
+    ret = SapModel.PropLink.SetMultiLinearPoints("HOR1", 6, 7, HORF_r3, HORD_r3)
+
+    ret = SapModel.PropLink.SetMultiLinearPoints("VER1", 1, 5, VERF_u1, VERD_u1)
+    ret = SapModel.PropLink.SetMultiLinearPoints("VER1", 2, 5, VERF_u23, VERD_u23)
+    ret = SapModel.PropLink.SetMultiLinearPoints("VER1", 3, 5, VERF_u23, VERD_u23)
+    ret = SapModel.PropLink.SetMultiLinearPoints("VER1", 4, 7, VERF_r1, VERD_r1)
+    ret = SapModel.PropLink.SetMultiLinearPoints("VER1", 5, 7, VERF_r23, VERD_r23)
+    ret = SapModel.PropLink.SetMultiLinearPoints("VER1", 6, 7, VERF_r23, VERD_r23)
+
+    #弹簧单元
+    MyDof_linearhor = [True, True, True, False, False, False]
+    MyFixed_linearhor = [False, False, False, False, False, False]
+    MyKe_linearhor = [11000000, 3900000, 24000000,0,0,0]
+    MyCe_linearhor = [0.05,0.05,0.05,0,0,0]
+    ret = SapModel.PropLink.Setlinear("LINEARHOR1", MyDof_linearhor, MyFixed_linearhor, MyKe_linearhor, MyCe_linearhor, 0, 0)
+
+    MyDof_linearver = [True, True, True, False, False, False]
+    MyFixed_linearver = [False, False, False, False, False, False]
+    MyKe_linearver = [1500000, 3000000, 12900000,0,0,0]
+    MyCe_linearver = [0.05,0.05,0.05,0,0,0]
+    ret = SapModel.PropLink.Setlinear("LINEARVER1", MyDof_linearver, MyFixed_linearver, MyKe_linearver, MyCe_linearver, 0, 0)
+
+    # if modular_i_info['type']
+
+    """ define the structure """
+    Nodes = ModularBuilding.building_nodes
+    Joints_hor = ModularBuilding.building_room_joints_hor
+    Joints_ver = ModularBuilding.building_room_joints_ver
+    Corr_beams = ModularBuilding.corr_beams
+    Room_indx = ModularBuilding.building_nodes_indx
+
+    ''' 1st adding points '''
+    for node_indx in range(len(Nodes)):
+        x, y, z = Nodes[node_indx]
+        ret = SapModel.PointObj.AddCartesian(x, y, z, None, "nodes"+str(node_indx), "Global")
+    """ define frames mid points """
+    for modular_indx in range(len(modulars)):
+        modular_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(len(modular_edges)):
+            indx1, indx2 = modular_edges[edge_indx]
+            # Point1 = "nodes" + str(indx1)
+            # Point2 = "nodes" + str(indx2)
+            x1, y1, z1 = Nodes[indx1]
+            x2, y2, z2 = Nodes[indx2]
+            x3 = 0.5 * (x1 + x2)
+            y3 = 0.5 * (y1 + y2)
+            z3 = 0.5 * (z1 + z2)
+            ret = SapModel.PointObj.AddCartesian(x3, y3, z3, None, "nodes_mid" + str(modular_indx) + '_' + str(edge_indx), "Global")
+    """define frame 3 point"""
+    for modular_indx in range(len(modulars)):
+        modular_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in [5, 7, 9, 11]:
+            indx1, indx2 = modular_edges[edge_indx]
+            # Point1 = "nodes" + str(indx1)
+            # Point2 = "nodes" + str(indx2)
+            x1, y1, z1 = Nodes[indx1]
+            x2, y2, z2 = Nodes[indx2]
+            x3 = 0.5 * (x1 + x2)
+            y3 = 0.5 * (y1 + y2) -750
+            z3 = 0.5 * (z1 + z2)
+            y4 = 0.5 * (y1 + y2) +750
+            ret = SapModel.PointObj.AddCartesian(x3, y3, z3, None, "nodes_brace" + str(modular_indx) + '_' + str(edge_indx) + '_0', "Global")
+            ret = SapModel.PointObj.AddCartesian(x3, y4, z3, None, "nodes_brace" + str(modular_indx) + '_' + str(edge_indx) + '_1', "Global")
+    ''' 2nd adding frames '''
+    for modular_indx in range(len(modulars)):
+        modular_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(len(modular_edges)):
+            indx1, indx2 = modular_edges[edge_indx]
+            Point1 = "nodes" + str(indx1)
+            Point2 = "nodes" + str(indx2)
+            name = "frame_" + str(modular_indx) + '_' + str(edge_indx)
+            section_name = "frame_section_" + str(modular_indx) + '_' + str(edge_indx)
+            ret = SapModel.FrameObj.AddByPoint(Point1, Point2, " ", section_name, name)
+    ''' 3rd adding joints '''
+    joint_sec, joint_mater = "Rectang", f"{material_title[2]}"
+    ret = SapModel.PropFrame.SetRectangle(joint_sec, joint_mater,width_joint,width_joint,-1)
+    brace_sec, brace_mater = "Rectang", f"{material_title[2]}"
+    ret = SapModel.PropFrame.SetTube(brace_sec, brace_mater, 100, 100,10,10, -1)
+    ''' 4rd adding braces '''
+    weight_brace = 0.0
+    for i in range(len(modulars)):
+        #人字支撑
+        if pop_room_label[i] == 1:
+            nodes_indx = ModularBuilding.building_nodes_indx[i]
+            ret = SapModel.FrameObj.AddByPoint("nodes"+str(nodes_indx[0]), "nodes_mid" + str(i) + '_' + str(11), " ", brace_sec, "brace_" + str(i) + '_' + str(0))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_mid" + str(i) + '_' + str(11), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(1))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_mid" + str(i) + '_' + str(9), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(2))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_mid" + str(i) + '_' + str(9), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(3))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(4))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(5))
+            br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
+            leng = distance(br_back)
+            wb = (5000*4+leng*2)*(100*100-90*90)*0.00000000785
+            weight_brace +=wb
+
+        # 交叉支撑
+        elif pop_room_label[i] == 2 :
+            nodes_indx = ModularBuilding.building_nodes_indx[i]
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(0))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes" + str(nodes_indx[1]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(1))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes" + str(nodes_indx[5]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(2))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes" + str(nodes_indx[4]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(3))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(4))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(5))
+
+            br_back = [Nodes[nodes_indx[5]][0] - Nodes[nodes_indx[6]][0], Nodes[nodes_indx[5]][1] - Nodes[nodes_indx[6]][1],
+                       Nodes[nodes_indx[5]][2] - Nodes[nodes_indx[6]][2]]
+            leng = distance(br_back)
+            wb = (8544 * 4 + leng * 2) *(100*100-90*90)* 0.00000000785
+            weight_brace += wb
+        #双交叉支撑
+        elif pop_room_label[i] == 3:
+            nodes_indx = ModularBuilding.building_nodes_indx[i]
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes_brace" + str(i) + '_' + str(11) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(0))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[1]), "nodes_brace" + str(i) + '_' + str(7) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(1))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_brace" + str(i) + '_' + str(11) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(2))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[7]), "nodes_brace" + str(i) + '_' + str(7) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(3))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_brace" + str(i) + '_' + str(9) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(4))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes_brace" + str(i) + '_' + str(5) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(5))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_brace" + str(i) + '_' + str(9) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(6))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes_brace" + str(i) + '_' + str(5) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(7))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(8))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(9))
+
+            br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
+            leng = distance(br_back)
+            wb = (4423*8+leng*2)*(100*100-90*90)*0.00000000785
+            weight_brace +=wb
+    zjq = weight_brace
+    ''' 刚接连接 '''
+    for joint_indx in range(len(Joints_hor)):
+        indx1, indx2 = Joints_hor[joint_indx]
+        Point1 = "nodes" + str(indx1)
+        Point2 = "nodes" + str(indx2)
+        name = "hor_" + str(joint_indx) + '_' + str(edge_indx)
+        ret = SapModel.FrameObj.AddByPoint(Point1, Point2, " ", joint_sec, name)
+    for i in range(len(Joints_ver)):
+        indx1, indx2 = Joints_ver[i]
+        Point1 = "nodes" + str(indx1)
+        Point2 = "nodes" + str(indx2)
+        name = "verlink_" + str(i)
+        ret = SapModel.FrameObj.AddByPoint(Point1, Point2, "  ", joint_sec, name)
+    ''' 连接单元 '''
+    #全部添加
+    # for j_indx in range(len(Joints_hor)):
+    #     indx1, indx2 = Joints_hor[j_indx]
+    #     Point1 = "nodes" + str(indx1)
+    #     Point2 = "nodes" + str(indx2)
+    #     name = "horlink_" + str(j_indx)
+    #     ret = SapModel.LinkObj.AddByPoint(Point1, Point2, name, False, "HOR1")
+    #
+    #只添加天花板处
+    # for joint_num in range((modular_length_num-1)*2*(story_num-1)):
+    #     for num_num in range(2):
+    #         indx1, indx2 = Joints_hor[joint_num*4+num_num]
+    #         Point1 = "nodes" + str(indx1)
+    #         Point2 = "nodes" + str(indx2)
+    #         name = "horlink_" + str(joint_num*4+num_num)
+    #         ret = SapModel.LinkObj.AddByPoint(Point1, Point2, name, False, "LINEARHOR1")
+    # for joint_num in range((modular_length_num-1)*2*(story_num-1),(modular_length_num-1)*2*(story_num)):
+    #     for num_num in range(4):
+    #         indx1, indx2 = Joints_hor[joint_num*4+num_num]
+    #         Point1 = "nodes" + str(indx1)
+    #         Point2 = "nodes" + str(indx2)
+    #         name = "horlink_" + str(joint_num*4+num_num)
+    #         ret = SapModel.LinkObj.AddByPoint(Point1, Point2, name, False, "LINEARHOR1")
+    #
+    # for j_indx in range(len(Joints_ver)):
+    #     indx1, indx2 = Joints_ver[j_indx]
+    #     Point1 = "nodes" + str(indx1)
+    #     Point2 = "nodes" + str(indx2)
+    #     name = "verlink_" + str(j_indx)
+    #     ret = SapModel.LinkObj.AddByPoint(Point1, Point2, name, False, "LINEARVER1")
     ''' 4th adding corridor_beams '''
     for co_beam_indx in range(len(Corr_beams)):
         indx1, indx2 = Corr_beams[co_beam_indx]

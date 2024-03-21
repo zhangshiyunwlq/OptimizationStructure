@@ -2813,7 +2813,7 @@ x = np.linspace(0, 12, 13)
 pop_room = []
 pop_room_label = []
 for i in range(18):
-    pop_room.append(3)
+    pop_room.append(14)
 # pop_room = all_GA_infor[0]
 for i in range(96):
     pop_room_label.append(0)
