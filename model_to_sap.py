@@ -2398,75 +2398,76 @@ def Run_GA_sap_3(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     ret = SapModel.PropFrame.SetTube(brace_sec, brace_mater, 100, 100,10,10, -1)
     ''' 4rd adding braces '''
     weight_brace = 0.0
-    for i in range(len(modulars)):
-        #人字支撑
-        if pop_room_label[i] == 1:
-            nodes_indx = ModularBuilding.building_nodes_indx[i]
-            ret = SapModel.FrameObj.AddByPoint("nodes"+str(nodes_indx[0]), "nodes_mid" + str(i) + '_' + str(11), " ", brace_sec, "brace_" + str(i) + '_' + str(0))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_mid" + str(i) + '_' + str(11), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(1))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_mid" + str(i) + '_' + str(9), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(2))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_mid" + str(i) + '_' + str(9), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(3))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(4))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(5))
-            br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
-            leng = distance(br_back)
-            wb = (5000*4+leng*2)*(100*100-90*90)*0.00000000785
-            weight_brace +=wb
-
-        # 交叉支撑
-        elif pop_room_label[i] == 2 :
-            nodes_indx = ModularBuilding.building_nodes_indx[i]
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes" + str(nodes_indx[7]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(0))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes" + str(nodes_indx[1]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(1))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes" + str(nodes_indx[5]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(2))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes" + str(nodes_indx[4]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(3))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(4))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(5))
-
-            br_back = [Nodes[nodes_indx[5]][0] - Nodes[nodes_indx[6]][0], Nodes[nodes_indx[5]][1] - Nodes[nodes_indx[6]][1],
-                       Nodes[nodes_indx[5]][2] - Nodes[nodes_indx[6]][2]]
-            leng = distance(br_back)
-            wb = (8544 * 4 + leng * 2) *(100*100-90*90)* 0.00000000785
-            weight_brace += wb
-        #双交叉支撑
-        elif pop_room_label[i] == 3:
-            nodes_indx = ModularBuilding.building_nodes_indx[i]
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes_brace" + str(i) + '_' + str(11) + '_0', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(0))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[1]), "nodes_brace" + str(i) + '_' + str(7) + '_0', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(1))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_brace" + str(i) + '_' + str(11) + '_1', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(2))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[7]), "nodes_brace" + str(i) + '_' + str(7) + '_1', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(3))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_brace" + str(i) + '_' + str(9) + '_0', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(4))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes_brace" + str(i) + '_' + str(5) + '_0', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(5))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_brace" + str(i) + '_' + str(9) + '_1', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(6))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes_brace" + str(i) + '_' + str(5) + '_1', " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(7))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(8))
-            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
-                                               brace_sec, "brace_" + str(i) + '_' + str(9))
-
-            br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
-            leng = distance(br_back)
-            wb = (4423*8+leng*2)*(100*100-90*90)*0.00000000785
-            weight_brace +=wb
+    # for i in range(len(modulars)):
+    #     #人字支撑
+    #     if pop_room_label[i] == 1:
+    #         nodes_indx = ModularBuilding.building_nodes_indx[i]
+    #         ret = SapModel.FrameObj.AddByPoint("nodes"+str(nodes_indx[0]), "nodes_mid" + str(i) + '_' + str(11), " ", brace_sec, "brace_" + str(i) + '_' + str(0))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_mid" + str(i) + '_' + str(11), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(1))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_mid" + str(i) + '_' + str(9), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(2))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_mid" + str(i) + '_' + str(9), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(3))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(4))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(5))
+    #         br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
+    #         leng = distance(br_back)
+    #         wb = (5000*4+leng*2)*(100*100-90*90)*0.00000000785
+    #         weight_brace +=wb
+    #
+    #     # 交叉支撑
+    #     elif pop_room_label[i] == 2 :
+    #         nodes_indx = ModularBuilding.building_nodes_indx[i]
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes" + str(nodes_indx[7]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(0))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes" + str(nodes_indx[1]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(1))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes" + str(nodes_indx[5]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(2))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes" + str(nodes_indx[4]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(3))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(4))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(5))
+    #
+    #         br_back = [Nodes[nodes_indx[5]][0] - Nodes[nodes_indx[6]][0], Nodes[nodes_indx[5]][1] - Nodes[nodes_indx[6]][1],
+    #                    Nodes[nodes_indx[5]][2] - Nodes[nodes_indx[6]][2]]
+    #         leng = distance(br_back)
+    #         wb = (8544 * 4 + leng * 2) *(100*100-90*90)* 0.00000000785
+    #         weight_brace += wb
+    #     #双交叉支撑
+    #     elif pop_room_label[i] == 3:
+    #         nodes_indx = ModularBuilding.building_nodes_indx[i]
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes_brace" + str(i) + '_' + str(11) + '_0', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(0))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[1]), "nodes_brace" + str(i) + '_' + str(7) + '_0', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(1))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_brace" + str(i) + '_' + str(11) + '_1', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(2))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[7]), "nodes_brace" + str(i) + '_' + str(7) + '_1', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(3))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_brace" + str(i) + '_' + str(9) + '_0', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(4))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes_brace" + str(i) + '_' + str(5) + '_0', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(5))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_brace" + str(i) + '_' + str(9) + '_1', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(6))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes_brace" + str(i) + '_' + str(5) + '_1', " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(7))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(8))
+    #         ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+    #                                            brace_sec, "brace_" + str(i) + '_' + str(9))
+    #
+    #         br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
+    #         leng = distance(br_back)
+    #         wb = (4423*8+leng*2)*(100*100-90*90)*0.00000000785
+    #         weight_brace +=wb
+    #
     zjq = weight_brace
     ''' 刚接连接 '''
     # for joint_indx in range(len(Joints_hor)):
