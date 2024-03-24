@@ -1905,6 +1905,7 @@ def Run_GA_sap_2(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     # cor_joint_data=np.array(cor_joint_data)
 
     node_change = copy.deepcopy(Nodes)
+    # 通过顺时针取一半节点,再通过逆时针取一半节点
     num_points = int(len(Corr_beams)/(story_num*2))
     cor_joint_data = []
     for i in range(story_num*2):
@@ -1919,10 +1920,23 @@ def Run_GA_sap_2(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
 
         cor_joint_data.append(cor_joint_floor)
     # cor_joint_data=np.array(cor_joint_data)
+    # 每个房间建一个走廊平面
+    num_points_room = int(len(Corr_beams) / (story_num * 4))
+    cor_joint_data_room = []
+    for i in range(story_num*2):
 
-
-
-
+        for j in range(num_points_room):
+            cor_joint_floor = []
+            indx1=Corr_beams[i*num_points_room*2+j*2][0]
+            indx2 = Corr_beams[i * num_points_room * 2 + j * 2+1][0]
+            indx3=Corr_beams[i*num_points_room*2+j*2+1][1]
+            indx4 = Corr_beams[i * num_points_room * 2 + j * 2][1]
+            cor_joint_floor.append('nodes' + str(indx1))
+            cor_joint_floor.append('nodes' + str(indx2))
+            cor_joint_floor.append('nodes' + str(indx3))
+            cor_joint_floor.append('nodes' + str(indx4))
+            cor_joint_data_room.append(cor_joint_floor)
+    cor_joint_data = cor_joint_data_room
     ret = SapModel.File.Save(ModelPath)
 
 
@@ -2157,7 +2171,7 @@ def Run_GA_sap_2(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
 
     all_data = [weight_all1, G_max, G_max_beam,frame_reactions_all,frame_section_info,all_up_fream_name,all_up_fream_data,Joint_dis,all_force_information]
     return all_data
-#换节点
+#换平移弹簧连接节点
 def Run_GA_sap_3(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_label,width_joint,modular_length_num,story_num):
 
     ret = SapModel.File.NewBlank()
@@ -2791,7 +2805,7 @@ def Run_GA_sap_3(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
 
     all_data = [weight_all1, G_max, G_max_beam,frame_reactions_all,frame_section_info,all_up_fream_name,all_up_fream_data,Joint_dis,all_force_information]
     return all_data
-#刚接
+#连接单元使用短柱刚接
 def Run_GA_sap_4(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_label,width_joint,modular_length_num,story_num):
 
     ret = SapModel.File.NewBlank()
