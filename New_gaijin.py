@@ -713,7 +713,8 @@ def decoding1(pop,num_var,num_room_type,labels):
                 if posi == 0:
                     pop_room_label[i][j] = 0
                 else:
-                    pop_room_label[i][j] = pop[i][num_var]
+                    # pop_room_label[i][j] = pop[i][num_var]
+                    pop_room_label[i][j] = 0
     return pop_all,pop_room_label
 
 
