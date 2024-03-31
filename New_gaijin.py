@@ -226,8 +226,8 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
                 pop2_list = copy.deepcopy(pop2)
                 memorize_list = copy.deepcopy(memorize_pool[i])
                 if pop2_list.tolist()==memorize_list.tolist():
-                    res1=memorize_fit[i]
-                    res2=memorize_weight[i]
+                    result[time]=memorize_fit[i]
+                    weight_1[time]=memorize_weight[i]
                     col_up[time]=memorize_col[i]
                     beam_up[time]=memorize_beam[i]
                     value = 1
