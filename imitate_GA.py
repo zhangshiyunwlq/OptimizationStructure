@@ -162,7 +162,7 @@ def mulitrun_GA(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_
             memory_pools_beam.append(1)
 
 #不加记忆池
-def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
+def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up):
     while True:
         if q.empty():
             break
@@ -171,26 +171,37 @@ def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pool
         pop = pop1[time]
         pop_room_label = pop3[time]
         pop2= pop_all[time]
+        value = 0
+        for i in range(len(memorize_pool)):
+            sum_code = sum(pop2)
+            if sum_code==memorize_sum[i]:
+                pop2_list = copy.deepcopy(pop2)
+                memorize_list = copy.deepcopy(memorize_pool[i])
+                if pop2_list.tolist()==memorize_list.tolist():
+                    res1=memorize_fit[i]
+                    res2=memorize_weight[i]
+                    col_up[time]=memorize_col[i]
+                    beam_up[time]=memorize_beam[i]
+                    value = 1
+                    break
+        if value ==0:
+            res1, res2 = fun(pop,pop_room_label)
 
-        res1, res2 = fun(pop,pop_room_label)
-
-        # num3 += 1
-        weight_1[time] = res2
-        col_up[time] = 1
-        beam_up[time] = 1
-        result[time] = res1
+            # num3 += 1
+            weight_1[time] = res2
+            col_up[time] = 1
+            beam_up[time] = 1
+            result[time] = res1
+            memorize_sum.append(sum(pop2))
+            memorize_pool.append(pop2)
+            memorize_fit.append(res1)
+            memorize_weight.append(res2)
+            memorize_col.append(col_up[time])
+            memorize_beam.append(beam_up[time])
 
 
 def thread_sap(num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
 
-
-    pop_n = [0 for i in range(len(pop2[0]))]
-    if len(memory_pools_all)==0:
-        memory_pools_all.append(pop_n)
-        memory_pools_fit.append(100000)
-        memory_pools_weight.append(100000)
-        memory_pools_col.append(100000)
-        memory_pools_beam.append(100000)
 
     q = queue.Queue()
     threads = []
@@ -198,7 +209,7 @@ def thread_sap(num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,memory_pools_al
         q.put(i)
     for i in range(num_thread):
         t = threading.Thread(target=mulitrun_GA_1, args=(pop1,pop2,pop3,q,
-                            result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam))
+                            result,weight_1,col_up,beam_up))
         t.start()
         threads.append(t)
     for i in threads:
@@ -280,9 +291,19 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
 
 
 def run(num_var,num_room_type,x,labels):
+
     pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
     pop1,pop3 = decoding1(pop_decoe_1,num_var,num_room_type,labels)
+    # memo_code = []
+    # for i in range(len(pop2[0])):
+    #     memo_code.append(20)
+    # memorize_sum.append(sum(memo_code))
+    # memorize_pool.append(np.array(memo_code))
+    # memorize_fit.append(10000)
+    # memorize_weight.append(10000)
+    # memorize_col.append(10000)
+    # memorize_beam.append(10000)
 
     pop_zhongqun_all = []  # 记录每代种群（不重复）
     pop_zhongqun_all_2 = []#记录种群所有
@@ -309,6 +330,9 @@ def run(num_var,num_room_type,x,labels):
         weight = [0 for i in range(len(pop2))]
         clo_val = [0 for i in range(len(pop2))]
         beam_val = [0 for i in range(len(pop2))]
+        # if run_time ==2:
+        #     for i in range(len(pop2)):
+        #         pop2[i]=memo_code
         result1,weight_pop,clo_up_1,beam_up_1=thread_sap(num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val, memory_pools_all, memory_pools_fit,
                    memory_pools_weight, memory_pools_col, memory_pools_beam)
 
@@ -332,15 +356,15 @@ def run(num_var,num_room_type,x,labels):
         # 引入新个体
         run_time +=1
         if run_time % 5 == 0:
-            pop2_new = generate_DNA_coding_story5(num_var, num_room_type, x)
+            pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
 
         if run_time %5==0:
             print(run_time)
-            print(f'记忆池数量:{len(memory_pools_all)}')
-        pop1, pop3 = decoding(pop2, num_var, num_room_type, labels)
+            print(f'记忆池数量:{len(memorize_pool)}')
+        pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
 
         aaa = []
         aaa.append(pop1[0])
@@ -500,6 +524,13 @@ x = np.linspace(0, 6, 7)
 num_var = 5
 num_room_type=1
 
+memorize_pool = []
+memorize_fit = []
+memorize_weight = []
+memorize_col = []
+memorize_beam = []
+memorize_sum = []
+
 # label=[1,1,1,1,2,2,2,2]
 # labels = []
 # for i in range(12):
@@ -508,8 +539,15 @@ labels = []
 for i in range(1,7):
     for j in range(16):
         labels.append(i)
+for num_var in [2,4,6]:
+    memorize_pool = []
+    memorize_fit = []
+    memorize_weight = []
+    memorize_col = []
+    memorize_beam = []
+    memorize_sum = []
 
-zhan,jia,qi=run(num_var,num_room_type,x,labels)
+    zhan,jia,qi=run(num_var,num_room_type,x,labels)
 
 
 # draw_picture('name','title')

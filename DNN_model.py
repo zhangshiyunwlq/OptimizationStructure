@@ -76,6 +76,7 @@ pop_num = 30
 var_num = Elements.shape[0]
 
 var_low = np.zeros((var_num,))+0
+
 var_upp =  np.zeros((var_num,))+41
 
 penalties = [1e6, 1e7]

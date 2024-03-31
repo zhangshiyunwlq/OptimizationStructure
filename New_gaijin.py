@@ -215,20 +215,40 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
     while True:
         if q.empty():
             break
-
         time = q.get()
         pop = pop1[time]
         pop_room_label = pop3[time]
         pop2= pop_all[time]
+        value = 0
+        for i in range(len(memorize_pool)):
+            sum_code = sum(pop2)
+            if sum_code==memorize_sum[i]:
+                pop2_list = copy.deepcopy(pop2)
+                memorize_list = copy.deepcopy(memorize_pool[i])
+                if pop2_list.tolist()==memorize_list.tolist():
+                    res1=memorize_fit[i]
+                    res2=memorize_weight[i]
+                    col_up[time]=memorize_col[i]
+                    beam_up[time]=memorize_beam[i]
+                    value = 1
+                    break
+        if value ==0:
+            we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
+                                                                                     pop,
+                                                                                     pop_room_label)
+            res1, res2 = Fun_1(we, co, be, dis_all, force_all, 10000)
 
-        we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel, pop,
-                                                                                 pop_room_label)
-        res1, res2 = Fun_1(we, co, be, dis_all, force_all, 10000)
-        # num3 += 1
-        weight_1[time] = res2
-        col_up[time] = co
-        beam_up[time] = be
-        result[time] = res1
+            # num3 += 1
+            weight_1[time] = res2
+            col_up[time] = co
+            beam_up[time] = be
+            result[time] = res1
+            memorize_sum.append(sum(pop2))
+            memorize_pool.append(pop2)
+            memorize_fit.append(res1)
+            memorize_weight.append(res2)
+            memorize_col.append(col_up[time])
+            memorize_beam.append(beam_up[time])
 
 
 def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up):
@@ -530,7 +550,7 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
 
         if run_time %5==0:
             print(run_time)
-            print(f'记忆池数量:{len(memory_pools_all)}')
+            print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
 
         aaa = []
@@ -756,6 +776,12 @@ x = np.linspace(0, 13, 14)
 num_var = 2
 num_room_type=1
 
+memorize_pool = []
+memorize_fit = []
+memorize_weight = []
+memorize_col = []
+memorize_beam = []
+memorize_sum = []
 
 
 
@@ -770,7 +796,13 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(2):
+    for time in range(1):
+        memorize_pool = []
+        memorize_fit = []
+        memorize_weight = []
+        memorize_col = []
+        memorize_beam = []
+        memorize_sum = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         gc.collect()
