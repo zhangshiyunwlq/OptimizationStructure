@@ -20,6 +20,8 @@ import comtypes.client
 import gc
 import openpyxl
 
+
+
 def fun(a,b):
     pop_1=copy.deepcopy(a)
     pop_2=copy.deepcopy(b)
@@ -177,7 +179,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         g_beam_all += g_beam[i]
     #y dis ratio
     for i in range(len(dis_all[5])):
-        if dis_all[5][i] <= 0.001 and dis_all[5][i] >= -0.001:
+        if dis_all[5][i] <= 0.00167 and dis_all[5][i] >= -0.00167:
             dis_all[5][i] = 0
         else:
             dis_all[5][i] = dis_all[5][i]
@@ -736,6 +738,95 @@ def decoding1(pop,num_var,num_room_type,labels):
                     # pop_room_label[i][j] = pop[i][num_var]
                     pop_room_label[i][j] = 0
     return pop_all,pop_room_label
+
+def DNN_GA():
+    x_train = np.array(memorize_pool)
+    y_train = np.array(memorize_fit)
+
+def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
+    pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
+    pop_decoe_1 = copy.deepcopy(pop2)
+    pop1,pop3 = decoding1(pop_decoe_1,num_var,num_room_type,labels)
+
+    pop_zhongqun_all = []  # 记录每代种群（不重复）
+    pop_zhongqun_all_2 = []#记录种群所有
+    pop_zhongqun_all_3 = []
+    memory_pools_all = []
+    memory_pools_fit = []
+    memory_pools_weight = []
+    memory_pools_col = []
+    memory_pools_beam = []
+    col_up_all= []
+    beam_up_all=[]
+    pop_all_weight=[]
+    pop_all_fitness=[]
+    weight_min=[]
+    min_ru = []
+    sap_run_time = 0
+    for run_time in range(N_GENERATIONS):
+        pop_zhongqun_all.append(pop1)
+        pop_zhongqun_all_2.append(pop2)
+        pop_zhongqun_all_3.append(pop3)
+
+        # 计算fitness等参数
+        fit = [0 for i in range(len(pop2))]
+        weight = [0 for i in range(len(pop2))]
+        clo_val = [0 for i in range(len(pop2))]
+        beam_val = [0 for i in range(len(pop2))]
+        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
+
+        col_up_all.append(clo_up_1)
+        beam_up_all.append(beam_up_1)
+        pop_all_weight.append(weight_pop)
+        fitness2 =result1
+        pop_all_fitness.append(fitness2)
+        mm = fitness2.index(min(fitness2))
+        weight_min.append(weight_pop[mm])
+        min1 = min(fitness2)
+        mm2 = pop1[mm]# 最小值对应pop1编码
+        mm2_all = pop2[mm]# 最小值对应pop2编码
+        mm2_all3 = pop3[mm]  # 最小值对应pop2编码
+        min_ru.append(min(fitness2))# 统计历代最小值
+        #选择
+        pop2 = select_2(pop2, fitness2)
+        #交叉变异
+        pop2 = crossover_and_mutation_coding_story5(pop2, num_var, num_room_type, CROSSOVER_RATE)
+
+        # 引入新个体
+        run_time +=1
+        if run_time % 5 == 0:
+            pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
+            exchange_num = int(0.3*len(pop2_new))
+            for ex_num in range(exchange_num):
+                pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
+
+        if run_time %5==0:
+            print(run_time)
+            print(f'记忆池数量:{len(memorize_pool)}')
+        pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
+
+        aaa = []
+        aaa.append(pop1[0])
+        pop3_ga = []
+        pop3_ga.append(pop3[0])
+        # if max1 <= m.log(GA(aaa,pop3_ga)[0][0]):
+        if min1 <=GA_examine(ModelPath_name[0],mySapObject_name[0], SapModel_name[0],aaa, pop3_ga)[0][0]:
+            sap_run_time += 1
+            pop1[0] = mm2
+            pop2[0] = mm2_all
+            pop3[0] = mm2_all3
+
+    for i in range(len(mySapObject_name)):
+        ret = mySapObject_name[i].ApplicationExit(False)
+        SapModel_name[i] = None
+        mySapObject_name[i] = None
+
+
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
+
+
+
+    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
 
 '''model data'''

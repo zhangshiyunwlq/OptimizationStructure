@@ -1,3 +1,5 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers, models
@@ -51,20 +53,13 @@ def get_data(num,path):
 
 
 #生成训练数据
-num = 500
+num = 5000
 path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_1.xls"
 x_train,y_train = get_data(num,path)
 
 # 创建神经网络模型
 model = create_model()
 #训练
-model.fit(x_train, y_train, epochs=5, batch_size=32)
-
-# 生成一个随机的数据数据作为输入
-# random_input = np.random.randint(1, 39)
-# ran = []
-# individual_data = np.array()
-#
-# # 使用生成器网络生成新的数据
-# generated_data = model.predict(np.concatenate((x_train[0:1], random_y_train), axis=1))
-# print(generated_data)
+# model.fit(x_train, y_train, epochs=10000, batch_size=512)
+#预测生成y_test
+# y_test_predicted = model.predict(x_test)

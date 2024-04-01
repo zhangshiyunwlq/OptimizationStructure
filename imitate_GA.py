@@ -10,7 +10,7 @@ import math as m
 import os
 import xlrd
 import matplotlib.pyplot as plt
-
+from CNN import create_model
 
 def fun(a,b):
     pop_1=copy.deepcopy(a)
@@ -501,6 +501,14 @@ def draw_picture(name,title_name):
 
     plt.show()
 
+
+def DNN_GA():
+    x_train = np.array(memorize_pool)
+    y_train = np.array(memorize_fit)
+    # 创建神经网络模型
+    model = create_model()
+    # 训练
+    model.fit(x_train, y_train, epochs=1000, batch_size=512)
 
 modular_length_num = 8
 modular_length = 8000
