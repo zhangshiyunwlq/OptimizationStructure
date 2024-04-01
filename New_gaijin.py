@@ -184,6 +184,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         else:
             dis_all[5][i] = dis_all[5][i]
         Y_dis_radio_all += dis_all[5][i]
+    Y_dis_radio_all = Y_dis_radio_all*100
     # y interdis max
     for i in range(len(dis_all[7])):
         if dis_all[7][i] <= 0.004 and dis_all[7][i] >= -0.004:
@@ -856,8 +857,8 @@ room_indx = model_data[6]
 
 POP_SIZE =50
 DNA_SIZE = story_num*3
-CROSSOVER_RATE = 0.35
-MUTATION_RATE = 0.15
+CROSSOVER_RATE = 0.2
+MUTATION_RATE = 0.05
 N_GENERATIONS = 100
 num_thread = 10
 min_genera = []
