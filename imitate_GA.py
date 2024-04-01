@@ -289,9 +289,8 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,3)
 
-
+#传统遗传算法
 def run(num_var,num_room_type,x,labels):
-
     pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
     pop1,pop3 = decoding1(pop_decoe_1,num_var,num_room_type,labels)
@@ -501,14 +500,190 @@ def draw_picture(name,title_name):
 
     plt.show()
 
+#生成一个种群
+def DNN_GA(run_time,num_pop):
+    pop_best = []
+    all_room_num = story_num*4
+    pop_generation = np.zeros((POP_SIZE,num_var+num_room_type+all_room_num))
+    for num in range(num_pop):
+        x_train = np.array(memorize_pool)
+        y_train = np.array(memorize_fit)
+        # 创建神经网络模型
+        model = create_model()
+        # 训练
+        model.fit(x_train, y_train, epochs=1000, batch_size=256)
+        generate_DNA_coding_story1(num_var, num_room_type, x)
+        pop2 = generate_DNA_coding_story1(num_var, num_room_type, x)
+        for i in range(run_time):
+            fitness2 =model.predict(pop2)
 
-def DNN_GA():
+            mm = fitness2.index(min(fitness2))
+            min1 = min(fitness2)
+            mm2_all = pop2[mm]
+            #选择
+            pop2 = select_2(pop2, fitness2)
+            # 交叉变异
+            pop2 = crossover_and_mutation_coding_story5(pop2, num_var, num_room_type, CROSSOVER_RATE)
+
+            if min1 <= model.predict(pop2[0]):
+                pop2[0] = mm2_all
+        #取出种群中最优秀的m个个体
+        fitness_co = copy.deepcopy(fitness2)
+        min_number = []
+        min_index = []
+        for _ in range(int(POP_SIZE/num_pop)):
+            number = min(fitness_co)
+            index = fitness_co.index(number)
+            fitness_co[index] = 1000000
+            min_number.append(number)
+            min_index.append(index)
+
+        for ind in range(len(min_index)):
+            pop_best.append(pop2[min_index[ind]])
+    #将得到的所有优秀个体组合为一个新种群
+    for i in range(len(pop_best)):
+        pop_generation[i]=pop_best[i]
+
+    return pop_generation
+
+#生成多个优秀个体
+def DNN_GA_indi(run_time,num_ind,num_joint):
+    pop_best = []
+    all_room_num = story_num*4
+    pop_generation = np.zeros((num_ind,num_var+num_room_type+all_room_num))
     x_train = np.array(memorize_pool)
     y_train = np.array(memorize_fit)
     # 创建神经网络模型
-    model = create_model()
+    model = create_model(num_joint)
     # 训练
-    model.fit(x_train, y_train, epochs=1000, batch_size=512)
+    model.fit(x_train, y_train, epochs=100, batch_size=32)
+    generate_DNA_coding_story1(num_var, num_room_type, x)
+    pop2 = generate_DNA_coding_story1(num_var, num_room_type, x)
+    for i in range(run_time):
+        fitness1 =model.predict(pop2)
+        fitness2=[]
+        for i in range(len(fitness1)):
+            fitness2.append(fitness1[i].tolist()[0])
+        mm = fitness2.index(min(fitness2))
+        min1 = min(fitness2)
+        mm2_all = pop2[mm]
+        #选择
+        pop2 = select_2(pop2, fitness2)
+        # 交叉变异
+        pop2 = crossover_and_mutation_coding_story5(pop2, num_var, num_room_type, CROSSOVER_RATE)
+        fit_pred = model.predict(pop2)
+        if min1 <= fit_pred[0].tolist()[0]:
+            pop2[0] = mm2_all
+    #取出种群中最优秀的m个个体
+    fitness_co = copy.deepcopy(fitness2)
+    min_number = []
+    min_index = []
+    for _ in range(int(num_ind)):
+        number = min(fitness_co)
+        index = fitness_co.index(number)
+        fitness_co[index] = 1000000
+        min_number.append(number)
+        min_index.append(index)
+
+    #将得到的所有优秀个体组合为一个新种群
+    for i in range(num_ind):
+        pop_generation[i]=pop2[min_index[i]]
+
+    return pop_generation
+
+#基于神经网络每隔N代引入多个优秀个体
+def run_DNN_ind(num_var,num_room_type,x,labels):
+    pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
+    pop_decoe_1 = copy.deepcopy(pop2)
+    pop1,pop3 = decoding1(pop_decoe_1,num_var,num_room_type,labels)
+    # memo_code = []
+    # for i in range(len(pop2[0])):
+    #     memo_code.append(20)
+    # memorize_sum.append(sum(memo_code))
+    # memorize_pool.append(np.array(memo_code))
+    # memorize_fit.append(10000)
+    # memorize_weight.append(10000)
+    # memorize_col.append(10000)
+    # memorize_beam.append(10000)
+
+    pop_zhongqun_all = []  # 记录每代种群（不重复）
+    pop_zhongqun_all_2 = []#记录种群所有
+    pop_zhongqun_all_3 = []
+    memory_pools_all = []
+    memory_pools_fit = []
+    memory_pools_weight = []
+    memory_pools_col = []
+    memory_pools_beam = []
+    col_up_all= []
+    beam_up_all=[]
+    pop_all_weight=[]
+    pop_all_fitness=[]
+    weight_min=[]
+    min_ru = []
+    sap_run_time = 0
+    for run_time in range(N_GENERATIONS):
+        pop_zhongqun_all.append(pop1)
+        pop_zhongqun_all_2.append(pop2)
+        pop_zhongqun_all_3.append(pop3)
+
+        # 计算fitness等参数
+        fit = [0 for i in range(len(pop2))]
+        weight = [0 for i in range(len(pop2))]
+        clo_val = [0 for i in range(len(pop2))]
+        beam_val = [0 for i in range(len(pop2))]
+        # if run_time ==2:
+        #     for i in range(len(pop2)):
+        #         pop2[i]=memo_code
+        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val, memory_pools_all, memory_pools_fit,
+                   memory_pools_weight, memory_pools_col, memory_pools_beam)
+
+        col_up_all.append(clo_up_1)
+        beam_up_all.append(beam_up_1)
+        pop_all_weight.append(weight_pop)
+        fitness2 =result1
+        pop_all_fitness.append(fitness2)
+        mm = fitness2.index(min(fitness2))
+        weight_min.append(weight_pop[mm])
+        min1 = min(fitness2)
+        mm2 = pop1[mm]# 最小值对应pop1编码
+        mm2_all = pop2[mm]# 最小值对应pop2编码
+        mm2_all3 = pop3[mm]  # 最小值对应pop2编码
+        min_ru.append(min(fitness2))# 统计历代最小值
+        #选择
+        pop2 = select_2(pop2, fitness2)
+        #交叉变异
+        pop2 = crossover_and_mutation_coding_story5(pop2, num_var, num_room_type, CROSSOVER_RATE)
+
+        # 引入新个体
+        run_time +=1
+        if run_time % 10 == 0:
+            pop2_new = DNN_GA_indi(run_time,int(0.3*len(pop2)),len(pop2[0]))
+            exchange_num = int(0.3*len(pop2))
+            for ex_num in range(exchange_num):
+                pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
+
+        if run_time %10==0:
+            print(run_time)
+            print(f'记忆池数量:{len(memorize_pool)}')
+        pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
+
+        aaa = []
+        aaa.append(pop1[0])
+        pop3_ga = []
+        pop3_ga.append(pop3[0])
+        # if max1 <= m.log(GA(aaa,pop3_ga)[0][0]):
+        if min1 <=fun(pop1[0], pop3[0])[0]:
+            sap_run_time += 1
+            pop1[0] = mm2
+            pop2[0] = mm2_all
+            pop3[0] = mm2_all3
+
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight)
+
+
+
+    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
+
 
 modular_length_num = 8
 modular_length = 8000
@@ -547,7 +722,7 @@ labels = []
 for i in range(1,7):
     for j in range(16):
         labels.append(i)
-for num_var in [2,4,6]:
+for num_var in [6]:
     memorize_pool = []
     memorize_fit = []
     memorize_weight = []
@@ -555,7 +730,7 @@ for num_var in [2,4,6]:
     memorize_beam = []
     memorize_sum = []
 
-    zhan,jia,qi=run(num_var,num_room_type,x,labels)
+    zhan,jia,qi=run_DNN_ind(num_var,num_room_type,x,labels)
 
 
 # draw_picture('name','title')
