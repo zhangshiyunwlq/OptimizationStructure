@@ -9,8 +9,8 @@ import numpy as np
 # 创建一个简单的神经网络模型
 def create_model(num_joint):
     model = models.Sequential([
-        layers.Dense(20, activation='relu', input_shape=(num_joint,)),
-        layers.Dense(20, activation='relu'),
+        layers.Dense(100, activation='relu', input_shape=(num_joint,)),
+        layers.Dense(100, activation='relu'),
         layers.Dense(1)
     ])
     model.compile(optimizer='adam',
@@ -51,15 +51,18 @@ def get_data(num,path):
     y_train1 = y_train[0:num]
     return x_train1,y_train1
 
-
+'''
 #生成训练数据
-# num = 5000
-# path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_1.xls"
-# x_train,y_train = get_data(num,path)
+num = 5000
+path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_1.xls"
 
+x_train,y_train = get_data(num,path)
+
+num_joint = len(x_train[0])
 # 创建神经网络模型
-# model = create_model(num_joint)
+model = create_model(num_joint)
 #训练
-# model.fit(x_train, y_train, epochs=10000, batch_size=512)
+model.fit(x_train, y_train, epochs=100, batch_size=512)
 #预测生成y_test
 # y_test_predicted = model.predict(x_test)
+'''

@@ -89,9 +89,9 @@ def static_braced(name1):
 # infor_name = ['2_0','3_0','3_1','4_0','4_1','5_0','5_1','6_0','6_1','6_2','6_3','6_4','7_0','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
 # title_name = 'Fitness'
 
-data_info = [[100,14,0],[100,14,1]]
+data_info = [[100,14,8],[100,14,10]]
 infor_all = get_info(data_info)
-infor_name = ['14_0','14_1']
+infor_name = ['14_8','14_10']
 title_name = 'Fitness'
 
 

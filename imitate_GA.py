@@ -178,8 +178,8 @@ def mulitrun_GA_1(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up):
                 pop2_list = copy.deepcopy(pop2)
                 memorize_list = copy.deepcopy(memorize_pool[i])
                 if pop2_list.tolist()==memorize_list.tolist():
-                    res1=memorize_fit[i]
-                    res2=memorize_weight[i]
+                    result[time]=memorize_fit[i]
+                    weight_1[time]=memorize_weight[i]
                     col_up[time]=memorize_col[i]
                     beam_up[time]=memorize_beam[i]
                     value = 1
@@ -347,6 +347,7 @@ def run(num_var,num_room_type,x,labels):
         mm2_all = pop2[mm]# 最小值对应pop2编码
         mm2_all3 = pop3[mm]  # 最小值对应pop2编码
         min_ru.append(min(fitness2))# 统计历代最小值
+        fit_best.append(min1)
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
@@ -354,13 +355,13 @@ def run(num_var,num_room_type,x,labels):
 
         # 引入新个体
         run_time +=1
-        if run_time % 5 == 0:
+        if run_time % 10 == 0:
             pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
 
-        if run_time %5==0:
+        if run_time %10==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -547,7 +548,8 @@ def DNN_GA(run_time,num_pop):
     return pop_generation
 
 #生成多个优秀个体
-def DNN_GA_indi(run_time,num_ind,num_joint):
+def DNN_GA_indi(pop,run_time,num_ind,num_joint):
+
     pop_best = []
     all_room_num = story_num*4
     pop_generation = np.zeros((num_ind,num_var+num_room_type+all_room_num))
@@ -558,7 +560,7 @@ def DNN_GA_indi(run_time,num_ind,num_joint):
     # 训练
     model.fit(x_train, y_train, epochs=100, batch_size=32)
     generate_DNA_coding_story1(num_var, num_room_type, x)
-    pop2 = generate_DNA_coding_story1(num_var, num_room_type, x)
+    pop2 = pop
     for i in range(run_time):
         fitness1 =model.predict(pop2)
         fitness2=[]
@@ -649,6 +651,7 @@ def run_DNN_ind(num_var,num_room_type,x,labels):
         mm2_all = pop2[mm]# 最小值对应pop2编码
         mm2_all3 = pop3[mm]  # 最小值对应pop2编码
         min_ru.append(min(fitness2))# 统计历代最小值
+        fit_best.append(min1)
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
@@ -657,7 +660,7 @@ def run_DNN_ind(num_var,num_room_type,x,labels):
         # 引入新个体
         run_time +=1
         if run_time % 10 == 0:
-            pop2_new = DNN_GA_indi(run_time,int(0.3*len(pop2)),len(pop2[0]))
+            pop2_new = DNN_GA_indi(pop2,run_time,int(0.3*len(pop2)),len(pop2[0]))
             exchange_num = int(0.3*len(pop2))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
@@ -683,6 +686,30 @@ def run_DNN_ind(num_var,num_room_type,x,labels):
 
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
+
+def draw_plot_picture(info):
+
+    num1 = 0.8
+    num2 = 0.60
+    num3 = 3
+    num4 = 0
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel('title_name', fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(4);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    # plt.ylim((150, 400))
+    for i in range(len(info)):
+        bbb = np.arange(0, len(info[i]))
+        ccc = info[i]
+        ax2.plot(bbb, ccc, label = i,linewidth=6)
+        ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
+
+    plt.show()
 
 
 modular_length_num = 8
@@ -714,6 +741,9 @@ memorize_col = []
 memorize_beam = []
 memorize_sum = []
 
+fit_best = []
+fit_all_best = []
+fit_all_best2 = []
 # label=[1,1,1,1,2,2,2,2]
 # labels = []
 # for i in range(12):
@@ -722,15 +752,17 @@ labels = []
 for i in range(1,7):
     for j in range(16):
         labels.append(i)
-for num_var in [6]:
-    memorize_pool = []
-    memorize_fit = []
-    memorize_weight = []
-    memorize_col = []
-    memorize_beam = []
-    memorize_sum = []
+for  i in range(3):
+    for num_var in [6]:
+        fit_best = []
+        memorize_pool = []
+        memorize_fit = []
+        memorize_weight = []
+        memorize_col = []
+        memorize_beam = []
+        memorize_sum = []
 
-    zhan,jia,qi=run_DNN_ind(num_var,num_room_type,x,labels)
-
-
+        zhan,jia,qi=run_DNN_ind(num_var,num_room_type,x,labels)
+        fit_all_best.append(fit_best)
+draw_plot_picture(fit_all_best)
 # draw_picture('name','title')

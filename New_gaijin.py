@@ -19,38 +19,9 @@ import configparser
 import comtypes.client
 import gc
 import openpyxl
+from CNN import create_model
 
 
-
-def fun(a,b):
-    pop_1=copy.deepcopy(a)
-    pop_2=copy.deepcopy(b)
-
-    for i in range(0,int(len(pop_1)/4)):
-        pop_1[i] = 5*m.sin(pop_1[i])
-    for i in range(int(len(pop_1)/4),int(len(pop_1)/4*2)):
-        pop_1[i] = 0.1*m.exp(pop_1[i])
-    for i in range(int(len(pop_1) / 4*2), int(len(pop_1) / 4 * 3)):
-        pop_1[i] = 0.1 * m.log(pop_1[i]+1,3)
-    for i in range(int(len(pop_1) / 4*3), int(len(pop_1) / 4 * 4)):
-        pop_1[i] = m.sqrt(pop_1[i])
-
-    for i in range(0,int(len(pop_2)/4)):
-        pop_2[i] = 5*m.sin(pop_2[i])
-    for i in range(int(len(pop_2)/4),int(len(pop_2)/4*2)):
-        pop_2[i] = 0.1*m.exp(pop_2[i])
-    for i in range(int(len(pop_2) / 4*2), int(len(pop_2) / 4 * 3)):
-        pop_2[i] = 0.1 * m.log(pop_2[i]+1,3)
-    for i in range(int(len(pop_2) / 4*3), int(len(pop_2) / 4 * 4)):
-        pop_2[i] = m.sqrt(pop_2[i])
-
-    result =0
-    for i in range(len(pop_1)):
-        result+=pop_1[i]
-
-    for i in range(len(pop_2)):
-        result+=pop_2[i]
-    return result,0.5*result
 
 def generate_DNA_coding_story5(num_var,num_room_type,x):
     all_room_num = 2*story_num*5
@@ -209,9 +180,10 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     #     floor_radio += all_force[10][i]
 
     G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
+    gx = [abs(g_col_all),abs(g_beam_all),abs(Y_dis_radio_all),abs(Y_interdis_all)]
     result = weight + G_value
 
-    return result,weight
+    return result,weight,gx
 
 #不加记忆池
 def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up):
@@ -239,7 +211,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
                                                                                      pop,
                                                                                      pop_room_label)
-            res1, res2 = Fun_1(we, co, be, dis_all, force_all, 10000)
+            res1, res2,gx = Fun_1(we, co, be, dis_all, force_all, 10000)
 
             # num3 += 1
             weight_1[time] = res2
@@ -252,7 +224,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             memorize_weight.append(res2)
             memorize_col.append(col_up[time])
             memorize_beam.append(beam_up[time])
-
+            memorize_gx.append(gx)
 
 def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up):
 
@@ -419,6 +391,7 @@ def SAPanalysis_GA_run2(APIPath):
     # create new blank model
     return mySapObject,ModelPath, SapModel
 
+
 def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
     result = []
     num1 = 0
@@ -458,21 +431,21 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
     #         elif num1 == 1:
     #             result.append(pop_fun_all[num2])
     #             weight_1.append(pop_weight_all[num2])
-    wb2_examine_ind = openpyxl.Workbook()
+    # wb2_examine_ind = openpyxl.Workbook()
     # wb2_examine_ind = openpyxl.load_workbook('examine_individual.xlsx')
-    wb2_pop1_indivi = wb2_examine_ind.create_sheet('pop1_indivi', index=0)
-    wb2_pop3_indivi = wb2_examine_ind.create_sheet('pop3_indivi', index=1)
+    # wb2_pop1_indivi = wb2_examine_ind.create_sheet('pop1_indivi', index=0)
+    # wb2_pop3_indivi = wb2_examine_ind.create_sheet('pop3_indivi', index=1)
     loc_3 = 1
     for time in range(len(pop1)):
         pop = pop1[time]
         pop_room_label = pop3[time]
-        _ = wb2_pop1_indivi.cell(row=loc_3, column=1, value=f'{pop1[time]}')
-        _ = wb2_pop3_indivi.cell(row=loc_3, column=1, value=f'{pop3[time]}')
-        loc_3 += 1
-        wb2_examine_ind.save('examine_individual.xlsx')
+        # _ = wb2_pop1_indivi.cell(row=loc_3, column=1, value=f'{pop1[time]}')
+        # _ = wb2_pop3_indivi.cell(row=loc_3, column=1, value=f'{pop3[time]}')
+        # loc_3 += 1
+        # wb2_examine_ind.save('examine_individual.xlsx')
         # pop_all.append(pop)
         we,co,be,r1,r2,r3,r4,dis_all,force_all =mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop,pop_room_label)
-        res1,res2 = Fun_1(we, co, be,dis_all,force_all, 10000)
+        res1,res2,gx = Fun_1(we, co, be,dis_all,force_all, 10000)
         # num3 += 1
         weight_1.append(res2)
         col_up.append(co)
@@ -481,16 +454,16 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
         # pop_fun_all.append(res1)
         # pop_weight_all.append(res2)
 
-    wb_clear_in1 = openpyxl.load_workbook('examine_individual.xlsx')
-    ws_clear_in1 = wb_clear_in1['pop1_indivi']
-    for row in ws_clear_in1:
-        for cell in row:
-            cell.value = None
-    ws_clear_in3 = wb_clear_in1['pop3_indivi']
-    for row in ws_clear_in3:
-        for cell in row:
-            cell.value = None
-    wb2_examine_ind.save('examine_individual.xlsx')
+    # wb_clear_in1 = openpyxl.load_workbook('examine_individual.xlsx')
+    # ws_clear_in1 = wb_clear_in1['pop1_indivi']
+    # for row in ws_clear_in1:
+    #     for cell in row:
+    #         cell.value = None
+    # ws_clear_in3 = wb_clear_in1['pop3_indivi']
+    # for row in ws_clear_in3:
+    #     for cell in row:
+    #         cell.value = None
+    # wb2_examine_ind.save('examine_individual.xlsx')
     return result,weight_1,col_up,beam_up
 
 
@@ -578,7 +551,7 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
 
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
-
+#统计每一代数据
 def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight,time):
     wb1 = xlwt.Workbook()
     out_pop1_all = wb1.add_sheet('pop1_all')
@@ -656,6 +629,51 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
 
 
     wb1.save(f'{path1}.xls')
+
+#统计记忆池
+def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,):
+    wb1 = xlwt.Workbook()
+    out_pop1_all = wb1.add_sheet('memorize_pool')
+    loc = 0
+
+    for i in range(len(memorize_pool)):
+        pool_list = copy.deepcopy(memorize_pool[i])
+        pool_list.tolist()
+        for j in range(len(pool_list)):
+            out_pop1_all.write(loc, j, pool_list[j])
+        loc += 1
+
+    pop_all_fit = wb1.add_sheet('memorize_fit')
+
+    for i in range(len(memorize_fit)):
+        pop_all_fit.write(i, 0, memorize_fit[i])
+
+    pop_all_wei = wb1.add_sheet('memorize_weight')
+
+    for i in range(len(memorize_weight)):
+        pop_all_wei.write(i, 0, memorize_weight[i])
+
+
+    memo_gx = wb1.add_sheet('memorize_gx')
+    loc = 0
+    for i in range(len(memorize_gx)):
+        for j in range(len(memorize_gx[i])):
+            memo_gx.write(loc, j, memorize_gx[i][j])
+        loc += 1
+
+
+    APIPath = os.path.join(os.getcwd(), 'out_all_memorize')
+    SpecifyPath = True
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+
+    path1 = os.path.join(APIPath, f'memorize_infor_{num_var}_{time}')
+
+    wb1.save(f'{path1}.xls')
+
 
 def draw_picture(name,title_name):
     value_str = []
@@ -740,9 +758,93 @@ def decoding1(pop,num_var,num_room_type,labels):
                     pop_room_label[i][j] = 0
     return pop_all,pop_room_label
 
-def DNN_GA():
-    x_train = np.array(memorize_pool)
-    y_train = np.array(memorize_fit)
+#在最优个体附近生成种群
+def generation_population(best_indivi,rate):
+    best_in = copy.deepcopy(best_indivi)
+    best_in.tolist()
+    pop = np.zeros((POP_SIZE,len(best_in)))
+    for i in range(len(pop)):
+        for j in range(len(pop[i])):
+            if np.random.rand() < rate:
+                pop[i][j] = randint(0,num_var-1)
+            else:
+                pop[i][j] = best_in[j]
+    return pop
+
+#用于将GA_forDNN中的gx格式转换
+def Gx_convert(fitness1):
+    fitness3 = copy.deepcopy(fitness1)
+    fitness4 = []  # 储存所有gx
+    fitness2 = []  # 所有gx的和
+    for j in range(len(fitness3)):
+        fitness4.append(fitness3[j].tolist())
+    for j in range(len(fitness3)):
+        fitness2.append(sum(fitness4[j]))
+    return fitness2
+
+#用于GA_forDNN中的交叉变异
+def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
+    pop = pop2
+
+    new_pop = np.zeros((len(pop),len(pop[0])))
+    for i in range(len(pop)):
+        father = pop[i]
+        child = father
+        if np.random.rand() < CROSSOVER_RATE:
+            mother = pop[np.random.randint(POP_SIZE)]
+            cross_points1 = np.random.randint(low=0, high=len(pop[0]))
+            cross_points2 = np.random.randint(low=0, high=len(pop[0]))
+            while cross_points2==cross_points1:
+                cross_points2 = np.random.randint(low=0, high=len(pop[0]))
+            exchan = []
+            exchan.append(cross_points2)
+            exchan.append(cross_points1)
+            for j in range(min(exchan),max(exchan)):
+                child[j] = mother[j]
+        mutation_GA_for_DNN(child,num_var,MUTATION_RATE)
+        new_pop[i] = child
+
+    return new_pop
+
+#用于GA_forDNN中的交叉变异
+def mutation_GA_for_DNN(child,num_var,MUTATION_RATE):
+    num_var = int(num_var)
+    for j in range(len(child)):
+        if np.random.rand() < MUTATION_RATE:
+            child[j] = randint(0,num_var-1)
+
+
+
+#用于神经网络训练的GA
+def GA_for_DNN(run_time,pop2,model):
+    for i in range(run_time):
+        fitness1 = model.predict(pop2)
+        fitness2 = Gx_convert(fitness1)
+        mm = fitness2.index(min(fitness2))
+        min1 = min(fitness2)
+        mm2_all = pop2[mm]
+        #选择
+        pop2 = select_2(pop2, fitness2)
+        # 交叉变异
+        pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE)
+        fit_pred = model.predict(pop2)
+        if min1 <= fit_pred[0].tolist()[0]:
+            pop2[0] = mm2_all
+    return pop2
+#通过神经网络预测新个体
+def DNN_GA(num_var,num_room_type,num_ind,num_joint,best_indivi,run_time):
+    x_train1 = np.array(memorize_pool)
+    x_train = x_train1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
+    y_train = np.array(memorize_gx)
+    model = create_model(num_joint)
+    model.fit(x_train, y_train, epochs=100, batch_size=32)
+    pop_best = []
+    for i in range(num_ind):
+        pop2 = generation_population(best_indivi, 0.2)
+        pop2 = GA_for_DNN(run_time, pop2, model)
+        pop_best.append(pop2[0].tolist())
+    pop_best = np.array(pop_best)
+    return pop_best
 
 def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
@@ -855,12 +957,12 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 
 
-POP_SIZE =50
+POP_SIZE =3
 DNA_SIZE = story_num*3
-CROSSOVER_RATE = 0.2
-MUTATION_RATE = 0.05
-N_GENERATIONS = 100
-num_thread = 10
+CROSSOVER_RATE = 0.35
+MUTATION_RATE = 0.15
+N_GENERATIONS = 3
+num_thread = 3
 min_genera = []
 
 x = np.linspace(0, 13, 14)
@@ -874,7 +976,7 @@ memorize_weight = []
 memorize_col = []
 memorize_beam = []
 memorize_sum = []
-
+memorize_gx = []
 
 
 # label=[1,1,1,1,2,2,2,2]
@@ -895,8 +997,10 @@ for num_var in [14]:
         memorize_col = []
         memorize_beam = []
         memorize_sum = []
+        memorize_gx = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx)
         gc.collect()
 
 # draw_picture('name','title')
