@@ -7,11 +7,11 @@ import pandas as pd
 import numpy as np
 
 # 创建一个简单的神经网络模型
-def create_model(num_joint):
+def create_model(num_joint,num_out):
     model = models.Sequential([
         layers.Dense(100, activation='relu', input_shape=(num_joint,)),
         layers.Dense(100, activation='relu'),
-        layers.Dense(1)
+        layers.Dense(num_out)
     ])
     model.compile(optimizer='adam',
                   loss='mse',

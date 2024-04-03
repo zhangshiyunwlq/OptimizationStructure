@@ -218,6 +218,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             col_up[time] = co
             beam_up[time] = be
             result[time] = res1
+            #全局记忆池
             memorize_sum.append(sum(pop2))
             memorize_pool.append(pop2)
             memorize_fit.append(res1)
@@ -225,6 +226,15 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             memorize_col.append(col_up[time])
             memorize_beam.append(beam_up[time])
             memorize_gx.append(gx)
+            # 全局记忆池
+            memorize_sum_local.append(sum(pop2))
+            memorize_pool_local.append(pop2)
+            memorize_fit_local.append(res1)
+            memorize_weight_local.append(res2)
+            memorize_col_local.append(col_up[time])
+            memorize_beam_local.append(beam_up[time])
+            memorize_gx_local.append(gx)
+
 
 def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up):
 
@@ -814,7 +824,6 @@ def mutation_GA_for_DNN(child,num_var,MUTATION_RATE):
             child[j] = randint(0,num_var-1)
 
 
-
 #用于神经网络训练的GA
 def GA_for_DNN(run_time,pop2,model):
     for i in range(run_time):
@@ -832,15 +841,30 @@ def GA_for_DNN(run_time,pop2,model):
             pop2[0] = mm2_all
     return pop2
 #通过神经网络预测新个体
-def DNN_GA(num_var,num_room_type,num_ind,num_joint,best_indivi,run_time):
-    x_train1 = np.array(memorize_pool)
+def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
+    #局部训练
+    pool_local = copy.deepcopy(memorize_pool_local)
+    x_train1_local = np.array(pool_local)
+    x_train_local = x_train1_local[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
+    gx_local = copy.deepcopy(memorize_gx_local)
+    y_train_local = np.array(gx_local)
+    model= create_model(len(x_train_local[0]), len(y_train_local[0]))
+    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32)
+
+
+    #全局训练
+    pool_global = copy.deepcopy(memorize_pool)
+    gx_global = copy.deepcopy(memorize_gx)
+    x_train1 = np.array(pool_global)
     x_train = x_train1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
-    y_train = np.array(memorize_gx)
-    model = create_model(num_joint)
+    y_train = np.array(gx_global)
+    model = create_model(len(x_train[0]),len(y_train[0]))
     model.fit(x_train, y_train, epochs=100, batch_size=32)
+
     pop_best = []
     for i in range(num_ind):
-        pop2 = generation_population(best_indivi, 0.2)
+        pop1 = generation_population(best_indivi, 0.2)
+        pop2 = pop1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
@@ -897,13 +921,21 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
         # 引入新个体
         run_time +=1
-        if run_time % 5 == 0:
-            pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
+        if run_time % 3 == 0:
+            pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],50)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
 
-        if run_time %5==0:
+            memorize_sum_loacl = []
+            memorize_pool_loacl = []
+            memorize_fit_loacl = []
+            memorize_weight_loacl = []
+            memorize_col_loacl = []
+            memorize_beam_loacl = []
+            memorize_gx_loacl = []
+
+        if run_time %3==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -957,19 +989,19 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 
 
-POP_SIZE =3
+POP_SIZE =50
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.35
 MUTATION_RATE = 0.15
-N_GENERATIONS = 3
-num_thread = 3
+N_GENERATIONS = 100
+num_thread = 10
 min_genera = []
 
 x = np.linspace(0, 13, 14)
 # x = np.array([2,4,6,8,10,12])
 num_var = 2
 num_room_type=1
-
+#全局记忆池
 memorize_pool = []
 memorize_fit = []
 memorize_weight = []
@@ -977,7 +1009,15 @@ memorize_col = []
 memorize_beam = []
 memorize_sum = []
 memorize_gx = []
+#局部记忆池
 
+memorize_sum_local=[]
+memorize_pool_local=[]
+memorize_fit_local=[]
+memorize_weight_local=[]
+memorize_col_local=[]
+memorize_beam_local=[]
+memorize_gx_local=[]
 
 # label=[1,1,1,1,2,2,2,2]
 # labels = []
@@ -990,7 +1030,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(1):
+    for time in range(15,18):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -998,8 +1038,18 @@ for num_var in [14]:
         memorize_beam = []
         memorize_sum = []
         memorize_gx = []
+
+        memorize_sum_local = []
+        memorize_pool_local = []
+        memorize_fit_local = []
+        memorize_weight_local = []
+        memorize_col_local = []
+        memorize_beam_local = []
+        memorize_gx_local = []
+
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-        zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx)
         gc.collect()
 
