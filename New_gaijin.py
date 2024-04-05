@@ -925,7 +925,8 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],50)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
-                pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
+                for indi in range(len(pop2_new)):
+                    pop2[len(pop1) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
 
             memorize_sum_loacl = []
             memorize_pool_loacl = []
