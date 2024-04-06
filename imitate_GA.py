@@ -556,9 +556,10 @@ def DNN_GA_indi(pop,run_time,num_ind,num_joint):
     x_train = np.array(memorize_pool)
     y_train = np.array(memorize_fit)
     # 创建神经网络模型
-    model = create_model(num_joint)
+    model = create_model(num_joint,1)
     # 训练
-    model.fit(x_train, y_train, epochs=100, batch_size=32)
+    history=model.fit(x_train, y_train, epochs=100, batch_size=32)
+    loss = history.history['loss']
     generate_DNA_coding_story1(num_var, num_room_type, x)
     pop2 = pop
     for i in range(run_time):

@@ -181,6 +181,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
 
     G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
     gx = [abs(g_col_all),abs(g_beam_all),abs(Y_dis_radio_all),abs(Y_interdis_all)]
+    # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
 
     return result,weight,gx
@@ -788,6 +789,7 @@ def Gx_convert(fitness1):
     fitness2 = []  # 所有gx的和
     for j in range(len(fitness3)):
         fitness4.append(fitness3[j].tolist())
+    fitness4=gx_nonNormalization(fitness4)
     for j in range(len(fitness3)):
         fitness2.append(sum(fitness4[j]))
     return fitness2
@@ -823,12 +825,41 @@ def mutation_GA_for_DNN(child,num_var,MUTATION_RATE):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
 
+#将gx中的数据归一化
+def gx_Normalization(gx):
+    gx_demo = copy.deepcopy(gx)
+    for i in range(len(gx_demo)):
+        if gx_demo[i][0]>=5:
+            gx_demo[i][0]=1
+        else:
+            gx_demo[i][0]=gx_demo[i][0]/5
+        if gx_demo[i][1]>=2:
+            gx_demo[i][1] = 1
+        else:
+            gx_demo[i][1] = gx_demo[i][1] / 2
+        if gx_demo[i][2] >= 5:
+            gx_demo[i][2] = 1
+        else:
+            gx_demo[i][2] = gx_demo[i][2] / 5
+        if gx_demo[i][3] >= 5:
+            gx_demo[i][3] = 1
+        else:
+            gx_demo[i][3] = gx_demo[i][3] / 5
+    return gx_demo
 
+def gx_nonNormalization(gx):
+    gx_demo = copy.deepcopy(gx)
+    for i in range(len(gx_demo)):
+        gx_demo[i][0]=gx_demo[i][0]*5
+        gx_demo[i][1] = gx_demo[i][1] * 2
+        gx_demo[i][2] = gx_demo[i][2] * 5
+        gx_demo[i][3] = gx_demo[i][3] * 5
+    return gx_demo
 #用于神经网络训练的GA
 def GA_for_DNN(run_time,pop2,model):
     for i in range(run_time):
         fitness1 = model.predict(pop2)
-        fitness2 = Gx_convert(fitness1)
+        fitness2 = Gx_convert(fitness1)#归一化还原，并将每个染色体对应的gx累加
         mm = fitness2.index(min(fitness2))
         min1 = min(fitness2)
         mm2_all = pop2[mm]
@@ -837,7 +868,8 @@ def GA_for_DNN(run_time,pop2,model):
         # 交叉变异
         pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE)
         fit_pred = model.predict(pop2)
-        if min1 <= fit_pred[0].tolist()[0]:
+        fit_pred2=Gx_convert(fit_pred)
+        if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
     return pop2
 #通过神经网络预测新个体
@@ -845,22 +877,24 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     #局部训练
     pool_local = copy.deepcopy(memorize_pool_local)
     x_train1_local = np.array(pool_local)
-    x_train_local = x_train1_local[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
+    x_train_local = x_train1_local[:,num_var+num_room_type:num_var+num_room_type+3*story_num]#提取用于训练的x_train部分
     gx_local = copy.deepcopy(memorize_gx_local)
     y_train_local = np.array(gx_local)
-    model= create_model(len(x_train_local[0]), len(y_train_local[0]))
-    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32)
-
+    y_train_local= gx_Normalization(y_train_local)#归一化
+    model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
+    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32)#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
     gx_global = copy.deepcopy(memorize_gx)
     x_train1 = np.array(pool_global)
-    x_train = x_train1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
+    x_train = x_train1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]#提取用于训练的x_train部分
     y_train = np.array(gx_global)
-    model = create_model(len(x_train[0]),len(y_train[0]))
-    model.fit(x_train, y_train, epochs=100, batch_size=32)
-
+    y_train = gx_Normalization(y_train)#归一化
+    model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
+    history=model.fit(x_train, y_train, epochs=100, batch_size=32)#训练模型
+    history_loss.extend(history.history['loss'])
+    history_mae.extend(history.history['mae'])
     pop_best = []
     for i in range(num_ind):
         pop1 = generation_population(best_indivi, 0.2)
@@ -921,7 +955,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
         # 引入新个体
         run_time +=1
-        if run_time % 3 == 0:
+        if run_time % 10 == 0:
             pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],50)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
@@ -936,7 +970,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time %3==0:
+        if run_time %10==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -964,6 +998,36 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
+def draw_loss(num_var,time):
+    fig = plt.figure(1)
+    ax1 = fig.add_subplot()
+    dev_x = np.arange(0, len(history_loss))
+    dev_y = history_loss
+    ax1.set_xlabel("Epoch",fontsize=10)
+    ax1.set_ylabel("loss", fontsize=10)
+
+    APIPath = os.path.join(os.getcwd(), f'loss_mae')
+    SpecifyPath = True
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+    path1 = os.path.join(APIPath, f'loss{num_var}_{time}')
+    ax1.plot(dev_x, dev_y)
+    plt.savefig(path1, dpi=300)
+    plt.close()
+    #绘制mae图
+    fig2 = plt.figure(2)
+    ax2 = fig2.add_subplot()
+    ax2.set_xlabel("Epoch",fontsize=10)
+    ax2.set_ylabel("Mae", fontsize=10)
+    path1 = os.path.join(APIPath, f'mae{num_var}_{time}')
+    dev_x = np.arange(0, len(history_loss))
+    dev_y = history_mae
+    ax2.plot(dev_x, dev_y)
+    plt.savefig(path1, dpi=300)
+    plt.close()
 
 '''model data'''
 # modular size
@@ -1019,7 +1083,8 @@ memorize_weight_local=[]
 memorize_col_local=[]
 memorize_beam_local=[]
 memorize_gx_local=[]
-
+history_loss = []
+history_mae = []
 # label=[1,1,1,1,2,2,2,2]
 # labels = []
 # for i in range(12):
@@ -1031,7 +1096,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(15,18):
+    for time in range(19,21):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1047,11 +1112,13 @@ for num_var in [14]:
         memorize_col_local = []
         memorize_beam_local = []
         memorize_gx_local = []
-
+        history_loss = []
+        history_mae = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx)
+        draw_loss(num_var, time)
         gc.collect()
 
 # draw_picture('name','title')

@@ -25,7 +25,7 @@ def get_info(name1):
 
 def draw_picture(info2,name,title_name):
     num1 = 0.8
-    num2 = 0.60
+    num2 = 0.75
     num3 = 3
     num4 = 0
     fig2 = plt.figure(num=1, figsize=(23, 30))
@@ -45,11 +45,32 @@ def draw_picture(info2,name,title_name):
             # info[i][j] = 500+100*(m.log(info[i][j]))
                 info[i][j] = 500 + info[i][j]/1000
 
-    for i in range(len(info)):
+    for i in range(1):
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
-        ax2.plot(bbb, ccc, label = name[i],linewidth=6)
-        ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
+        line1 = ax2.plot(bbb, ccc,label=f'{name[i]}',linewidth=6,color='r')
+        ax2.legend((line1),[name[i]],bbox_to_anchor=(num1+0.1, num2+0.05), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
+
+
+    for i in range(1,6):
+        bbb = np.arange(0, len(info[i]))
+        ccc = info[i]
+        ax2.plot(bbb, ccc,linewidth=6,color='r')
+    # ax2.legend(lines[:1],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
+
+    for i in range(6,7):
+        bbb = np.arange(0, len(info[i]))
+        ccc = info[i]
+        line2=ax2.plot(bbb, ccc,label=f'{name[i]}', linewidth=6,color='b')
+        ax2.legend((line2),[name[i]],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
+                shadow=False)
+
+    for i in range(7,len(info)):
+        bbb = np.arange(0, len(info[i]))
+        ccc = info[i]
+        ax2.plot(bbb, ccc, linewidth=6,color='b')
+    # ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
+    #         shadow=False)
 
     plt.show()
 
@@ -89,9 +110,9 @@ def static_braced(name1):
 # infor_name = ['2_0','3_0','3_1','4_0','4_1','5_0','5_1','6_0','6_1','6_2','6_3','6_4','7_0','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
 # title_name = 'Fitness'
 
-data_info = [[100,14,8],[100,14,10]]
+data_info = [[100,14,8],[100,14,10],[100,14,13],[100,14,14],[100,14,15],[100,14,16],[100,14,17],[100,14,18]]
 infor_all = get_info(data_info)
-infor_name = ['14_8','14_10']
+infor_name = ['GA','GA','GA','GA','GA','GA','HIGA','HIGA']
 title_name = 'Fitness'
 
 
