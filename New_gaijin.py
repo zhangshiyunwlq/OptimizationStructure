@@ -178,9 +178,13 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     #     else:
     #         all_force[10][i] = all_force[10][i]
     #     floor_radio += all_force[10][i]
-
-    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
-    gx = [abs(g_col_all),abs(g_beam_all),abs(Y_dis_radio_all),abs(Y_interdis_all)]
+    g_col_max= max(g_col)
+    g_beam_max = max(g_beam)
+    dis_all_max = max(dis_all[5])
+    interdis_max = max(dis_all[7])
+    g_all_max = max(g_col_max,g_beam_max)
+    G_value=u * (abs(g_col_max) + abs(g_beam_max) + abs(dis_all_max)*100 + abs(interdis_max)*100 + abs(Y_interdis_radio_all))
+    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
 
@@ -831,20 +835,24 @@ def gx_Normalization(gx):
     for i in range(len(gx_demo)):
         if gx_demo[i][0]>=5:
             gx_demo[i][0]=1
-        else:
-            gx_demo[i][0]=gx_demo[i][0]/5
+        elif gx_demo[i][0]<=-1:
+            gx_demo[i][0] = -1
+        elif gx_demo[i][0]<=5 and gx_demo[i][0]>=-1:
+            gx_demo[i][0]=(gx_demo[i][0]+1)/6
         if gx_demo[i][1]>=2:
-            gx_demo[i][1] = 1
+            gx_demo[i][1]=1
+        elif gx_demo[i][1]<=-1:
+            gx_demo[i][1] = -1
+        elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
+            gx_demo[i][1]=(gx_demo[i][1]+1)/3
+        if gx_demo[i][2] >= 0.01:
+            gx_demo[i][2] = 0.01
         else:
-            gx_demo[i][1] = gx_demo[i][1] / 2
-        if gx_demo[i][2] >= 5:
-            gx_demo[i][2] = 1
+            gx_demo[i][2] = gx_demo[i][2] / 0.01
+        if gx_demo[i][3] >= 0.01:
+            gx_demo[i][3] = 0.01
         else:
-            gx_demo[i][2] = gx_demo[i][2] / 5
-        if gx_demo[i][3] >= 5:
-            gx_demo[i][3] = 1
-        else:
-            gx_demo[i][3] = gx_demo[i][3] / 5
+            gx_demo[i][3] = gx_demo[i][3] / 0.01
     return gx_demo
 
 def gx_nonNormalization(gx):
@@ -897,7 +905,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     history_mae.extend(history.history['mae'])
     pop_best = []
     for i in range(num_ind):
-        pop1 = generation_population(best_indivi, 0.2)
+        pop1 = generation_population(best_indivi, 0.2)#根据最好个体生成种群
         pop2 = pop1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
@@ -1096,7 +1104,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(19,21):
+    for time in range(23,24):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
