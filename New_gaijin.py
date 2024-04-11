@@ -845,23 +845,23 @@ def gx_Normalization(gx):
             gx_demo[i][1] = -1
         elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
             gx_demo[i][1]=(gx_demo[i][1]+1)/3
-        if gx_demo[i][2] >= 0.01:
-            gx_demo[i][2] = 0.01
+        if gx_demo[i][2] >= 0.05:
+            gx_demo[i][2] = 0.05
         else:
-            gx_demo[i][2] = gx_demo[i][2] / 0.01
-        if gx_demo[i][3] >= 0.01:
-            gx_demo[i][3] = 0.01
+            gx_demo[i][2] = gx_demo[i][2] / 0.05
+        if gx_demo[i][3] >= 0.05:
+            gx_demo[i][3] = 0.05
         else:
-            gx_demo[i][3] = gx_demo[i][3] / 0.01
+            gx_demo[i][3] = gx_demo[i][3] / 0.05
     return gx_demo
 
 def gx_nonNormalization(gx):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
-        gx_demo[i][0]=gx_demo[i][0]*5
-        gx_demo[i][1] = gx_demo[i][1] * 2
-        gx_demo[i][2] = gx_demo[i][2] * 5
-        gx_demo[i][3] = gx_demo[i][3] * 5
+        gx_demo[i][0]=gx_demo[i][0]*6-1
+        gx_demo[i][1] = gx_demo[i][1] * 3-1
+        gx_demo[i][2] = gx_demo[i][2] * 0.05
+        gx_demo[i][3] = gx_demo[i][3] * 0.05
     return gx_demo
 #用于神经网络训练的GA
 def GA_for_DNN(run_time,pop2,model):
