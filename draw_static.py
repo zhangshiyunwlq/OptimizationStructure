@@ -162,13 +162,13 @@ def static_braced(name1):
 # infor_name = ['2_0','3_0','3_1','4_0','4_1','5_0','5_1','6_0','6_1','6_2','6_3','6_4','7_0','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
 # title_name = 'Fitness'
 
-data_info = [[100,14,8],[100,14,13],[100,14,14],[100,14,15],[100,14,16]]
+data_info = [[100,14,8],[100,14,13],[100,14,14],[100,14,15],[100,14,16],[100,14,25]]
 infor_all = get_info(data_info)
-# infor_name = ['GA','GA','GA','GA','GA']
-infor_name = ['14_8','14_13','14_14','14_15','14_16']
+infor_name = ['GA','GA','GA','GA','GA','HIGA']
+# infor_name = ['14_8','14_13','14_14','14_15','14_16']
 title_name = 'Fitness'
 
 
-draw_picture0(infor_all,infor_name,title_name)
+draw_picture(infor_all,infor_name,title_name)
 # draw_plot_picture(infor_all,data_info)
 # static_braced(data_info)

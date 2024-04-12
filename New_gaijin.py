@@ -136,33 +136,39 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     Y_interdis_all = 0
     Y_interdis_radio_all = 0
     floor_radio = 0
-    for i in range(len(g_col)):
-        if g_col[i]<= 0:
-            g_col[i] = 0
+    g_col1 = copy.deepcopy(g_col)
+    g_beam1 = copy.deepcopy(g_beam)
+    dis_all5 = copy.deepcopy(dis_all[5])
+    dis_all7 = copy.deepcopy(dis_all[7])
+    for i in range(len(g_col1)):
+        if g_col1[i]<= 0:
+            g_col1[i] = 0
         else:
-            g_col[i] = g_col[i]
-        g_col_all += g_col[i]
-    for i in range(len(g_beam)):
-        if g_beam[i]<= 0:
-            g_beam[i] = 0
+            g_col1[i] = g_col1[i]
+        g_col_all += g_col1[i]
+    for i in range(len(g_beam1)):
+        if g_beam1[i]<= 0:
+            g_beam1[i] = 0
         else:
-            g_beam[i] = g_beam[i]
-        g_beam_all += g_beam[i]
+            g_beam1[i] = g_beam1[i]
+        g_beam_all += g_beam1[i]
     #y dis ratio
-    for i in range(len(dis_all[5])):
-        if dis_all[5][i] <= 0.00167 and dis_all[5][i] >= -0.00167:
-            dis_all[5][i] = 0
+    for i in range(len(dis_all5)):
+        if dis_all5[i] <= 0.00167 and dis_all5[i] >= -0.00167:
+            dis_all5[i] = 0
         else:
-            dis_all[5][i] = dis_all[5][i]
-        Y_dis_radio_all += dis_all[5][i]
+            dis_all5[i] = dis_all5[i]
+        # Y_dis_radio_all += dis_all5[i]
+    Y_dis_radio_all = max(dis_all5)
     Y_dis_radio_all = Y_dis_radio_all*100
     # y interdis max
-    for i in range(len(dis_all[7])):
-        if dis_all[7][i] <= 0.004 and dis_all[7][i] >= -0.004:
-            dis_all[7][i] = 0
+    for i in range(len(dis_all7)):
+        if dis_all7[i] <= 0.004 and dis_all7[i] >= -0.004:
+            dis_all7[i] = 0
         else:
-            dis_all[7][i] = dis_all[7][i]
-        Y_interdis_all += dis_all[7][i]
+            dis_all7[i] = dis_all7[i]
+        # Y_interdis_all += dis_all7[i]
+    Y_interdis_all = max(dis_all7)
     Y_interdis_all = Y_interdis_all*100
     # # y interdis radio
     # for i in range(len(dis_all[11])):
@@ -183,12 +189,33 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     dis_all_max = max(dis_all[5])
     interdis_max = max(dis_all[7])
     g_all_max = max(g_col_max,g_beam_max)
-    G_value=u * (abs(g_col_max) + abs(g_beam_max) + abs(dis_all_max)*100 + abs(interdis_max)*100 + abs(Y_interdis_radio_all))
+    G_value=u * (abs(g_col_max) + abs(g_beam_max) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
     gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
 
-    return result,weight,gx
+    gx_demo = copy.deepcopy(gx)
+    if gx_demo[0]>=5:
+        gx_demo[0]=1
+    elif gx_demo[0]<=-1:
+        gx_demo[0] = -1
+    elif gx_demo[0]<=5 and gx_demo[0]>=-1:
+        gx_demo[0]=(gx_demo[0]+1)/6
+    if gx_demo[1]>=2:
+        gx_demo[1]=1
+    elif gx_demo[1]<=-1:
+        gx_demo[1] = -1
+    elif gx_demo[1]<=2 and gx_demo[1]>=-1:
+        gx_demo[1]=(gx_demo[1]+1)/3
+    if gx_demo[2] >= 0.05:
+        gx_demo[2] = 0.05
+    else:
+        gx_demo[2] = gx_demo[2] / 0.05
+    if gx_demo[3] >= 0.05:
+        gx_demo[3] = 0.05
+    else:
+        gx_demo[3] = gx_demo[3] / 0.05
+    return result,weight,gx,gx_demo
 
 #不加记忆池
 def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up):
@@ -216,7 +243,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
                                                                                      pop,
                                                                                      pop_room_label)
-            res1, res2,gx = Fun_1(we, co, be, dis_all, force_all, 10000)
+            res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000)
 
             # num3 += 1
             weight_1[time] = res2
@@ -231,6 +258,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             memorize_col.append(col_up[time])
             memorize_beam.append(beam_up[time])
             memorize_gx.append(gx)
+            memorize_gx_nor.append(gx_demo)
             # 全局记忆池
             memorize_sum_local.append(sum(pop2))
             memorize_pool_local.append(pop2)
@@ -336,8 +364,8 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
             child[j] = randint(0,num_var-1)
     for j in range(num_var, num_room_type + num_var ):
         if np.random.rand() < MUTATION_RATE:
-            child[j] = randint(1,3)
-
+            # child[j] = randint(1,3)
+            child[j] = 0
 def mulit_get_sap(num_thread):
     case_name = []
     APIPath_name = []
@@ -460,7 +488,7 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
         # wb2_examine_ind.save('examine_individual.xlsx')
         # pop_all.append(pop)
         we,co,be,r1,r2,r3,r4,dis_all,force_all =mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop,pop_room_label)
-        res1,res2,gx = Fun_1(we, co, be,dis_all,force_all, 10000)
+        res1,res2,gx,gx_demo = Fun_1(we, co, be,dis_all,force_all, 10000)
         # num3 += 1
         weight_1.append(res2)
         col_up.append(co)
@@ -646,7 +674,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     wb1.save(f'{path1}.xls')
 
 #统计记忆池
-def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,):
+def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae):
     wb1 = xlwt.Workbook()
     out_pop1_all = wb1.add_sheet('memorize_pool')
     loc = 0
@@ -675,6 +703,17 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,):
         for j in range(len(memorize_gx[i])):
             memo_gx.write(loc, j, memorize_gx[i][j])
         loc += 1
+
+    memo_loss = wb1.add_sheet('memorize_loss')
+
+    for i in range(len(memorize_loss)):
+        memo_loss.write(i, 0, memorize_loss[i])
+
+    memo_mae = wb1.add_sheet('memorize_mae')
+
+    for i in range(len(memorize_mae)):
+        memo_mae.write(i, 0, memorize_mae[i])
+
 
 
     APIPath = os.path.join(os.getcwd(), 'out_all_memorize')
@@ -746,11 +785,13 @@ def generate_DNA_coding_story1(num_var,num_room_type,x):
         for j in range(num_var):
             pop[i][j] = sec[j]
         for j in range(num_var,num_var+num_room_type):
-            pop[i][j] = randint(1,3)
+            # pop[i][j] = randint(1,3)
+            pop[i][j] = 0
         for j in range(num_var+num_room_type,num_var+num_room_type+story_num*3):
             pop[i][j] = randint(0,num_var-1)
         for j in range(num_var+num_room_type+story_num*3,num_var+num_room_type+story_num*4):
-            pop[i][j] = randint(0,1)
+            # pop[i][j] = randint(0,1)
+            pop[i][j] = 0
     return pop
 
 def decoding1(pop,num_var,num_room_type,labels):
@@ -901,8 +942,10 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     y_train = gx_Normalization(y_train)#归一化
     model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     history=model.fit(x_train, y_train, epochs=100, batch_size=32)#训练模型
-    history_loss.extend(history.history['loss'])
-    history_mae.extend(history.history['mae'])
+    # history_loss.extend(history.history['loss'])
+    # history_mae.extend(history.history['mae'])
+    history_loss.append(history.history['loss'][len(history.history['loss'])-1])
+    history_mae.append(history.history['mae'][len(history.history['loss'])-1])
     pop_best = []
     for i in range(num_ind):
         pop1 = generation_population(best_indivi, 0.2)#根据最好个体生成种群
@@ -1064,8 +1107,8 @@ room_indx = model_data[6]
 
 POP_SIZE =50
 DNA_SIZE = story_num*3
-CROSSOVER_RATE = 0.35
-MUTATION_RATE = 0.15
+CROSSOVER_RATE = 0.6
+MUTATION_RATE = 0.25
 N_GENERATIONS = 100
 num_thread = 10
 min_genera = []
@@ -1082,6 +1125,8 @@ memorize_col = []
 memorize_beam = []
 memorize_sum = []
 memorize_gx = []
+memorize_gx_nor = []
+
 #局部记忆池
 
 memorize_sum_local=[]
@@ -1104,7 +1149,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(23,24):
+    for time in range(29,30):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1125,7 +1170,7 @@ for num_var in [14]:
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae)
         draw_loss(num_var, time)
         gc.collect()
 
