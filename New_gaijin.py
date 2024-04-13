@@ -189,7 +189,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     dis_all_max = max(dis_all[5])
     interdis_max = max(dis_all[7])
     g_all_max = max(g_col_max,g_beam_max)
-    G_value=u * (abs(g_col_max) + abs(g_beam_max) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
+    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
     gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
@@ -674,7 +674,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     wb1.save(f'{path1}.xls')
 
 #统计记忆池
-def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae):
+def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor):
     wb1 = xlwt.Workbook()
     out_pop1_all = wb1.add_sheet('memorize_pool')
     loc = 0
@@ -713,6 +713,13 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
 
     for i in range(len(memorize_mae)):
         memo_mae.write(i, 0, memorize_mae[i])
+
+    memo_gx_nor = wb1.add_sheet('memorize_gx_nor')
+    loc = 0
+    for i in range(len(memorize_gx_nor)):
+        for j in range(len(memorize_gx_nor[i])):
+            memo_gx_nor.write(loc, j, memorize_gx_nor[i][j])
+        loc += 1
 
 
 
@@ -1006,7 +1013,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
         # 引入新个体
         run_time +=1
-        if run_time % 10 == 0:
+        if run_time % 3 == 0:
             pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],50)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
@@ -1021,7 +1028,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time %10==0:
+        if run_time %3==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -1149,7 +1156,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(29,30):
+    for time in range(33,34):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1170,7 +1177,7 @@ for num_var in [14]:
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor)
         draw_loss(num_var, time)
         gc.collect()
 
