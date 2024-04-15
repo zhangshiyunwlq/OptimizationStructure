@@ -938,7 +938,8 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     y_train_local = np.array(gx_local)
     y_train_local= gx_Normalization(y_train_local)#归一化
     model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
-    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32)#训练模型
+    #verbose取消打印损失
+    model.fit(x_train_local, y_train_local, epochs=300, batch_size=32,verbose=0)#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -948,7 +949,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     y_train = np.array(gx_global)
     y_train = gx_Normalization(y_train)#归一化
     model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
-    history=model.fit(x_train, y_train, epochs=100, batch_size=32)#训练模型
+    history=model.fit(x_train, y_train, epochs=100, batch_size=32,verbose=0)#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1013,8 +1014,8 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
         # 引入新个体
         run_time +=1
-        if run_time % 3 == 0:
-            pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],50)
+        if run_time % 10 == 0:
+            pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],200)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 for indi in range(len(pop2_new)):
@@ -1028,7 +1029,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time %3==0:
+        if run_time %10==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -1112,10 +1113,10 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 
 
-POP_SIZE =50
+POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.25
+MUTATION_RATE = 0.1
 N_GENERATIONS = 100
 num_thread = 10
 min_genera = []
@@ -1156,7 +1157,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(33,34):
+    for time in range(37,40):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
