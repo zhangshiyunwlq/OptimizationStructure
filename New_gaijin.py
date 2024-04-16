@@ -20,7 +20,7 @@ import comtypes.client
 import gc
 import openpyxl
 from CNN import create_model
-
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
 def generate_DNA_coding_story5(num_var,num_room_type,x):
@@ -674,7 +674,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     wb1.save(f'{path1}.xls')
 
 #统计记忆池
-def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor):
+def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num):
     wb1 = xlwt.Workbook()
     out_pop1_all = wb1.add_sheet('memorize_pool')
     loc = 0
@@ -720,6 +720,11 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
         for j in range(len(memorize_gx_nor[i])):
             memo_gx_nor.write(loc, j, memorize_gx_nor[i][j])
         loc += 1
+
+    memo_num = wb1.add_sheet('memorize_num')
+
+    for i in range(len(memorize_num)):
+        memo_num.write(i, 0, memorize_num[i])
 
 
 
@@ -914,7 +919,7 @@ def gx_nonNormalization(gx):
 #用于神经网络训练的GA
 def GA_for_DNN(run_time,pop2,model):
     for i in range(run_time):
-        fitness1 = model.predict(pop2)
+        fitness1 = model.predict(pop2,verbose=0)
         fitness2 = Gx_convert(fitness1)#归一化还原，并将每个染色体对应的gx累加
         mm = fitness2.index(min(fitness2))
         min1 = min(fitness2)
@@ -923,7 +928,7 @@ def GA_for_DNN(run_time,pop2,model):
         pop2 = select_2(pop2, fitness2)
         # 交叉变异
         pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE)
-        fit_pred = model.predict(pop2)
+        fit_pred = model.predict(pop2,verbose=0)
         fit_pred2=Gx_convert(fit_pred)
         if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
@@ -939,7 +944,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     y_train_local= gx_Normalization(y_train_local)#归一化
     model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
     #verbose取消打印损失
-    model.fit(x_train_local, y_train_local, epochs=300, batch_size=32,verbose=0)#训练模型
+    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32,verbose=0)#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -1014,13 +1019,13 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
         # 引入新个体
         run_time +=1
-        if run_time % 10 == 0:
+        if run_time % 15 == 0:
             pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],200)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 for indi in range(len(pop2_new)):
                     pop2[len(pop1) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
-
+            memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
             memorize_pool_loacl = []
             memorize_fit_loacl = []
@@ -1029,7 +1034,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time %10==0:
+        if run_time %15==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -1117,7 +1122,7 @@ POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 100
+N_GENERATIONS = 150
 num_thread = 10
 min_genera = []
 
@@ -1134,6 +1139,7 @@ memorize_beam = []
 memorize_sum = []
 memorize_gx = []
 memorize_gx_nor = []
+memorize_num = []
 
 #局部记忆池
 
@@ -1157,7 +1163,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(37,40):
+    for time in range(44,49):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1165,6 +1171,7 @@ for num_var in [14]:
         memorize_beam = []
         memorize_sum = []
         memorize_gx = []
+        memorize_num = []
 
         memorize_sum_local = []
         memorize_pool_local = []
@@ -1178,7 +1185,7 @@ for num_var in [14]:
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_num)
         draw_loss(num_var, time)
         gc.collect()
 
