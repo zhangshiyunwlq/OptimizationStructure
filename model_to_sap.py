@@ -3439,6 +3439,254 @@ def Run_GA_sap_4(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     all_data = [weight_all1, G_max, G_max_beam,frame_reactions_all,frame_section_info,all_up_fream_name,all_up_fream_data,Joint_dis,all_force_information]
     return all_data
 
+def Run_GA_low(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_label,width_joint,modular_length_num,story_num):
+    material_title = []
+    material_info_all = []
+    frame_section_name = []
+    frame_section_info = []
+    frame_section_info000 = []
+    modular_all_section = []
+    modulars = ModularBuilding.building_modulars
+    # modular_nodes_indx = ModularBuilding.nodes_indx
+    for modular_indx in range(len(modulars)):
+        modular_i_info = modulars[modular_indx].modular_info
+        modular_i_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(len(modular_i_edges)):
+            section_info = []
+            frame_section_info111 = []
+            section_name = "frame_section_" + str(modular_indx) + '_' + str(edge_indx)
+            material_name = f"{material_title[2]}"
+            section_data = modular_i_info[modulars[modular_indx].modular_edge_labels[edge_indx]]
+            # if pop_room_label[modular_indx] == 1 or pop_room_label[modular_indx] == 4 or pop_room_label[modular_indx] == 7 or pop_room_label[modular_indx] == 10:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels[edge_indx]]
+            # elif pop_room_label[modular_indx] == 2 or pop_room_label[modular_indx] == 5 or pop_room_label[modular_indx] == 8 or pop_room_label[modular_indx] == 11:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels_1[edge_indx]]
+            # elif pop_room_label[modular_indx] == 3 or pop_room_label[modular_indx] == 6 or pop_room_label[modular_indx] == 9 or pop_room_label[modular_indx] == 12:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels_2[edge_indx]]
+            # elif pop_room_label[modular_indx] == 4 or pop_room_label[modular_indx] == 8 or pop_room_label[modular_indx] == 12 or pop_room_label[modular_indx] == 16:
+            #     section_data = modular_i_info[modulars[modular_indx].modular_edge_labels_3[edge_indx]]
+
+            if section_data['type'] == 'c0':
+                ret = SapModel.PropFrame.SetChannel(section_name, material_name,
+                                                    section_data['outside_depth'], section_data['outside_flange_width'],
+                                                    section_data['flange_thickness'], section_data['web_thickness'], -1)
+                frame_section_name.append(section_name)
+                frame_section_info111.append(f"{material_title[0]}")
+                frame_section_info111.append("c0")
+                frame_section_info000.append(frame_section_info111)
+                section_info.append(section_data['outside_depth'])
+                section_info.append(section_data['outside_flange_width'])
+                section_info.append(section_data['flange_thickness'])
+                section_info.append(section_data['web_thickness'])
+                section_info.append(section_data['s22'])
+                section_info.append(section_data['s33'])
+                section_info.append(section_data['i22'])
+                section_info.append(section_data['i33'])
+                frame_section_info.append(section_info)
+            elif section_data['type'] == 'I0':
+                ret = SapModel.PropFrame.SetISection(section_name, material_name,
+                                                     section_data['heigth'], section_data['width'],
+                                                     section_data['tf'], section_data['tw'], section_data['width'],
+                                                     section_data['tf'], -1)
+                frame_section_name.append(section_name)
+                frame_section_info111.append(f"{material_title[0]}")
+                frame_section_info111.append("I0")
+                frame_section_info000.append(frame_section_info111)
+                section_info.append(section_data['heigth'])
+                section_info.append(section_data['width'])
+                section_info.append(section_data['tw'])
+                section_info.append(section_data['tf'])
+                section_info.append(section_data['s22'])
+                section_info.append(section_data['s33'])
+                section_info.append(section_data['i22'])
+                section_info.append(section_data['i33'])
+                frame_section_info.append(section_info)
+            elif section_data['type'] == 'b0':
+                ret = SapModel.PropFrame.SetTube(section_name, material_name,
+                                                 section_data['outside_depth'], section_data['outside_flange_width'],
+                                                 section_data['flange_thickness'], section_data['web_thickness'], -1)
+                frame_section_name.append(section_name)
+                frame_section_info111.append(f"{material_title[0]}")
+                frame_section_info111.append("b0")
+                frame_section_info000.append(frame_section_info111)
+                section_info.append(section_data['outside_depth'])
+                section_info.append(section_data['outside_flange_width'])
+                section_info.append(section_data['flange_thickness'])
+                section_info.append(section_data['web_thickness'])
+                section_info.append(section_data['s22'])
+                section_info.append(section_data['s33'])
+                section_info.append(section_data['i22'])
+                section_info.append(section_data['i33'])
+                frame_section_info.append(section_info)
+
+    """ define the structure """
+    Nodes = ModularBuilding.building_nodes
+    Joints_hor = ModularBuilding.building_room_joints_hor
+    Joints_ver = ModularBuilding.building_room_joints_ver
+    Corr_beams = ModularBuilding.corr_beams
+    Room_indx = ModularBuilding.building_nodes_indx
+
+    ''' 1st adding points '''
+    for node_indx in range(len(Nodes)):
+        x, y, z = Nodes[node_indx]
+        ret = SapModel.PointObj.AddCartesian(x, y, z, None, "nodes"+str(node_indx), "Global")
+    """ define frames mid points """
+    for modular_indx in range(len(modulars)):
+        modular_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(len(modular_edges)):
+            indx1, indx2 = modular_edges[edge_indx]
+            # Point1 = "nodes" + str(indx1)
+            # Point2 = "nodes" + str(indx2)
+            x1, y1, z1 = Nodes[indx1]
+            x2, y2, z2 = Nodes[indx2]
+            x3 = 0.5 * (x1 + x2)
+            y3 = 0.5 * (y1 + y2)
+            z3 = 0.5 * (z1 + z2)
+            ret = SapModel.PointObj.AddCartesian(x3, y3, z3, None, "nodes_mid" + str(modular_indx) + '_' + str(edge_indx), "Global")
+
+    ''' 2nd adding frames '''
+    for modular_indx in range(len(modulars)):
+        modular_edges = ModularBuilding.building_room_edges[modular_indx]
+        for edge_indx in range(len(modular_edges)):
+            indx1, indx2 = modular_edges[edge_indx]
+            Point1 = "nodes" + str(indx1)
+            Point2 = "nodes" + str(indx2)
+            name = "frame_" + str(modular_indx) + '_' + str(edge_indx)
+            section_name = "frame_section_" + str(modular_indx) + '_' + str(edge_indx)
+            ret = SapModel.FrameObj.AddByPoint(Point1, Point2, " ", section_name, name)
+    ''' 3rd adding joints '''
+    joint_sec, joint_mater = "Rectang", f"{material_title[2]}"
+    ret = SapModel.PropFrame.SetRectangle(joint_sec, joint_mater,width_joint,width_joint,-1)
+    brace_sec, brace_mater = "Rectang", f"{material_title[2]}"
+    ret = SapModel.PropFrame.SetTube(brace_sec, brace_mater, 100, 100,10,10, -1)
+    ''' 4rd adding braces '''
+    weight_brace = 0.0
+    for i in range(len(modulars)):
+        #人字支撑
+        if pop_room_label[i] == 1:
+            nodes_indx = ModularBuilding.building_nodes_indx[i]
+            ret = SapModel.FrameObj.AddByPoint("nodes"+str(nodes_indx[0]), "nodes_mid" + str(i) + '_' + str(11), " ", brace_sec, "brace_" + str(i) + '_' + str(0))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_mid" + str(i) + '_' + str(11), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(1))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_mid" + str(i) + '_' + str(9), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(2))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_mid" + str(i) + '_' + str(9), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(3))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(4))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(5))
+            br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
+            leng = distance(br_back)
+            wb = (5000*4+leng*2)*(100*100-90*90)*0.00000000785
+            weight_brace +=wb
+
+        # 交叉支撑
+        elif pop_room_label[i] == 2 :
+            nodes_indx = ModularBuilding.building_nodes_indx[i]
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(0))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes" + str(nodes_indx[1]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(1))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes" + str(nodes_indx[5]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(2))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes" + str(nodes_indx[4]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(3))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(4))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(5))
+
+            br_back = [Nodes[nodes_indx[5]][0] - Nodes[nodes_indx[6]][0], Nodes[nodes_indx[5]][1] - Nodes[nodes_indx[6]][1],
+                       Nodes[nodes_indx[5]][2] - Nodes[nodes_indx[6]][2]]
+            leng = distance(br_back)
+            wb = (8544 * 4 + leng * 2) *(100*100-90*90)* 0.00000000785
+            weight_brace += wb
+        #双交叉支撑
+        elif pop_room_label[i] == 3:
+            nodes_indx = ModularBuilding.building_nodes_indx[i]
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[0]), "nodes_brace" + str(i) + '_' + str(11) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(0))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[1]), "nodes_brace" + str(i) + '_' + str(7) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(1))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[6]), "nodes_brace" + str(i) + '_' + str(11) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(2))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[7]), "nodes_brace" + str(i) + '_' + str(7) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(3))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[2]), "nodes_brace" + str(i) + '_' + str(9) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(4))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[3]), "nodes_brace" + str(i) + '_' + str(5) + '_0', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(5))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes_brace" + str(i) + '_' + str(9) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(6))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes_brace" + str(i) + '_' + str(5) + '_1', " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(7))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[4]), "nodes" + str(nodes_indx[7]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(8))
+            ret = SapModel.FrameObj.AddByPoint("nodes" + str(nodes_indx[5]), "nodes" + str(nodes_indx[6]), " ",
+                                               brace_sec, "brace_" + str(i) + '_' + str(9))
+
+            br_back = [Nodes[nodes_indx[5]][0]-Nodes[nodes_indx[6]][0],Nodes[nodes_indx[5]][1]-Nodes[nodes_indx[6]][1],Nodes[nodes_indx[5]][2]-Nodes[nodes_indx[6]][2]]
+            leng = distance(br_back)
+            wb = (4423*8+leng*2)*(100*100-90*90)*0.00000000785
+            weight_brace +=wb
+
+    """ run the analysis """
+    # # save model
+    ret = SapModel.File.Save(ModelPath)
+    ret = SapModel.Analyze.RunAnalysis()
+
+    """ results output """
+    ret = SapModel.Results.Setup.DeselectAllCasesAndCombosForOutput()
+    # ret = SapModel.Results.Setup.SetCaseSelectedForOutput("DEAD")
+
+    ret = SapModel.Results.Setup.SetComboSelectedForOutput("COMB1")
+    # output displacement
+    weight_sap = 0.00
+    mass_sap = 0.00
+    # [weight_sap,mass_sap,ret] = SapModel.PropMaterial.GetWeightAndMass("Q355", weight_sap, mass_sap)
+
+    ou_all_dis, ou_mid_dis, displacements, mid_displacements, name_frame_mid, name_all_nodes, Joint_dis = output_dis(Nodes, SapModel, modulars, ModularBuilding,modular_length_num,story_num)
+
+    # 输出每层位移最大值
+    max_dis_story = []
+    for i in range(6):
+        all_1_dis = []
+        for j in range(modular_length_num*16*i,modular_length_num*16*(i+1)):
+            all_1_dis.append(ou_all_dis[j])
+        mm = max(all_1_dis)
+        max_dis_story.append(mm)
+        # print(f"第{i}层节点最大位移=",mm)
+    max_dis_mid = []
+    for i in range(6):
+        mid_1_dis = []
+        for j in range(modular_length_num*8*i,modular_length_num*8*(i+1)):
+            mid_1_dis.append(ou_mid_dis[j])
+        mm = max(mid_1_dis)
+        max_dis_mid.append(mm)
+        # print(f"第{i}层柱挠度最大位移=",mm)
+
+
+    # import pdb;
+    # pdb.set_trace()
+
+    # frame reactions
+    all_force_information = output_force(Nodes, SapModel, modulars, ModularBuilding, frame_section_info,frame_section_info000,modular_length_num,story_num)
+    frame_reactions = all_force_information[0]
+    name_re = all_force_information[1]
+    G_max = all_force_information[2]
+    G_max_beam = all_force_information[3]
+    frame_reactions_all = all_force_information[4]
+    all_up_fream_name = all_force_information[5]
+    all_up_fream_data = all_force_information[6]
+    weight_all1 = all_force_information[7] + weight_brace
+    all_up_num = all_force_information[11]
+    mmm = all_force_information[8]
+
+    all_data = [weight_all1, G_max, G_max_beam,frame_reactions_all,frame_section_info,all_up_fream_name,all_up_fream_data,Joint_dis,all_force_information]
+    return all_data
+
+
 # modular_length = 8000
 # modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 # modular_heigth = 4000

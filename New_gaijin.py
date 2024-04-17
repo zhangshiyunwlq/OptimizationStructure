@@ -64,55 +64,9 @@ def decoding(pop,num_var,num_room_type,labels):
                     pop_room_label[i][j] = pop[i][num_var]
     return pop_all,pop_room_label
 
-def mulitrun_GA(pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,memory_pools_all,memory_pools_fit,memory_pools_weight,memory_pools_col,memory_pools_beam):
-    while True:
-        if q.empty():
-            break
-
-        time = q.get()
-        pop = pop1[time]
-        pop_room_label = pop3[time]
-        pop2= pop_all[time]
-        # 判断记忆池
-        for j in range(len(memory_pools_all)):
-            tf = []
-            for z in range(len(pop2)):
-                if pop2[z] != memory_pools_all[j][z]:
-                    tf.append(z)
-            if len(tf) == 0:
-                break
-        # 记忆池中存在满足条件的个体
-        if len(tf) == 0:
-            result[time] = memory_pools_fit[j]
-            weight_1[time] = memory_pools_weight[j]
-            col_up[time] = memory_pools_col[j]
-            beam_up[time] = memory_pools_beam[j]
-        # 记忆池中不存在满足条件的个体
-        else:
-            # pop_all.append(pop)
-
-            res1, res2 = fun(pop,pop_room_label)
-
-            # num3 += 1
-            weight_1[time] = res2
-            col_up[time] = 1
-            beam_up[time] = 1
-            result[time] = res1
-        # 记忆池更新
-            memory_pools_all.append(pop2)
-            memory_pools_fit.append(res1)
-            memory_pools_weight.append(res2)
-            memory_pools_col.append(1)
-            memory_pools_beam.append(1)
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
 
-    sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                      cfg_file_name="Steel_section_data.ini")
-    modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
-    # 按房间分好节点
-    modulars_of_building = modular_building.building_modulars
-    modular_nums = len(labels)
     modular_infos = {}
     # 每个房间定义梁柱截面信息
     sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
@@ -128,7 +82,24 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 
     ret = SapModel.SetModelIsLocked(False)
     return aa,bb,cc,dd,ee,ff,gg,hh,ii
+#减少重复建模工作
+def mulit_Sap_analy_allroom_low(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
 
+    modular_infos = {}
+    # 每个房间定义梁柱截面信息
+    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    #
+    for i in range(len(modulars_of_building)):
+        modulars_of_building[i].Add_Info_And_Update_Modular(
+            # modular_infos[modulars_of_building[i].modular_label - 1])
+            modular_infos[i])
+    modular_building.Building_Assembling(modulars_of_building)
+
+    all_data = ms.Run_GA_low(mySapObject, ModelPath, SapModel, modular_building,pop_room_label,200,modular_length_num,story_num)
+    aa, bb, cc, dd, ee, ff, gg, hh, ii = all_data
+
+    ret = SapModel.SetModelIsLocked(False)
+    return aa,bb,cc,dd,ee,ff,gg,hh,ii
 def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     g_col_all = 0
     g_beam_all = 0
@@ -218,7 +189,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     return result,weight,gx,gx_demo
 
 #不加记忆池
-def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up):
+def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
     while True:
         if q.empty():
             break
@@ -240,7 +211,13 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
                     value = 1
                     break
         if value ==0:
-            we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
+            if sap_run_time00<num_thread:
+                we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
+                                                                                     pop,
+                                                                                     pop_room_label)
+                sap_run_time00 =sap_run_time00+1
+            else:
+                we, co, be, r1, r2, r3, r4, dis_all, force_all= mulit_Sap_analy_allroom_low(ModelPath, mySapObject, SapModel,
                                                                                      pop,
                                                                                      pop_room_label)
             res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000)
@@ -285,7 +262,7 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
                 SapModel_name.append(f"SapModel{j}")
                 ModelPath_name.append(f"ModelPath{j}")
                 mySapObject_name[j], ModelPath_name[j], SapModel_name[j] = SAPanalysis_GA_run2(os.path.join(os.getcwd(), f"cases{j}"))
-        t = threading.Thread(target=mulitrun_GA_1, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up))
+        t = threading.Thread(target=mulitrun_GA_1, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00))
         t.start()
         threads.append(t)
     for i in threads:
@@ -561,13 +538,13 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
 
         # 引入新个体
         run_time +=1
-        if run_time % 5 == 0:
+        if run_time % 15 == 0:
             pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
 
-        if run_time %5==0:
+        if run_time %15==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -1034,7 +1011,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time %15==0:
+        if run_time % 15 ==  0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -1116,7 +1093,12 @@ cor_edges = model_data[3]
 joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
-
+#建立房间信息
+sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                  cfg_file_name="Steel_section_data.ini")
+modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
+# 按房间分好节点
+modulars_of_building = modular_building.building_modulars
 
 POP_SIZE =30
 DNA_SIZE = story_num*3
@@ -1140,7 +1122,7 @@ memorize_sum = []
 memorize_gx = []
 memorize_gx_nor = []
 memorize_num = []
-
+sap_run_time00 = 0
 #局部记忆池
 
 memorize_sum_local=[]
@@ -1163,7 +1145,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(44,49):
+    for time in range(53,54):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1172,6 +1154,7 @@ for num_var in [14]:
         memorize_sum = []
         memorize_gx = []
         memorize_num = []
+        sap_run_time00 = 0
 
         memorize_sum_local = []
         memorize_pool_local = []
@@ -1183,10 +1166,10 @@ for num_var in [14]:
         history_loss = []
         history_mae = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_num)
-        draw_loss(num_var, time)
+        zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        # zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+        # draw_loss(num_var, time)
         gc.collect()
 
 # draw_picture('name','title')
