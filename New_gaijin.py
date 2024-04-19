@@ -1145,7 +1145,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(49,50):
+    for time in range(65,66):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1172,33 +1172,33 @@ for num_var in [14]:
         draw_loss(num_var, time)
         gc.collect()
 
-for num_var in [14]:
-    for time in range(54,55):
-        memorize_pool = []
-        memorize_fit = []
-        memorize_weight = []
-        memorize_col = []
-        memorize_beam = []
-        memorize_sum = []
-        memorize_gx = []
-        memorize_num = []
-        sap_run_time00 = 0
-
-        memorize_sum_local = []
-        memorize_pool_local = []
-        memorize_fit_local = []
-        memorize_weight_local = []
-        memorize_col_local = []
-        memorize_beam_local = []
-        memorize_gx_local = []
-        history_loss = []
-        history_mae = []
-        mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-        zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        # zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
-        # draw_loss(num_var, time)
-        gc.collect()
+# for num_var in [14]:
+#     for time in range(54,55):
+#         memorize_pool = []
+#         memorize_fit = []
+#         memorize_weight = []
+#         memorize_col = []
+#         memorize_beam = []
+#         memorize_sum = []
+#         memorize_gx = []
+#         memorize_num = []
+#         sap_run_time00 = 0
+#
+#         memorize_sum_local = []
+#         memorize_pool_local = []
+#         memorize_fit_local = []
+#         memorize_weight_local = []
+#         memorize_col_local = []
+#         memorize_beam_local = []
+#         memorize_gx_local = []
+#         history_loss = []
+#         history_mae = []
+#         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+#         zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+#         # zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+#         # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+#         # draw_loss(num_var, time)
+#         gc.collect()
 
 # draw_picture('name','title')
 
