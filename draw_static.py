@@ -25,7 +25,7 @@ def get_info(name1):
 
 def draw_picture(info2,name,title_name):
     num1 = 0.8
-    num2 = 0.75
+    num2 = 0.8
     num3 = 3
     num4 = 0
     fig2 = plt.figure(num=1, figsize=(23, 30))
@@ -52,20 +52,20 @@ def draw_picture(info2,name,title_name):
         ax2.legend((line1),[name[i]],bbox_to_anchor=(num1+0.1, num2+0.05), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
 
 
-    for i in range(1,5):
+    for i in range(1,6):
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
         ax2.plot(bbb, ccc,linewidth=6,color='r')
     # ax2.legend(lines[:1],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
 
-    for i in range(5,6):
+    for i in range(6,7):
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
         line2=ax2.plot(bbb, ccc,label=f'{name[i]}', linewidth=6,color='b')
         ax2.legend((line2),[name[i]],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
                 shadow=False)
 
-    for i in range(6,len(info)):
+    for i in range(7,len(info)):
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
         ax2.plot(bbb, ccc, linewidth=6,color='b')
@@ -89,6 +89,7 @@ def draw_picture0(info2,name,title_name):
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
     plt.ylim((150, 400))
+    plt.ylim((0, len(info2[0]),15))
     info = copy.deepcopy(info2)
     for i in range(len(info)):
         for j in range(len(info[i])):
@@ -137,6 +138,7 @@ def draw_plot_picture(info2,data_infor):
     plt.xticks(range(0, 12, 1))
     # plt.yticks(range(100, 500, 50))
     plt.ylim((150, 400))
+    plt.ylim((150, 400))
     plt.scatter(num_var, fit, s=13, label='fitness')
     plt.xlabel("The number of variable", fontdict={'size': 16})
     plt.ylabel("Fitness", fontdict={'size': 16})
@@ -163,9 +165,9 @@ def static_braced(name1):
 # title_name = 'Fitness'
 
 # data_info = [[100,14,18],[100,14,19],[100,14,20],[100,14,21],[100,14,22],[100,14,25],[100,14,30],[100,14,31],[100,14,33],[100,14,36]]
-data_info = [[100,14,18],[100,14,19],[100,14,20],[100,14,21],[100,14,22],[100,14,37],[100,14,38],[100,14,39],[100,14,40],[100,14,41],[100,14,42],[100,14,43],[100,14,44]]
+data_info = [[150,14,50],[150,14,51],[150,14,52],[150,14,53],[150,14,54],[150,14,55],[150,14,44],[150,14,46],[150,14,47],[150,14,49],[150,14,471],[150,14,491]]
 infor_all = get_info(data_info)
-infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA','HIGA','HIGA','HIGA','HIGA','HIGA','HIGA']
+infor_name = ['GA','GA','GA','GA','GA','GA','HIGA','HIGA','HIGA','HIGA','HIGA','HIGA']
 #普通遗传算法
 # infor_name = ['14_8','14_13','14_14','14_15','14_16']
 title_name = 'Fitness'

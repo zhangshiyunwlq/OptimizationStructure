@@ -281,8 +281,8 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
         sort_num.append(fit_ini.index(luyi[i]))
     for i in range(len(fit_ini)):
         list_new.append(lst[sort_num[i]])
-    for i in range(len(list_new)):
-        list_new[i] = m.e ** (list_new[i] * 1.5)
+    # for i in range(len(list_new)):
+    #     list_new[i] = m.e ** (list_new[i] * 1.5)
     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
                            p=np.array(list_new) / (sum(list_new)))
     pop2 = np.zeros((POP_SIZE, len(pop[0])))
@@ -996,9 +996,9 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
         # 引入新个体
         run_time +=1
-        if run_time % 15 == 0:
-            pop2_new = DNN_GA(num_var,num_room_type,int(0.3 * len(pop2)),pop2[0],200)
-            exchange_num = int(0.3*len(pop2_new))
+        if run_time % 20 == 0:
+            pop2_new = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
+            exchange_num = int(0.9*len(pop2_new))
             for ex_num in range(exchange_num):
                 for indi in range(len(pop2_new)):
                     pop2[len(pop1) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
@@ -1011,7 +1011,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time % 15 ==  0:
+        if run_time % 20 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -1103,8 +1103,8 @@ modulars_of_building = modular_building.building_modulars
 POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.1
-N_GENERATIONS = 150
+MUTATION_RATE = 0.2
+N_GENERATIONS = 200
 num_thread = 10
 min_genera = []
 
@@ -1145,7 +1145,35 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(53,54):
+    for time in range(49,50):
+        memorize_pool = []
+        memorize_fit = []
+        memorize_weight = []
+        memorize_col = []
+        memorize_beam = []
+        memorize_sum = []
+        memorize_gx = []
+        memorize_num = []
+        sap_run_time00 = 0
+
+        memorize_sum_local = []
+        memorize_pool_local = []
+        memorize_fit_local = []
+        memorize_weight_local = []
+        memorize_col_local = []
+        memorize_beam_local = []
+        memorize_gx_local = []
+        history_loss = []
+        history_mae = []
+        mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+        draw_loss(num_var, time)
+        gc.collect()
+
+for num_var in [14]:
+    for time in range(54,55):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1168,7 +1196,7 @@ for num_var in [14]:
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         # zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
         # draw_loss(num_var, time)
         gc.collect()
 

@@ -9,11 +9,12 @@ import numpy as np
 # 创建一个简单的神经网络模型
 def create_model(num_joint,num_out):
     model = models.Sequential([
-        layers.Dense(100, activation='relu', input_shape=(num_joint,)),
-        layers.Dense(100, activation='relu'),
+        layers.Dense(200, activation=tf.nn.leaky_relu, input_shape=(num_joint,),alpha = 0.1),
+        layers.Dense(200, activation=tf.nn.leaky_relu,alpha = 0.1),
         layers.Dense(num_out)
     ])
-    model.compile(optimizer='adam',
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+    model.compile(optimizer=optimizer,
                   loss='mse',
                   metrics=['mae'])
     return model
