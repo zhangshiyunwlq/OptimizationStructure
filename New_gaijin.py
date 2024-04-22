@@ -236,7 +236,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             memorize_beam.append(beam_up[time])
             memorize_gx.append(gx)
             memorize_gx_nor.append(gx_demo)
-            # 全局记忆池
+            # 局部记忆池
             memorize_sum_local.append(sum(pop2))
             memorize_pool_local.append(pop2)
             memorize_fit_local.append(res1)
@@ -271,20 +271,17 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
 
 def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
-    fit_ini = fitness
-    luyi = fitness
+    fit_ini = copy.deepcopy(fitness)
+    luyi = copy.deepcopy(fitness)
     luyi.sort(reverse=True)
     sort_num = []
-    lst = list(range(1, len(fit_ini)+1))
-    list_new = []
     for i in range(len(fit_ini)):
-        sort_num.append(fit_ini.index(luyi[i]))
-    for i in range(len(fit_ini)):
-        list_new.append(lst[sort_num[i]])
+        sort_num.append(luyi.index(fit_ini[i]))
+
     # for i in range(len(list_new)):
     #     list_new[i] = m.e ** (list_new[i] * 1.5)
     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
-                           p=np.array(list_new) / (sum(list_new)))
+                           p=np.array(sort_num) / (sum(sort_num)))
     pop2 = np.zeros((POP_SIZE, len(pop[0])))
     for i in range(len(pop2)):
         pop2[i] = pop[int(idx[i])]
@@ -998,10 +995,10 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
         run_time +=1
         if run_time % 20 == 0:
             pop2_new = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
-            exchange_num = int(0.9*len(pop2_new))
+            exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
                 for indi in range(len(pop2_new[0])):
-                    pop2[len(pop1) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
+                    pop2[len(pop2) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
             memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
             memorize_pool_loacl = []
