@@ -2708,6 +2708,95 @@ def Run_GA_allstory2_divided_mulit(POP_SIZE_1, DNA_SIZE_1, CROSSOVER_RATE_1, MUT
                  pop_all_weight,col_up_all, beam_up_all,pop2[0],pop3[0],pop_zhongqun_all_3]
     return all_infor
 
+def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
+    g_col_all = 0
+    g_beam_all = 0
+    Y_dis_radio_all = 0
+    Y_interdis_all = 0
+    Y_interdis_radio_all = 0
+    floor_radio = 0
+    g_col1 = copy.deepcopy(g_col)
+    g_beam1 = copy.deepcopy(g_beam)
+    dis_all5 = copy.deepcopy(dis_all[5])
+    dis_all7 = copy.deepcopy(dis_all[7])
+    for i in range(len(g_col1)):
+        if g_col1[i]<= 0:
+            g_col1[i] = 0
+        else:
+            g_col1[i] = g_col1[i]
+        g_col_all += g_col1[i]
+    for i in range(len(g_beam1)):
+        if g_beam1[i]<= 0:
+            g_beam1[i] = 0
+        else:
+            g_beam1[i] = g_beam1[i]
+        g_beam_all += g_beam1[i]
+    #y dis ratio
+    for i in range(len(dis_all5)):
+        if dis_all5[i] <= 0.00167 and dis_all5[i] >= -0.00167:
+            dis_all5[i] = 0
+        else:
+            dis_all5[i] = dis_all5[i]
+        # Y_dis_radio_all += dis_all5[i]
+    Y_dis_radio_all = max(dis_all5)
+    Y_dis_radio_all = Y_dis_radio_all*100
+    # y interdis max
+    for i in range(len(dis_all7)):
+        if dis_all7[i] <= 0.004 and dis_all7[i] >= -0.004:
+            dis_all7[i] = 0
+        else:
+            dis_all7[i] = dis_all7[i]
+        # Y_interdis_all += dis_all7[i]
+    Y_interdis_all = max(dis_all7)
+    Y_interdis_all = Y_interdis_all*100
+    # # y interdis radio
+    # for i in range(len(dis_all[11])):
+    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
+    #         dis_all[11][i] = 0
+    #     else:
+    #         dis_all[11][i] = dis_all[11][i]
+    #     Y_interdis_radio_all += dis_all[11][i]
+    # # x interdis ratio
+    # for i in range(len(all_force[10])):
+    #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
+    #         all_force[10][i] = 0
+    #     else:
+    #         all_force[10][i] = all_force[10][i]
+    #     floor_radio += all_force[10][i]
+    g_col_max= max(g_col)
+    g_beam_max = max(g_beam)
+    dis_all_max = max(dis_all[5])
+    interdis_max = max(dis_all[7])
+    g_all_max = max(g_col_max,g_beam_max)
+    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
+    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
+    # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
+    result = weight + G_value
+
+    gx_demo = copy.deepcopy(gx)
+    if gx_demo[0]>=5:
+        gx_demo[0]=1
+    elif gx_demo[0]<=-1:
+        gx_demo[0] = -1
+    elif gx_demo[0]<=5 and gx_demo[0]>=-1:
+        gx_demo[0]=(gx_demo[0]+1)/6
+    if gx_demo[1]>=2:
+        gx_demo[1]=1
+    elif gx_demo[1]<=-1:
+        gx_demo[1] = -1
+    elif gx_demo[1]<=2 and gx_demo[1]>=-1:
+        gx_demo[1]=(gx_demo[1]+1)/3
+    if gx_demo[2] >= 0.05:
+        gx_demo[2] = 0.05
+    else:
+        gx_demo[2] = gx_demo[2] / 0.05
+    if gx_demo[3] >= 0.05:
+        gx_demo[3] = 0.05
+    else:
+        gx_demo[3] = gx_demo[3] / 0.05
+    return result,weight,gx,gx_demo
+
+
 
 '''model data'''
 # modular size
@@ -2795,15 +2884,15 @@ x = np.linspace(0, 12, 13)
 pop_room = []
 pop_room_label = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_6.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_67.xls',
     formatting_info=True)
 sheet1 = wb.sheet_by_index(0)
 for z in range(18):
-    rows = sheet1.row_values(5050)[z]
+    rows = sheet1.row_values(6170)[z]
     pop_room.append(rows)
 sheet1 = wb.sheet_by_index(2)
 for z in range(96):
-    rows = sheet1.row_values(5050)[z]
+    rows = sheet1.row_values(6170)[z]
     pop_room_label.append(rows)
 
 
@@ -2871,6 +2960,8 @@ word_3th.append(Y_interdis_ave)
 word_3th.append(Y_interdis_radio)
 word_infor.append(word_1th)
 word_infor.append(word_3th)
+
+res1, res2,gx,gx_demo=Fun_1(weight1,g_col,g_beam,Joint_dis,all_force,10000)
 
 # yangtingting = [i for i in range(50)]
 # luyiwen = []

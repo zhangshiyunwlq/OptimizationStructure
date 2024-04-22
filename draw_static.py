@@ -33,45 +33,29 @@ def draw_picture(info2,name,title_name):
     ax2.tick_params(labelsize=40)
     ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
     ax2.set_ylabel(title_name, fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
-    ax2.spines['bottom'].set_linewidth(4);###设置底部坐标轴的粗细
-    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['bottom'].set_linewidth(2);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
     plt.ylim((150, 400))
     info = copy.deepcopy(info2)
+
     for i in range(len(info)):
-        for j in range(len(info[i])):
-            if info[i][j]>=500:
-            # info[i][j] = 500+100*(m.log(info[i][j]))
-                info[i][j] = 500 + info[i][j]/1000
-
-    for i in range(1):
+        if name[i] =='HIGA1':
+            co = 'r'
+        else:
+            co = 'b'
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
-        line1 = ax2.plot(bbb, ccc,label=f'{name[i]}',linewidth=6,color='r')
-        ax2.legend((line1),[name[i]],bbox_to_anchor=(num1+0.1, num2+0.05), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
+        ax2.plot(bbb, ccc, linewidth=6, color=co)
+        legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
+                          plt.Line2D([0], [0], color='b', lw=2,linewidth=20)]
+        legend_labels = ['GA', 'HIGA']
+        # plt.legend(legend_handles, legend_labels,fontsize=20)
 
-
-    for i in range(1,6):
-        bbb = np.arange(0, len(info[i]))
-        ccc = info[i]
-        ax2.plot(bbb, ccc,linewidth=6,color='r')
-    # ax2.legend(lines[:1],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
-
-    for i in range(6,7):
-        bbb = np.arange(0, len(info[i]))
-        ccc = info[i]
-        line2=ax2.plot(bbb, ccc,label=f'{name[i]}', linewidth=6,color='b')
-        ax2.legend((line2),[name[i]],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
-                shadow=False)
-
-    for i in range(7,len(info)):
-        bbb = np.arange(0, len(info[i]))
-        ccc = info[i]
-        ax2.plot(bbb, ccc, linewidth=6,color='b')
-    # ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
-    #         shadow=False)
-
+    ax2.set(xlim=(0, 200), ylim=(0, 1000),
+           xticks=np.arange(0, 200, 20),
+           yticks=np.arange(0, 1000, 100))
     plt.show()
 
 def draw_picture0(info2,name,title_name):
@@ -88,8 +72,11 @@ def draw_picture0(info2,name,title_name):
     ax2.spines['left'].set_linewidth(4)
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
-    plt.ylim((150, 400))
-    plt.ylim((0, len(info2[0]),15))
+    # plt.ylim((150, 400))
+    # plt.xlim((0, len(info2[0])))
+    ax2.set(xlim=(0, len(info2[0])), ylim=(0, 1000),
+           xticks=np.arange(0, len(info2[0]), 20),
+           yticks=np.arange(0, 1000, 100))
     info = copy.deepcopy(info2)
     for i in range(len(info)):
         for j in range(len(info[i])):
@@ -103,27 +90,6 @@ def draw_picture0(info2,name,title_name):
         ax2.plot(bbb, ccc,label=f'{name[i]}', linewidth=6)
         ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
 
-
-
-    # for i in range(1,5):
-    #     bbb = np.arange(0, len(info[i]))
-    #     ccc = info[i]
-    #     ax2.plot(bbb, ccc,linewidth=6,color='r')
-    # # ax2.legend(lines[:1],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
-    #
-    # for i in range(5,6):
-    #     bbb = np.arange(0, len(info[i]))
-    #     ccc = info[i]
-    #     line2=ax2.plot(bbb, ccc,label=f'{name[i]}', linewidth=6,color='b')
-    #     ax2.legend((line2),[name[i]],bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
-    #             shadow=False)
-    #
-    # for i in range(6,len(info)):
-    #     bbb = np.arange(0, len(info[i]))
-    #     ccc = info[i]
-    #     ax2.plot(bbb, ccc, linewidth=6,color='b')
-    # ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4, handlelength=1.5, fontsize=30,
-    #         shadow=False)
 
     plt.show()
 
@@ -165,9 +131,16 @@ def static_braced(name1):
 # title_name = 'Fitness'
 
 # data_info = [[100,14,18],[100,14,19],[100,14,20],[100,14,21],[100,14,22],[100,14,25],[100,14,30],[100,14,31],[100,14,33],[100,14,36]]
-data_info = [[150,14,50],[150,14,51],[150,14,52],[150,14,53],[150,14,54],[150,14,55],[150,14,44],[150,14,46],[150,14,47],[150,14,49],[150,14,471],[150,14,491]]
+# data_info = [[150,14,44],[150,14,45],[150,14,46],[150,14,47],[150,14,48],[150,14,49],[150,14,471],[150,14,491],[200,14,60],[200,14,65],[200,14,67],[200,14,68]]
+#
+# infor_name = ['HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA2','HIGA2','HIGA2','HIGA2']
+
+data_info = [[200,14,67]]
+
+infor_name = ['HIGA2']
+# data_info = [[200,14,65]]
+# infor_name = ['GA']
 infor_all = get_info(data_info)
-infor_name = ['GA','GA','GA','GA','GA','GA','HIGA','HIGA','HIGA','HIGA','HIGA','HIGA']
 #普通遗传算法
 # infor_name = ['14_8','14_13','14_14','14_15','14_16']
 title_name = 'Fitness'

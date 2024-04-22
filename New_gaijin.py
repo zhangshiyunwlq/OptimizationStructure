@@ -987,7 +987,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
         min1 = min(fitness2)
         mm2 = pop1[mm]# 最小值对应pop1编码
         mm2_all = pop2[mm]# 最小值对应pop2编码
-        mm2_all3 = pop3[mm]  # 最小值对应pop2编码
+        mm2_all3 = pop3[mm]  # 最小值对应pop3编码
         min_ru.append(min(fitness2))# 统计历代最小值
         #选择
         pop2 = select_2(pop2, fitness2)
@@ -1000,7 +1000,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             pop2_new = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2_new))
             for ex_num in range(exchange_num):
-                for indi in range(len(pop2_new)):
+                for indi in range(len(pop2_new[0])):
                     pop2[len(pop1) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
             memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
@@ -1145,7 +1145,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(65,66):
+    for time in range(68,69):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
