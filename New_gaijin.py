@@ -66,6 +66,12 @@ def decoding(pop,num_var,num_room_type,labels):
 
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
+    # 建立房间信息
+    sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                      cfg_file_name="Steel_section_data.ini")
+    modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
+    # 按房间分好节点
+    modulars_of_building = modular_building.building_modulars
 
     modular_infos = {}
     # 每个房间定义梁柱截面信息
@@ -85,6 +91,12 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 
 #减少重复建模工作
 def mulit_Sap_analy_allroom_low(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
+    # 建立房间信息
+    sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                      cfg_file_name="Steel_section_data.ini")
+    modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
+    # 按房间分好节点
+    modulars_of_building = modular_building.building_modulars
 
     modular_infos = {}
     # 每个房间定义梁柱截面信息
@@ -1096,12 +1108,6 @@ cor_edges = model_data[3]
 joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
-#建立房间信息
-sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                  cfg_file_name="Steel_section_data.ini")
-modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
-# 按房间分好节点
-modulars_of_building = modular_building.building_modulars
 
 POP_SIZE =30
 DNA_SIZE = story_num*3
