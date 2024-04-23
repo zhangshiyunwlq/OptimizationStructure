@@ -2796,6 +2796,23 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
         gx_demo[3] = gx_demo[3] / 0.05
     return result,weight,gx,gx_demo
 
+def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
+
+    modular_infos = {}
+    # 每个房间定义梁柱截面信息
+    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    #
+    for i in range(len(modulars_of_building)):
+        modulars_of_building[i].Add_Info_And_Update_Modular(
+            # modular_infos[modulars_of_building[i].modular_label - 1])
+            modular_infos[i])
+    modular_building.Building_Assembling(modulars_of_building)
+
+    all_data = ms.Run_GA_sap_2(mySapObject, ModelPath, SapModel, modular_building,pop_room_label,200,modular_length_num,story_num)
+    aa, bb, cc, dd, ee, ff, gg, hh, ii = all_data
+
+    ret = SapModel.SetModelIsLocked(False)
+    return aa,bb,cc,dd,ee,ff,gg,hh,ii
 
 
 '''model data'''
@@ -2847,6 +2864,14 @@ room_indx = model_data[6]
 # # run sap2000
 # all_data = ms.Run_GA_sap(mySapObject, ModelPath, SapModel, modular_building,200,modular_length_num,story_num)
 
+sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                  cfg_file_name="Steel_section_data.ini")
+modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
+# 按房间分好节点
+modulars_of_building = modular_building.building_modulars
+
+
+
 '''GA to model'''
 # case 1 按照区域分组优化
 POP_SIZE = 50
@@ -2884,15 +2909,15 @@ x = np.linspace(0, 12, 13)
 pop_room = []
 pop_room_label = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_67.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_36.xls',
     formatting_info=True)
 sheet1 = wb.sheet_by_index(0)
 for z in range(18):
-    rows = sheet1.row_values(6168)[z]
+    rows = sheet1.row_values(5050)[z]
     pop_room.append(rows)
 sheet1 = wb.sheet_by_index(2)
 for z in range(96):
-    rows = sheet1.row_values(6168)[z]
+    rows = sheet1.row_values(5050)[z]
     pop_room_label.append(rows)
 
 
@@ -2919,7 +2944,7 @@ for z in range(96):
 APIPath = os.path.join(os.getcwd(), 'cases')
 mySapObject, ModelPath, SapModel = ms.SAPanalysis_GA_run(APIPath)
 # ret = SapModel.File.Save("D:\图片文件夹\结构分析模型.sdb")
-weight1,g_col,g_beam,reaction_all,section_all,all_up_name,all_up_data,Joint_dis,all_force = Sap_analy_allroom(pop_room,pop_room_label)
+weight1,g_col,g_beam,reaction_all,section_all,all_up_name,all_up_data,Joint_dis,all_force = mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label)
 
 
 # weight1,g_col,g_beam,reaction_all,section_all,all_up_name,all_up_data,Joint_dis,all_force=mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label)
@@ -2978,54 +3003,54 @@ res1, res2,gx,gx_demo=Fun_1(weight1,g_col,g_beam,Joint_dis,all_force,10000)
 #     zhanhuang.append(luyiwen[i]/zhanjiaqi)
 #
 
-import copy
-import math as m
-import random
-from random import randint
-import numpy as np
-from collections import Counter
-
-POP_SIZE = 50
-pop = [[] for i in range(50)]
-fitness = []
-for i in range(50):
-    pop[i].append(i*i)
-
-    fitness.append(random.randint(1,50))
-
-
-def select_2(pop, fitness):  # nature selection wrt pop's fitness
-
-    fit_ini = copy.deepcopy(fitness)
-    luyi = copy.deepcopy(fitness)
-    luyi.sort(reverse=True)
-    sort_num = []
-    for i in range(len(fit_ini)):
-        sort_num.append(luyi.index(fit_ini[i]))
-
-
-    list_n = []
-    for i in range(len(lst)):
-        list_n.append(lst[sort_num[i]])
-    list_new = []
-    for i in range(len(fit_ini)):
-        sort_num.append(fit_ini.index(luyi[i]))
-    for i in range(len(fit_ini)):
-        list_new.append(lst[sort_num[i]])
-    for i in range(len(list_new)):
-        list_new[i] = m.e ** (list_new[i] * 1.2)
-    idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
-                           p=np.array(list_new) / (sum(list_new)))
-    pop2 = np.zeros((POP_SIZE, len(pop[0])))
-    for i in range(len(pop2)):
-        pop2[i] = pop[int(idx[i])]
-    return pop2
-
-yangtingting = select_2(pop, fitness)
-zhanhuang= yangtingting.tolist()
-zhanjiahuang = []
-for i in range(len(zhanhuang)):
-    zhanjiahuang.append(zhanhuang[i][0])
-zhanjiaqi = Counter(zhanjiahuang)
-
-
+# import copy
+# import math as m
+# import random
+# from random import randint
+# import numpy as np
+# from collections import Counter
+#
+# POP_SIZE = 50
+# pop = [[] for i in range(50)]
+# fitness = []
+# for i in range(50):
+#     pop[i].append(i*i)
+#
+#     fitness.append(random.randint(1,50))
+#
+#
+# def select_2(pop, fitness):  # nature selection wrt pop's fitness
+#
+#     fit_ini = copy.deepcopy(fitness)
+#     luyi = copy.deepcopy(fitness)
+#     luyi.sort(reverse=True)
+#     sort_num = []
+#     for i in range(len(fit_ini)):
+#         sort_num.append(luyi.index(fit_ini[i]))
+#
+#
+#     list_n = []
+#     for i in range(len(lst)):
+#         list_n.append(lst[sort_num[i]])
+#     list_new = []
+#     for i in range(len(fit_ini)):
+#         sort_num.append(fit_ini.index(luyi[i]))
+#     for i in range(len(fit_ini)):
+#         list_new.append(lst[sort_num[i]])
+#     for i in range(len(list_new)):
+#         list_new[i] = m.e ** (list_new[i] * 1.2)
+#     idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
+#                            p=np.array(list_new) / (sum(list_new)))
+#     pop2 = np.zeros((POP_SIZE, len(pop[0])))
+#     for i in range(len(pop2)):
+#         pop2[i] = pop[int(idx[i])]
+#     return pop2
+#
+# yangtingting = select_2(pop, fitness)
+# zhanhuang= yangtingting.tolist()
+# zhanjiahuang = []
+# for i in range(len(zhanhuang)):
+#     zhanjiahuang.append(zhanhuang[i][0])
+# zhanjiaqi = Counter(zhanjiahuang)
+#
+#

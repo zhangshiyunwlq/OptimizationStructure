@@ -82,6 +82,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 
     ret = SapModel.SetModelIsLocked(False)
     return aa,bb,cc,dd,ee,ff,gg,hh,ii
+
 #减少重复建模工作
 def mulit_Sap_analy_allroom_low(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
 
@@ -210,16 +211,21 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
                     beam_up[time]=memorize_beam[i]
                     value = 1
                     break
-        if value ==0:
-            if sap_run_time00<num_thread:
-                we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
-                                                                                     pop,
-                                                                                     pop_room_label)
-                sap_run_time00 =sap_run_time00+1
-            else:
-                we, co, be, r1, r2, r3, r4, dis_all, force_all= mulit_Sap_analy_allroom_low(ModelPath, mySapObject, SapModel,
-                                                                                     pop,
-                                                                                     pop_room_label)
+        # if value ==0:
+        #     if sap_run_time00<num_thread:
+        #         we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
+        #                                                                              pop,
+        #                                                                              pop_room_label)
+        #         sap_run_time00 =sap_run_time00+1
+        #     else:
+        #         we, co, be, r1, r2, r3, r4, dis_all, force_all= mulit_Sap_analy_allroom_low(ModelPath, mySapObject, SapModel,
+        #                                                                              pop,
+        #                                                                              pop_room_label)
+        if value == 0:
+            we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
+                                                                                             pop,
+                                                                                             pop_room_label)
+
             res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000)
 
             # num3 += 1
