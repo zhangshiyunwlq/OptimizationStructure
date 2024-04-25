@@ -2,7 +2,8 @@ import copy
 import random
 import xlrd
 import matplotlib.pyplot as plt
-
+import os
+import sys
 def generate_data():
     node1 = [(0, 0), (8, 0), (0, 3), (8, 3), (11, 0), (19, 0), (11, 3), (19, 3)]
     nodes_all = []
@@ -104,6 +105,42 @@ def draw_corr_conn(cons_all,nodes_all,corrs_all):
     for node in nodes_all:
         plt.plot(node[0], node[1], 'ro', markersize=4, color='grey')
 
+
+def draw_side_all(num_pop,iter,wb):
+    sheet1 = wb.sheet_by_index(0)
+    for it in range(len(iter)):
+        iter_num = iter[it]*num_pop+1
+        for z in range(18):
+            rows = sheet1.row_values(iter_num)[z]
+            member_section.append(rows)
+
+        member_all, nodes_all, beams_all, colus_all, cons_all, corrs_all = generate_data()
+        draw_clo_beam(member_all, member_section, nodes_all, beams_all, colus_all)
+        draw_corr_conn(cons_all, nodes_all, corrs_all)
+
+        # 设置坐标轴范围
+        plt.xlim(-3, 30)
+        plt.ylim(-5, 30)
+
+        # 设置坐标轴标签
+        plt.xlabel('X')
+        plt.ylabel('Y')
+
+        # 显示图形
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.show()
+        # APIPath = os.path.join(os.getcwd(), f'frame_side')
+        # SpecifyPath = True
+        # if not os.path.exists(APIPath):
+        #     try:
+        #         os.makedirs(APIPath)
+        #     except OSError:
+        #         pass
+        # path1 = os.path.join(APIPath, f'loss{iter[it]}')
+        # plt.savefig(path1, dpi=300)
+        # plt.close()
+
+
 area = [3090,3814,3568,4356,5041,4644,6096,6800,7600,8400,9600,10800,11600,13600]
 fit_ini = copy.deepcopy(area)
 luyi = copy.deepcopy(area)
@@ -120,14 +157,16 @@ num_var = 14
 num_room = 1
 member_section = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_67.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_71.xls',
     formatting_info=True)
+
+iter=[0,2,10,14,77,153,186,199]
+# draw_side_all(30,iter,wb)
+
 sheet1 = wb.sheet_by_index(0)
 for z in range(18):
-    rows = sheet1.row_values(1)[z]
+    rows = sheet1.row_values(2*30+1)[z]
     member_section.append(rows)
-
-
 
 member_all,nodes_all,beams_all,colus_all,cons_all,corrs_all = generate_data()
 draw_clo_beam(member_all,member_section,nodes_all,beams_all,colus_all)

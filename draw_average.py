@@ -60,9 +60,27 @@ def draw_picture(data):
            xticks=np.arange(0, 200, 20),
            )
     plt.show()
-num = 5000
-path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_67.xls"
 
+def drwa_loss(path_m):
+    x_train_df = pd.read_excel(io=path_m, sheet_name="memorize_loss")
+    all_data = x_train_df.values.tolist()
+    data_x = []
+    for i in range(len(all_data)):
+        data_x.extend(all_data[i])
+    fig2 = plt.figure(2)
+    ax2 = fig2.add_subplot()
+    ax2.set_xlabel("time",fontsize=10)
+    ax2.set_ylabel("loss", fontsize=10)
+    dev_x = np.arange(0, len(data_x))
+    dev_y = data_x
+    ax2.plot(dev_x, dev_y)
+    plt.show()
+
+
+num = 5000
+path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_71.xls"
+path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
+drwa_loss(path_memo)
 fitness_all = get_data(num,path)
 fitness_max = []
 fitness_min = []

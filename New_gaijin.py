@@ -553,13 +553,13 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
 
         # 引入新个体
         run_time +=1
-        if run_time % 15 == 0:
+        if run_time % 20 == 0:
             pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
             exchange_num = int(0.3*len(pop2_new))
             for ex_num in range(exchange_num):
                 pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
 
-        if run_time %15==0:
+        if run_time %20==0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding1(pop2, num_var, num_room_type, labels)
@@ -696,15 +696,25 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
             memo_gx.write(loc, j, memorize_gx[i][j])
         loc += 1
 
-    memo_loss = wb1.add_sheet('memorize_loss')
 
+    # for i in range(len(memorize_loss)):
+    #     memo_loss.write(i, 0, memorize_loss[i])
+    memo_loss = wb1.add_sheet('memorize_loss')
+    loc = 0
     for i in range(len(memorize_loss)):
-        memo_loss.write(i, 0, memorize_loss[i])
+        for j in range(len(memorize_loss[i])):
+            memo_loss.write(loc, j, memorize_loss[i][j])
+        loc += 1
 
     memo_mae = wb1.add_sheet('memorize_mae')
-
+    loc = 0
     for i in range(len(memorize_mae)):
-        memo_mae.write(i, 0, memorize_mae[i])
+        for j in range(len(memorize_mae[i])):
+            memo_mae.write(loc, j, memorize_mae[i][j])
+        loc += 1
+
+    # for i in range(len(memorize_mae)):
+    #     memo_mae.write(i, 0, memorize_mae[i])
 
     memo_gx_nor = wb1.add_sheet('memorize_gx_nor')
     loc = 0
@@ -789,13 +799,13 @@ def generate_DNA_coding_story1(num_var,num_room_type,x):
         for j in range(num_var):
             pop[i][j] = sec[j]
         for j in range(num_var,num_var+num_room_type):
-            # pop[i][j] = randint(1,3)
-            pop[i][j] = 0
+            pop[i][j] = randint(1,3)
+            # pop[i][j] = 0
         for j in range(num_var+num_room_type,num_var+num_room_type+story_num*3):
             pop[i][j] = randint(0,num_var-1)
         for j in range(num_var+num_room_type+story_num*3,num_var+num_room_type+story_num*4):
-            # pop[i][j] = randint(0,1)
-            pop[i][j] = 0
+            pop[i][j] = randint(0,1)
+            # pop[i][j] = 0
     return pop
 
 def decoding1(pop,num_var,num_room_type,labels):
@@ -814,8 +824,8 @@ def decoding1(pop,num_var,num_room_type,labels):
                 if posi == 0:
                     pop_room_label[i][j] = 0
                 else:
-                    # pop_room_label[i][j] = pop[i][num_var]
-                    pop_room_label[i][j] = 0
+                    pop_room_label[i][j] = pop[i][num_var]
+                    # pop_room_label[i][j] = 0
     return pop_all,pop_room_label
 
 #在最优个体附近生成种群
@@ -930,7 +940,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     #局部训练
     pool_local = copy.deepcopy(memorize_pool_local)
     x_train1_local = np.array(pool_local)
-    x_train_local = x_train1_local[:,num_var+num_room_type:num_var+num_room_type+3*story_num]#提取用于训练的x_train部分
+    x_train_local = x_train1_local[:,num_var:num_var+num_room_type+4*story_num]#提取用于训练的x_train部分
     gx_local = copy.deepcopy(memorize_gx_local)
     y_train_local = np.array(gx_local)
     y_train_local= gx_Normalization(y_train_local)#归一化
@@ -942,19 +952,21 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     pool_global = copy.deepcopy(memorize_pool)
     gx_global = copy.deepcopy(memorize_gx)
     x_train1 = np.array(pool_global)
-    x_train = x_train1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]#提取用于训练的x_train部分
+    x_train = x_train1[:,num_var:num_var+num_room_type+4*story_num]#提取用于训练的x_train部分
     y_train = np.array(gx_global)
     y_train = gx_Normalization(y_train)#归一化
     model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     history=model.fit(x_train, y_train, epochs=100, batch_size=32,verbose=0)#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
-    history_loss.append(history.history['loss'][len(history.history['loss'])-1])
-    history_mae.append(history.history['mae'][len(history.history['loss'])-1])
+    # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
+    # history_mae.append(history.history['mae'][len(history.history['loss'])-1])
+    history_loss.append(history.history['loss'])
+    history_mae.append(history.history['mae'])
     pop_best = []
     for i in range(num_ind):
         pop1 = generation_population(best_indivi, 0.2)#根据最好个体生成种群
-        pop2 = pop1[:,num_var+num_room_type:num_var+num_room_type+3*story_num]
+        pop2 = pop1[:,num_var:num_var+num_room_type+4*story_num]
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
@@ -1016,7 +1028,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
                 for indi in range(len(pop2_new[0])):
-                    pop2[len(pop2) - 1 - ex_num][indi+num_var+num_room_type] = pop2_new[ex_num][indi]
+                    pop2[len(pop2) - 1 - ex_num][indi+num_var] = pop2_new[ex_num][indi]
             memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
             memorize_pool_loacl = []
@@ -1109,12 +1121,12 @@ joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
 
-POP_SIZE =30
+POP_SIZE =4
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.2
-N_GENERATIONS = 200
-num_thread = 10
+N_GENERATIONS = 3
+num_thread = 2
 min_genera = []
 
 x = np.linspace(0, 13, 14)
@@ -1154,7 +1166,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(68,69):
+    for time in range(771,772):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1175,10 +1187,10 @@ for num_var in [14]:
         history_loss = []
         history_mae = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
-        draw_loss(num_var, time)
+        zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        # zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+        # draw_loss(num_var, time)
         gc.collect()
 
 # for num_var in [14]:

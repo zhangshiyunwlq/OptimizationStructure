@@ -135,7 +135,7 @@ def static_braced(name1):
 #
 # infor_name = ['HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA1','HIGA2','HIGA2','HIGA2','HIGA2']
 
-data_info = [[200,14,67]]
+data_info = [[200,14,71]]
 
 infor_name = ['HIGA2']
 # data_info = [[200,14,65]]
