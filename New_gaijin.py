@@ -884,13 +884,13 @@ def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
 def mutation_GA_for_DNN(child,num_var,MUTATION_RATE):
     num_var = int(num_var)
 
-    for j in range(num_var,num_var+num_room_type):
+    for j in range(num_room_type):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(1,3)
-    for j in range(num_var+num_room_type,num_var+num_room_type+3*story_num):
+    for j in range(num_room_type,num_room_type+3*story_num):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
-    for j in range(num_var+num_room_type+3*story_num,num_var+num_room_type+4*story_num):
+    for j in range(num_room_type+3*story_num,num_room_type+4*story_num):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,1)
 
@@ -939,7 +939,7 @@ def GA_for_DNN(run_time,pop2,model):
         #选择
         pop2 = select_2(pop2, fitness2)
         # 交叉变异
-        pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE)
+        pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE*0.5)
         fit_pred = model.predict(pop2,verbose=0)
         fit_pred2=Gx_convert(fit_pred)
         if min1 <= fit_pred2[0]:
@@ -1134,7 +1134,7 @@ room_indx = model_data[6]
 POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.2
+MUTATION_RATE = 0.1
 N_GENERATIONS = 80
 num_thread = 10
 min_genera = []
@@ -1176,7 +1176,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(94,95):
+    for time in range(941,942):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
