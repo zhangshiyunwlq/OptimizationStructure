@@ -354,10 +354,13 @@ def mutation_1_stort5(child, x,num_var,num_room_type,MUTATION_RATE):
     for j in range(num_room_type + num_var, num_room_type + num_var + DNA_SIZE):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
+    for j in range(num_room_type + num_var+ DNA_SIZE, num_room_type + num_var + DNA_SIZE+story_num):
+        if np.random.rand() < MUTATION_RATE:
+            child[j] = randint(0,1)
     for j in range(num_var, num_room_type + num_var ):
         if np.random.rand() < MUTATION_RATE:
-            # child[j] = randint(1,3)
-            child[j] = 0
+            child[j] = randint(1,3)
+            # child[j] = 0
 def mulit_get_sap(num_thread):
     case_name = []
     APIPath_name = []
@@ -880,9 +883,16 @@ def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
 #用于GA_forDNN中的交叉变异
 def mutation_GA_for_DNN(child,num_var,MUTATION_RATE):
     num_var = int(num_var)
-    for j in range(len(child)):
+
+    for j in range(num_var,num_var+num_room_type):
+        if np.random.rand() < MUTATION_RATE:
+            child[j] = randint(1,3)
+    for j in range(num_var+num_room_type,num_var+num_room_type+3*story_num):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
+    for j in range(num_var+num_room_type+3*story_num,num_var+num_room_type+4*story_num):
+        if np.random.rand() < MUTATION_RATE:
+            child[j] = randint(0,1)
 
 #将gx中的数据归一化
 def gx_Normalization(gx):
@@ -1121,12 +1131,12 @@ joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
 
-POP_SIZE =4
+POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.2
-N_GENERATIONS = 3
-num_thread = 2
+N_GENERATIONS = 80
+num_thread = 10
 min_genera = []
 
 x = np.linspace(0, 13, 14)
@@ -1166,7 +1176,7 @@ for i in range(1,7):
 
 
 for num_var in [14]:
-    for time in range(771,772):
+    for time in range(94,95):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1187,10 +1197,10 @@ for num_var in [14]:
         history_loss = []
         history_mae = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-        zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        # zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
-        # draw_loss(num_var, time)
+        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+        draw_loss(num_var, time)
         gc.collect()
 
 # for num_var in [14]:
