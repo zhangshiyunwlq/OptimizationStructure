@@ -555,12 +555,12 @@ def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,la
         pop2 = crossover_and_mutation_coding_story5(pop2, num_var, num_room_type, CROSSOVER_RATE)
 
         # 引入新个体
-        run_time +=1
-        if run_time % 20 == 0:
-            pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
-            exchange_num = int(0.3*len(pop2_new))
-            for ex_num in range(exchange_num):
-                pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
+        # run_time +=1
+        # if run_time % 20 == 0:
+        #     pop2_new = generate_DNA_coding_story1(num_var, num_room_type, x)
+        #     exchange_num = int(0.3*len(pop2_new))
+        #     for ex_num in range(exchange_num):
+        #         pop2[len(pop1) - 1 - ex_num] = pop2_new[ex_num]
 
         if run_time %20==0:
             print(run_time)
