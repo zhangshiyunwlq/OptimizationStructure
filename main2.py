@@ -2840,7 +2840,7 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 
 '''model visvalization'''
-# dj.model_vis(model_data)
+dj.model_vis(model_data)
 
 
 '''model to sap2000'''
