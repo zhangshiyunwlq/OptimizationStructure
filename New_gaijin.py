@@ -75,7 +75,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 
     modular_infos = {}
     # 每个房间定义梁柱截面信息
-    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room,story_num)
     #
     for i in range(len(modulars_of_building)):
         modulars_of_building[i].Add_Info_And_Update_Modular(
@@ -504,7 +504,7 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
     # wb2_examine_ind.save('examine_individual.xlsx')
     return result,weight_1,col_up,beam_up
 
-
+#普通遗传算法、每层四组变量
 def run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
@@ -669,7 +669,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     wb1.save(f'{path1}.xls')
 
 #统计记忆池
-def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num):
+def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num,gx_prediction):
     wb1 = xlwt.Workbook()
     out_pop1_all = wb1.add_sheet('memorize_pool')
     loc = 0
@@ -698,6 +698,14 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
         for j in range(len(memorize_gx[i])):
             memo_gx.write(loc, j, memorize_gx[i][j])
         loc += 1
+
+    gx_pred = wb1.add_sheet('gx_prediction')
+    loc = 0
+    for i in range(len(gx_prediction)):
+        for j in range(len(gx_prediction[i])):
+            gx_pred.write(loc, j, gx_prediction[i][j])
+        loc += 1
+
 
 
     # for i in range(len(memorize_loss)):
@@ -837,9 +845,19 @@ def generation_population(best_indivi,rate):
     best_in.tolist()
     pop = np.zeros((POP_SIZE,len(best_in)))
     for i in range(len(pop)):
-        for j in range(len(pop[i])):
-            if np.random.rand() < rate:
-                pop[i][j] = randint(0,num_var-1)
+        for j in range(num_room_type, num_room_type + DNA_SIZE):
+            if np.random.rand() < MUTATION_RATE:
+                pop[i][j] = randint(0, num_var - 1)
+            else:
+                pop[i][j] = best_in[j]
+        for j in range(num_room_type + DNA_SIZE, num_room_type + DNA_SIZE + story_num):
+            if np.random.rand() < MUTATION_RATE:
+                pop[i][j] = randint(0, 1)
+            else:
+                pop[i][j] = best_in[j]
+        for j in range(num_room_type):
+            if np.random.rand() < MUTATION_RATE:
+                pop[i][j] = randint(1, 3)
             else:
                 pop[i][j] = best_in[j]
     return pop
@@ -980,8 +998,8 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
-    return pop_best
-
+    return pop_best,model
+#HIGA、每层四组变量
 def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_DNA_coding_story1(num_var, num_room_type, x)
     pop_decoe_1 = copy.deepcopy(pop2)
@@ -1034,7 +1052,7 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
         # 引入新个体
         run_time +=1
         if run_time % 20 == 0:
-            pop2_new = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
+            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
                 for indi in range(len(pop2_new[0])):
@@ -1064,6 +1082,12 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
 
+    #使用深度神经网络对记忆池中的所有个体进行预测
+    memorize_pool_temp = copy.deepcopy(memorize_pool)
+    memorize_pool_temp= np.array(memorize_pool_temp)
+    x_data_prediction = memorize_pool_temp[:,num_var:num_var+num_room_type+4*story_num]
+    fitness_prediction = model.predict(x_data_prediction, verbose=0)
+
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
         SapModel_name[i] = None
@@ -1074,7 +1098,13 @@ def GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_ty
 
 
 
-    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
+    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction
+
+
+#HIGA、每个房间随机变化
+
+
+
 
 def draw_loss(num_var,time):
     fig = plt.figure(1)
@@ -1198,8 +1228,8 @@ for num_var in [14]:
         history_mae = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        zhan, jia, qi = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num)
+        zhan, jia, qi,fitness_prediction = GA_DNN_run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num,fitness_prediction)
         draw_loss(num_var, time)
         gc.collect()
 

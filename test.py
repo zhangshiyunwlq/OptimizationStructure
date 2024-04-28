@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import random
 from random import randint
@@ -9,74 +11,59 @@ import matplotlib.pyplot as plt
 from matplotlib import font_manager
 import math as m
 all_value_str = []
-for num_var in [4,8,10]:
-    for num_room_type in [5,9]:
-        value_str = []
-        for z in range(50):
-            wb = xlrd.open_workbook(filename=f'out_sap_run_{num_var}_{num_room_type}.xls', formatting_info=True)
-            sheet1 = wb.sheet_by_index(6)
-            rows = sheet1.row_values(3)[z]
-            value_str.append(rows)
-        all_value_str.append(value_str)
+story_num = 6
+modular_length_num = 8
+modular_num = 6
+POP_SIZE = 4*story_num+modular_length_num*2*story_num
+POP_SIZE = 50
+def generate_coding_modular():
+    section_num = 3*modular_num
+    brace_num = modular_num
 
-value_all_int = []
-for i in range(len(all_value_str)):
-    value_int = []
-    for j in range(len(all_value_str[0])):
-        value= int(all_value_str[i][j][0])*100+int(all_value_str[i][j][1])*10+int(all_value_str[i][j][2])
-        value_int.append(value)
-    value_all_int.append(value_int)
+    pop = np.zeros((POP_SIZE,section_num+brace_num+modular_length_num*2*story_num))
+    for i in range(len(pop)):
+        for j in range(section_num):
+            pop[i][j] = random.randint(0,13)
+        for j in range(section_num,section_num+brace_num):
+            pop[i][j] = randint(1,3)
+        for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+            pop[i][j] = randint(0,modular_num-1)
 
-num1 = 0.8
-num2 = 0.75
-num3 = 3
-num4 = 0
-fig2 = plt.figure(num=1, figsize=(23, 30))
-ax2 = fig2.add_subplot(111)
-ax2.tick_params(labelsize=40)
-ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
-ax2.set_ylabel("Total weight", fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
-ax2.spines['bottom'].set_linewidth(4);###设置底部坐标轴的粗细
-ax2.spines['left'].set_linewidth(4)
-ax2.spines['right'].set_color('none')
-ax2.spines['top'].set_color('none')
-bbb = np.arange(0, 50)
-label_var = [[4,5],[4,9],[8,5],[8,9],[10,5],[10,9]]
-for i in range(6):
-    ccc = value_all_int[i]
-    ax2.plot(bbb, ccc, label = f"sec{label_var[i][0]}_ro{label_var[i][1]}",linewidth=6)
-    ax2.legend(bbox_to_anchor=(num1, num2), loc=num3, borderaxespad=num4,  handlelength=1.5, fontsize=30, shadow=False)
+    return pop
 
-    # ax2.set_xticks(np.linspace(1, 5, 5))
-    # ax2.set_yticks(np.linspace(0, 18, 10))
-    # ax2.set_xticklabels(["1th time", "2nd time", "3rd time", "4th time", "5th time"], fontproperties="SimHei", \
-    #                    fontsize=12, rotation=10)
-plt.show()
-
-conf = configparser.ConfigParser()
-list = []
-for i in range(5):
-    list1 = []
-    for j in range(5):
-        list1.append(randint(0,5))
-    list.append(list1)
-
-
-
-yangtingting = []
-zhanjiqi = []
-luyiwen = []
-for i in range(50):
-    yangtingting.append(i+1)
-    zhanjiqi.append(m.e**(yangtingting[i]*0.25))
-    luyiwen.append(zhanjiqi[i])
+def decoding_modular(pop2):
+    section_num = 3*modular_num
+    brace_num = modular_num
+    pop_all = copy.deepcopy(pop2)
+    modular_type1 = [i for i in range(3)]
+    #生成对每个模块的截面编号索引
+    modular_type_all= []
+    for i in range(modular_num):
+        modular_type_temp = []
+        for j in range(len(modular_type1)):
+            modular_type_temp.append(modular_type1[j]+3*i)
+        modular_type_all.append(modular_type_temp)
+    #生成截面表
+    pop1_all = []
+    for i in range(len(pop_all)):
+        pop1_section = []
+        for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+            for z in range(3):
+                sec = int(pop_all[i][j])
+                pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
+        pop1_all.append(pop1_section)
+    #生成支撑表
+    brace_sort = [i for i in range(section_num,section_num+brace_num)]
+    pop3_all = []
+    for i in range(len(pop_all)):
+        pop3_brace = []
+        for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+            bra = int(pop_all[i][j])
+            pop3_brace.append(pop_all[i][int(brace_sort[bra])])
+        pop3_all.append(pop3_brace)
+    return pop1_all,pop3_all
 
 
+pop2= generate_coding_modular()
+pop1,pop3 = decoding_modular(pop2)
 
-zhanhuang = 0
-for i in range(len(luyiwen)):
-    zhanhuang+=luyiwen[i]
-
-zhangqingyang = []
-for i in range(len(luyiwen)):
-    zhangqingyang.append(luyiwen[i]/zhanhuang)
