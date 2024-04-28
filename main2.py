@@ -2822,7 +2822,7 @@ modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
-story_num = 6
+story_num = 10
 corridor_width = 4000
 
 # steel section information
@@ -2840,7 +2840,7 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 
 '''model visvalization'''
-dj.model_vis(model_data)
+# dj.model_vis(model_data)
 
 
 '''model to sap2000'''
@@ -2924,18 +2924,14 @@ for z in range(96):
 
 
 
-# pop_room = []
-# pop_room_label = []
-# for i in range(18):
-#     pop_room.append(11)
-# # pop_room = all_GA_infor[0]
-# for i in range(96):
-#     pop_room_label.append(0)
+pop_room = []
+pop_room_label = []
+for i in range(story_num*3):
+    pop_room.append(11)
+# pop_room = all_GA_infor[0]
+for i in range(modular_length_num*2*story_num):
+    pop_room_label.append(0)
 
-# for i in range(32,48):
-#     pop_room_label.append(0)
-# for i in range(48,96):
-#     pop_room_label.append(1)
 
 
 # #

@@ -85,8 +85,8 @@ def get_section_info(section_type, cfg_file_name="RHS_section_data.ini"):
         section_data.append([float(j) for j in temp1])
     return dict_temp, set_temp, np.array(section_data)
 
-def Wind_Load_Y(ModularBuilding,modulars, SapModel,storys, bz, us, uz1,uz2,w0,modular_length_num):
-    for i in range(int((storys-1) * (len(modulars))/6)+modular_length_num, int(storys * (len(modulars))/6)):
+def Wind_Load_Y(ModularBuilding,modulars, SapModel,storys, bz, us, uz1,uz2,w0,modular_length_num,story_num):
+    for i in range(int((storys-1) * (len(modulars))/story_num)+modular_length_num, int(storys * (len(modulars))/story_num)):
         A = (distance(modulars[i].modular_nodes[modulars[i].modular_four_planes[2][0]] - modulars[i].modular_nodes[
             modulars[i].modular_four_planes[2][1]])) * (distance(modulars[i].modular_nodes[modulars[i].modular_four_planes[2][0]] - modulars[i].modular_nodes[
                 modulars[i].modular_four_planes[2][3]]))
@@ -107,7 +107,7 @@ def Wind_Load_Y(ModularBuilding,modulars, SapModel,storys, bz, us, uz1,uz2,w0,mo
         ret = SapModel.PointObj.SetLoadForce(point4, "WINDY", Value2)
 
 def Wind_Load_X(ModularBuilding,modulars, SapModel,storys, bz, us, uz1,uz2,w0,modular_length_num):
-    for i in [0 + (storys-1) * modular_length_num*2,modular_length_num-1 + (storys-1) * modular_length_num*2]:
+    for i in [0 + (storys-1) * modular_length_num*2,modular_length_num + (storys-1) * modular_length_num*2]:
         A = (distance(modulars[i].modular_nodes[modulars[i].modular_four_planes[1][0]] - modulars[i].modular_nodes[
             modulars[i].modular_four_planes[1][1]])) * (distance(modulars[i].modular_nodes[modulars[i].modular_four_planes[1][0]] - modulars[i].modular_nodes[
                 modulars[i].modular_four_planes[1][3]]))
@@ -2025,34 +2025,12 @@ def Run_GA_sap_2(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     #添加风荷载下的围覆面
     a = modulars[0].modular_planes
     ret = SapModel.PropArea.SetShell_1("Cladding1", 1, True, "4000Psi", 0, 0, 0)
-
-    #添加Y向风荷载
-    # 一层
-    Wind_Load_Y(ModularBuilding, modulars, SapModel, 1, 1, 1.3, 0, 1, 0.00055, modular_length_num)
-    # 二层
-    Wind_Load_Y(ModularBuilding, modulars, SapModel, 2, 1, 1.3, 1, 1.09, 0.00055, modular_length_num)
-    # 三层
-    Wind_Load_Y(ModularBuilding, modulars, SapModel, 3, 1, 1.3, 1.09, 1.09, 0.00055, modular_length_num)
-    # 四层
-    Wind_Load_Y(ModularBuilding, modulars, SapModel, 4, 1, 1.3, 1.09, 1.28, 0.00055, modular_length_num)
-    # 五层
-    Wind_Load_Y(ModularBuilding, modulars, SapModel, 5, 1, 1.3, 1.28, 1.42, 0.00055, modular_length_num)
-    # 六层
-    Wind_Load_Y(ModularBuilding, modulars, SapModel, 6, 1, 1.3, 1.42, 1.42, 0.00055, modular_length_num)
-
-    # 添加X向风荷载
-    # 一层
-    Wind_Load_X(ModularBuilding, modulars, SapModel, 1, 1, 1.3, 0, 1, 0.00055, modular_length_num)
-    # 二层
-    Wind_Load_X(ModularBuilding, modulars, SapModel, 2, 1, 1.3, 1, 1.09, 0.00055, modular_length_num)
-    # 三层
-    Wind_Load_X(ModularBuilding, modulars, SapModel, 3, 1, 1.3, 1.09, 1.09, 0.00055, modular_length_num)
-    # 四层
-    Wind_Load_X(ModularBuilding, modulars, SapModel, 4, 1, 1.3, 1.09, 1.28, 0.00055, modular_length_num)
-    # 五层
-    Wind_Load_X(ModularBuilding, modulars, SapModel, 5, 1, 1.3, 1.28, 1.42, 0.00055, modular_length_num)
-    # 六层
-    Wind_Load_X(ModularBuilding, modulars, SapModel, 6, 1, 1.3, 1.42, 1.42, 0.00055, modular_length_num)
+    wind_force1 = [1,1.09,1.09,1.28,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42,1.42]
+    wind_force2 = [0,1, 1.09, 1.09, 1.28, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42, 1.42,
+                   1.42, 1.42]
+    for st_num in range(story_num):
+        Wind_Load_Y(ModularBuilding, modulars, SapModel, st_num+1, 1, 1.3, wind_force2[st_num], wind_force1[st_num], 0.00055, modular_length_num,story_num)
+        Wind_Load_X(ModularBuilding, modulars, SapModel, st_num+1, 1, 1.3, wind_force2[st_num], wind_force1[st_num], 0.00055, modular_length_num)
 
     ret = SapModel.LoadPatterns.Add("EX", 5)
     ret = SapModel.LoadPatterns.Add("EY", 5)

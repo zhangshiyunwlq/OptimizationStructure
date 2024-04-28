@@ -1114,7 +1114,7 @@ modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
-story_num = 6
+story_num = 10
 corridor_width = 4000
 
 # steel section information
@@ -1131,12 +1131,12 @@ joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
 
-POP_SIZE =30
+POP_SIZE =2
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 80
-num_thread = 10
+N_GENERATIONS = 2
+num_thread =2
 min_genera = []
 
 x = np.linspace(0, 13, 14)
@@ -1170,8 +1170,8 @@ history_mae = []
 # for i in range(12):
 #     labels.extend(label)
 labels = []
-for i in range(1,7):
-    for j in range(16):
+for i in range(1,story_num+1):
+    for j in range(modular_length_num*2):
         labels.append(i)
 
 

@@ -7,7 +7,7 @@ def generate_model_data(modular_length,modular_width,modular_heigth,modular_leng
     '''room labels'''
     labels = []
     labels1 = [1, 1, 1, 1, 2, 2, 2, 2]
-    for i in range(12):
+    for i in range(story_num*2):
         labels.extend(labels1)
 
     '''room nodes'''
