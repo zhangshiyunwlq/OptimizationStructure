@@ -216,11 +216,11 @@ for i in range(len(fit_ini)):
 num_var = 14
 num_room = 1
 story_num = 6
-pop_num = 79#第n代种群
+pop_num = 139#第n代种群
 pop_size = 30#种群数量
 member_section = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_941.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_74.xls',
     formatting_info=True)
 
 iter=[0,2,10,14,77,153,186,199]

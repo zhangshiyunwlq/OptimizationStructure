@@ -17,7 +17,7 @@ def generative_data():
     top_beam_num = [[5,6],[4,7],[4,5],[6,7]]
     bottom_beam_num = [[0,3],[1,2],[0,1],[2,3]]
     #支撑编号
-    person_brace = [[0,10],[3,10],[1,11],[2,12]]
+    person_brace = [[0,10],[3,10],[1,18],[2,18]]
     exchange_brace = [[3,4],[0,7],[1,6],[2,5]]
     double_exchange_brace = [[0,16],[4,12],[3,17],[7,13],[1,18],[5,14],[2,19],[6,15]]
 
@@ -75,7 +75,7 @@ def draw_3d_modular():
     z = all_draw_node[:, 2]
     for j in range(len(modular_num_all)):
         if brace_dis[j] == 1:
-            brace = brace_data[int(brace_type)]
+            brace = brace_data[int(brace_type)-1]
             brace = np.array(brace)
             for zz in range(len(brace)):
                 tube2 = pv.Tube((x[modular_num_all[j][brace[zz, 0]]],
@@ -144,7 +144,7 @@ def draw_3d_modular():
 
 
 #模块定位点
-location = [[0,0,0],[6000,0,0],[12000,0,0],[0,0,6000],[6000,0,6000],[12000,0,6000]]
+location = [[0,0,0],[6000,0,0],[12000,0,0],[0,0,9000],[6000,0,9000],[12000,0,9000]]
 #一个模块所有点坐标，柱编号、顶梁编号、底梁编号、所有模块的节点、支撑数据,模块节点编号
 all_point,column_num,top_beam_num,bottom_beam_num,all_draw_node,brace_data,modular_num_all,modular_sectione_all = generative_data()
 #按照截面大小排序
@@ -153,11 +153,11 @@ list_new = area_sort()
 num_var = 14
 num_room = 1
 story_num = 6
-pop_num = 79#第n代种群
+pop_num = 139#第n代种群
 pop_size = 30#种群数量
 member_section = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_941.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_74.xls',
     formatting_info=True)
 
 #获得梁柱截面编号

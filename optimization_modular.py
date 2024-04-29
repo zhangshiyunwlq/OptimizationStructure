@@ -640,7 +640,7 @@ def crossover_and_mutation_coding_modular(pop2,CROSSOVER_RATE):
             exchan.append(cross_points1)
             for j in range(min(exchan),max(exchan)):
                 child[j] = mother[j]
-        mutation_1_stort_modular(child,x,num_var,num_room_type,MUTATION_RATE)
+        mutation_1_stort_modular(child,MUTATION_RATE)
         new_pop[i] = child
 
     for i in range(len(new_pop)):
@@ -830,7 +830,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     pop_best = []
     for i in range(num_ind):
         pop1 = generation_population_modular(best_indivi, 0.2)#根据最好个体生成种群
-        pop2 = pop1[:,num_var:num_var+num_room_type+4*story_num]
+        pop2 = pop1
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
@@ -891,8 +891,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
-                for indi in range(len(pop2_new[0])):
-                    pop2[len(pop2) - 1 - ex_num][indi+num_var] = pop2_new[ex_num][indi]
+                pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
             memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
             memorize_pool_loacl = []

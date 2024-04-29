@@ -699,11 +699,13 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
             memo_gx.write(loc, j, memorize_gx[i][j])
         loc += 1
 
+    gx_prediction_temp = copy.deepcopy(gx_prediction)
+    gx_prediction_temp = gx_prediction_temp.tolist()
     gx_pred = wb1.add_sheet('gx_prediction')
     loc = 0
-    for i in range(len(gx_prediction)):
-        for j in range(len(gx_prediction[i])):
-            gx_pred.write(loc, j, gx_prediction[i][j])
+    for i in range(len(gx_prediction_temp)):
+        for j in range(len(gx_prediction_temp[i])):
+            gx_pred.write(loc, j, gx_prediction_temp[i][j])
         loc += 1
 
 
@@ -845,17 +847,17 @@ def generation_population(best_indivi,rate):
     best_in.tolist()
     pop = np.zeros((POP_SIZE,len(best_in)))
     for i in range(len(pop)):
-        for j in range(num_room_type, num_room_type + DNA_SIZE):
+        for j in range(num_var+num_room_type, num_var+num_room_type + DNA_SIZE):
             if np.random.rand() < MUTATION_RATE:
                 pop[i][j] = randint(0, num_var - 1)
             else:
                 pop[i][j] = best_in[j]
-        for j in range(num_room_type + DNA_SIZE, num_room_type + DNA_SIZE + story_num):
+        for j in range(num_var+num_room_type + DNA_SIZE, num_var+num_room_type + DNA_SIZE + story_num):
             if np.random.rand() < MUTATION_RATE:
                 pop[i][j] = randint(0, 1)
             else:
                 pop[i][j] = best_in[j]
-        for j in range(num_room_type):
+        for j in range(num_var,num_var+num_room_type):
             if np.random.rand() < MUTATION_RATE:
                 pop[i][j] = randint(1, 3)
             else:
@@ -1161,12 +1163,12 @@ joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
 
-POP_SIZE =2
+POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 2
-num_thread =2
+N_GENERATIONS = 80
+num_thread =10
 min_genera = []
 
 x = np.linspace(0, 13, 14)
@@ -1206,7 +1208,7 @@ for i in range(1,story_num+1):
 
 
 for num_var in [14]:
-    for time in range(941,942):
+    for time in range(81,83):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
