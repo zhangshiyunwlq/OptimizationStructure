@@ -144,7 +144,7 @@ def draw_3d_modular():
 
 
 #模块定位点
-location = [[0,0,0],[6000,0,0],[12000,0,0],[0,0,9000],[6000,0,9000],[12000,0,9000]]
+location = [[0,0,0],[6000,0,0],[12000,0,0],[18000,0,0],[24000,0,0],[0,0,12000],[6000,0,12000],[12000,0,12000],[18000,0,12000],[24000,0,12000]]
 #一个模块所有点坐标，柱编号、顶梁编号、底梁编号、所有模块的节点、支撑数据,模块节点编号
 all_point,column_num,top_beam_num,bottom_beam_num,all_draw_node,brace_data,modular_num_all,modular_sectione_all = generative_data()
 #按照截面大小排序
@@ -152,12 +152,12 @@ list_new = area_sort()
 
 num_var = 14
 num_room = 1
-story_num = 6
-pop_num = 139#第n代种群
+story_num = 10
+pop_num =139#第n代种群
 pop_size = 30#种群数量
 member_section = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_74.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_81.xls',
     formatting_info=True)
 
 #获得梁柱截面编号

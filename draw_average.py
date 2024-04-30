@@ -56,8 +56,8 @@ def draw_picture(data):
             ax2.plot(bbb, data[i], linewidth=6, color='b')
         if i == 2:
             ax2.plot(bbb, data[i], linewidth=6, color='g')
-    ax2.set(xlim=(0, 200),
-           xticks=np.arange(0, 200, 20),
+    ax2.set(xlim=(0,  len(data[0])),
+           xticks=np.arange(0,  len(data[0]), 20),
            )
     plt.show()
 
@@ -77,10 +77,10 @@ def drwa_loss(path_m):
     plt.show()
 
 
-num = 5000
-path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_71.xls"
+num = 2400
+path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_79.xls"
 path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
-drwa_loss(path_memo)
+# drwa_loss(path_memo)
 fitness_all = get_data(num,path)
 fitness_max = []
 fitness_min = []

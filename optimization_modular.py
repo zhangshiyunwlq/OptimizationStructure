@@ -18,6 +18,8 @@ import sap_run as sr
 import configparser
 import comtypes.client
 import gc
+import xlsxwriter
+import csv
 import openpyxl
 from CNN import create_model
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -27,7 +29,7 @@ from CNN import create_model
 '''
 
 def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight,time):
-    wb1 = xlwt.Workbook()
+    wb1 = xlsxwriter.Workbook()
     out_pop1_all = wb1.add_sheet('pop1_all')
     loc = 0
     for i in range(len(pop1_all)):
@@ -104,8 +106,10 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
 
     wb1.save(f'{path1}.xls')
 
+
+
 def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num,gx_prediction):
-    wb1 = xlwt.Workbook()
+    wb1 = xlsxwriter.Workbook()
     out_pop1_all = wb1.add_sheet('memorize_pool')
     loc = 0
 
@@ -887,7 +891,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
         # 引入新个体
         run_time +=1
-        if run_time % 20 == 0:
+        if run_time % 3 == 0:
             pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
@@ -901,7 +905,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time % 20 == 0:
+        if run_time % 3 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding_modular(pop2)
@@ -920,7 +924,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     #使用深度神经网络对记忆池中的所有个体进行预测
     memorize_pool_temp = copy.deepcopy(memorize_pool)
     memorize_pool_temp= np.array(memorize_pool_temp)
-    x_data_prediction = memorize_pool_temp[:,num_var:num_var+num_room_type+4*story_num]
+    x_data_prediction = memorize_pool_temp
     fitness_prediction = model.predict(x_data_prediction, verbose=0)
 
     for i in range(len(mySapObject_name)):
@@ -944,7 +948,7 @@ modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
-story_num = 10
+story_num = 6
 corridor_width = 4000
 modular_num = 6
 # steel section information
@@ -961,12 +965,12 @@ joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
 
-POP_SIZE =2
+POP_SIZE =3
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 2
-num_thread =2
+N_GENERATIONS = 6
+num_thread =3
 min_genera = []
 
 x = np.linspace(0, 13, 14)

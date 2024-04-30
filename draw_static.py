@@ -53,8 +53,8 @@ def draw_picture(info2,name,title_name):
         legend_labels = ['GA', 'HIGA']
         # plt.legend(legend_handles, legend_labels,fontsize=20)
 
-    ax2.set(xlim=(0, 100), ylim=(0, 800),
-           xticks=np.arange(0, 100, 20),
+    ax2.set(xlim=(0, 160), ylim=(0, 800),
+           xticks=np.arange(0, 160, 20),
            yticks=np.arange(0, 800, 100))
     plt.show()
 
@@ -74,8 +74,8 @@ def draw_picture0(info2,name,title_name):
     ax2.spines['top'].set_color('none')
     # plt.ylim((150, 400))
     # plt.xlim((0, len(info2[0])))
-    ax2.set(xlim=(0, len(info2[0])), ylim=(0, 6000),
-           xticks=np.arange(0, len(info2[0]), 20),
+    ax2.set(xlim=(0, len(info2[1])), ylim=(0, 6000),
+           xticks=np.arange(0, len(info2[1]), 20),
            yticks=np.arange(0, 6000, 100))
     info = copy.deepcopy(info2)
     for i in range(len(info)):
@@ -139,9 +139,9 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 
-data_info = [[80,14,812]]
+data_info = [[80,14,812],[140,14,85],[140,14,86]]
 
-infor_name = ['HIGA']
+infor_name = ['HIGA','HIGA','HIGA']
 
 
 # data_info = [[200,14,65]]

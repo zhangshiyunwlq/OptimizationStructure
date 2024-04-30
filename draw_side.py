@@ -95,7 +95,7 @@ def generate_data():
         col_ce_all.append([col_ce_1[0] + 4 * i, col_ce_1[1] + 4 * i, col_ce_1[2] + 4 * i, col_ce_1[3] + 4 * i])
 
     member_all = []
-    for i in range(6):
+    for i in range(story_num):
         member_all.append(beam_ce_all[i])
         member_all.append(beam_bo_all[i])
         member_all.append(col_ce_all[i])
@@ -220,7 +220,7 @@ pop_num = 139#第n代种群
 pop_size = 30#种群数量
 member_section = []
 wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_74.xls',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_81.xls',
     formatting_info=True)
 
 iter=[0,2,10,14,77,153,186,199]
@@ -248,7 +248,7 @@ draw_brace(brace_data,brace_type,brace_dis)
 
 # 设置坐标轴范围
 plt.xlim(-3, 30)
-plt.ylim(-5,30)
+plt.ylim(-5,60)
 
 # 设置坐标轴标签
 plt.xlabel('X')
