@@ -41,21 +41,25 @@ def draw_picture(info2,name,title_name):
     info = copy.deepcopy(info2)
 
     for i in range(len(info)):
-        if name[i] =='GA':
+        if name[i] =='0.6':
             co = 'r'
-        else:
+        elif name[i] =='0.4':
             co = 'black'
+        elif name[i] == '0.3':
+            co = 'blue'
+
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
         ax2.plot(bbb, ccc, linewidth=6, color=co)
         legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
-                          plt.Line2D([0], [0], color='b', lw=2,linewidth=20)]
-        legend_labels = ['GA', 'HIGA']
-        # plt.legend(legend_handles, legend_labels,fontsize=20)
+                          plt.Line2D([0], [0], color='black', lw=2,linewidth=20)
+                          ]
+        legend_labels = ['0.6', '0.4']
+        plt.legend(legend_handles, legend_labels,fontsize=20)
 
-    ax2.set(xlim=(0, 160), ylim=(0, 800),
+    ax2.set(xlim=(0, 160), ylim=(0, 400),
            xticks=np.arange(0, 160, 20),
-           yticks=np.arange(0, 800, 100))
+           yticks=np.arange(0, 400, 100))
     plt.show()
 
 def draw_picture0(info2,name,title_name):
@@ -139,9 +143,9 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 
-data_info = [[80,14,812],[140,14,85],[140,14,86]]
+data_info = [[140,14,79],[140,14,81],[140,14,99],[140,14,100]]
 
-infor_name = ['HIGA','HIGA','HIGA']
+infor_name = ['0.6','0.6','0.4','0.4']
 
 
 # data_info = [[200,14,65]]

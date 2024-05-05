@@ -70,7 +70,7 @@ def gx_nonNormalization(gx):
         gx_demo[i][3] = gx_demo[i][3] * 0.05
     return gx_demo
 
-path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_79.xls"
+path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_99.xls"
 gx_prediction = pd.read_excel(io=path_memo, sheet_name="gx_prediction")
 gx_prediction_data = gx_prediction.values.tolist()
 

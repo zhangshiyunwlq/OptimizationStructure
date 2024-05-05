@@ -643,15 +643,15 @@ def output_dis(Nodes,SapModel,modulars,ModularBuilding,modular_length_num,story_
     for i in range(len(Nodes)):
         result = []
         Obj,U1, U2, U3, R1, R2, R3 = get_point_displacement("nodes"+str(i), SapModel)
-        # if len(U1) != 0:
-        name_all_nodes.append(Obj[0])
-        result.append(U1[0])
-        result.append(U2[0])
-        result.append(U3[0])
-        result.append(R1[0])
-        result.append(R2[0])
-        result.append(R3[0])
-        displacements.append(result)
+        if len(U1) != 0:
+            name_all_nodes.append(Obj[0])
+            result.append(U1[0])
+            result.append(U2[0])
+            result.append(U3[0])
+            result.append(R1[0])
+            result.append(R2[0])
+            result.append(R3[0])
+            displacements.append(result)
     displacements = np.array(displacements)
     # mid nodes displacements
     for modular_indx in range(len(modulars)):

@@ -78,7 +78,7 @@ def drwa_loss(path_m):
 
 
 num = 2400
-path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_79.xls"
+path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_99.xls"
 path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
 # drwa_loss(path_memo)
 fitness_all = get_data(num,path)

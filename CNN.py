@@ -11,8 +11,8 @@ def leaky_relu(x, alpha=0.1):
 # 创建一个简单的神经网络模型
 def create_model(num_joint,num_out):
     model = models.Sequential([
-        layers.Dense(200, activation=leaky_relu, input_shape=(num_joint,)),
-        layers.Dense(200, activation=leaky_relu),
+        layers.Dense(100, activation=leaky_relu, input_shape=(num_joint,)),
+        layers.Dense(100, activation=leaky_relu),
         layers.Dense(num_out)
     ])
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)

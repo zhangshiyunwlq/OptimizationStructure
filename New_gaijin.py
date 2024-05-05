@@ -1146,7 +1146,7 @@ modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
-story_num = 10
+story_num = 6
 corridor_width = 4000
 
 # steel section information
@@ -1167,7 +1167,7 @@ POP_SIZE =30
 DNA_SIZE = story_num*3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 80
+N_GENERATIONS = 140
 num_thread =10
 min_genera = []
 
@@ -1208,7 +1208,7 @@ for i in range(1,story_num+1):
 
 
 for num_var in [14]:
-    for time in range(87,88):
+    for time in range(105,106):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
