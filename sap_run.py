@@ -122,6 +122,48 @@ def run_column_room_story1(building_room_labels, pop_room_label, modular_all_num
                 pop_num[z * 3 + 0]],bottom_edge=sections_data_c1[pop_num[z * 3 + 1]],
                 column_edge=sections_data_c1[pop_num[z * 3 + 2]])
 
+def run_column_room_modular_section(building_room_labels, pop_room_label, modular_all_num, sections_data_c1,
+                       modular_infos2, pop_num,story_num,zone_num):
+    edges_labels = [['top_edge', 'bottom_edge', 'column_edge'], ['left_member', 'right_member', 'short_member'],
+                    ['front_member', 'back_member', 'long_member'], ['column', 'short_member', 'long_member']]
+    labels = building_room_labels
+    section_all_modular = []
+    brace_all_modular = []
+
+    modular_type1 = [i for i in range(3)]
+
+    zone_type_all = []  # 所有区域的编号索引
+    for i in range(zone_num):
+        modular_type_temp = []
+        for j in range(len(modular_type1)):
+            modular_type_temp.append(modular_type1[j] + 3 * i)
+        zone_type_all.append(modular_type_temp)
+    #生成每个模块的三个截面
+    section_all = []
+    for i in range(len(labels)):
+        for j in range(3):
+            temp1 = zone_type_all[int(labels[i])][j]
+            section_all.append(pop_num[temp1])
+
+    #生成所有房间的索引
+    modular_type1 = [i for i in range(3)]
+    #生成对每个模块的截面编号索引
+    modular_type_all= []
+    for i in range(len(labels)):
+        modular_type_temp = []
+        for j in range(len(modular_type1)):
+            modular_type_temp.append(modular_type1[j]+3*i)
+        modular_type_all.append(modular_type_temp)
+
+    #建立每个房间的信息
+    for i in range(len(labels)):
+        temp0 = int(section_all[int(modular_type_all[i][0])])
+        temp1 = int(section_all[int(modular_type_all[i][1])])
+        temp2 = int(section_all[int(modular_type_all[i][2])])
+        modular_infos2[i] = ms.Modular_Info_Initialization(type='regular', top_edge=sections_data_c1[
+            temp0], bottom_edge=sections_data_c1[temp1],column_edge=sections_data_c1[temp2])
+
+
 def run_column_room_modular(building_room_labels, pop_room_label, modular_all_num, sections_data_c1,
                        modular_infos2, pop_num,story_num):
     edges_labels = [['top_edge', 'bottom_edge', 'column_edge'], ['left_member', 'right_member', 'short_member'],

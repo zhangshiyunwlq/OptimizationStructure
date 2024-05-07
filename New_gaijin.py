@@ -1208,7 +1208,7 @@ for i in range(1,story_num+1):
 
 
 for num_var in [14]:
-    for time in range(105,106):
+    for time in range(106,107):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

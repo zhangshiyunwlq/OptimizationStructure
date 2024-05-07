@@ -40,7 +40,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     path1 = os.path.join(APIPath, f'run_infor_{num_var}_{time}')
 
 
-    wb1 = xlsxwriter.Workbook(f'{path1}.xls')
+    wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
     out_pop1_all = wb1.add_worksheet('pop1_all')
 
     loc = 0
@@ -110,9 +110,8 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     wb1.close()
 
 
-
-def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num,gx_prediction):
-    APIPath = os.path.join(os.getcwd(), 'out_all_infor')
+def out_put_prediction_gx(gx_prediction,time_pr):
+    APIPath = os.path.join(os.getcwd(), 'out_all_prediction')
     SpecifyPath = True
     if not os.path.exists(APIPath):
         try:
@@ -120,11 +119,34 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'run_infor_{num_var}_{time}')
+    path1 = os.path.join(APIPath, f'prediction_infor_{num_var}_{time}')
+
+    wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
+
+    gx_pred = wb1.add_worksheet(f'gx_prediction_{time_pr}')
+    loc = 0
+    for i in range(len(gx_prediction)):
+        for j in range(len(gx_prediction[i])):
+            gx_pred.write(loc, j, gx_prediction[i][j])
+        loc += 1
+
+    wb1.close()
+
+def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num,gx_prediction):
+    APIPath = os.path.join(os.getcwd(), 'out_all_memorize')
+    SpecifyPath = True
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+
+    path1 = os.path.join(APIPath, f'memorize_infor_{num_var}_{time}')
+
+    wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
 
 
-    wb1 = xlsxwriter.Workbook(f'{path1}.xls')
     out_pop1_all = wb1.add_worksheet('memorize_pool')
     loc = 0
 
@@ -244,24 +266,32 @@ def mulit_get_sap(num_thread):
         mySapObject_name[i], ModelPath_name[i], SapModel_name[i] = SAPanalysis_GA_run2(APIPath_name[i])
     return mySapObject_name,ModelPath_name,SapModel_name
 
-def generate_coding_modular():
-    section_num = 3*modular_num
-    brace_num = modular_num
+def generate_coding_modular_section(x):
 
-    pop = np.zeros((POP_SIZE,section_num+brace_num+modular_length_num*2*story_num))
+    room_nu = np.linspace(1, 3, 3)
+
+    pop = np.zeros((POP_SIZE,num_var+num_room_type+section_num+brace_num+zone_num))
     for i in range(len(pop)):
-        for j in range(section_num):
-            pop[i][j] = random.randint(0,13)
-        for j in range(section_num,section_num+brace_num):
-            pop[i][j] = randint(1,3)
-        for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+        sec = list(map(int, random.sample(x.tolist(), num_var)))
+        sec.sort()
+        for j in range(num_var):
+            pop[i][j] = sec[j]
+
+        for j in range(num_var,num_var+num_room_type):
+            pop[i][j] = random.randint(1,3)
+
+        for j in range(num_var+num_room_type,num_var+num_room_type+section_num):
+            pop[i][j] = random.randint(0,num_var-1)
+
+        for j in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
+            pop[i][j] = randint(0,1)
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
             pop[i][j] = randint(0,modular_num-1)
 
     return pop
 
-def decoding_modular(pop2):
-    section_num = 3*modular_num
-    brace_num = modular_num
+def decoding_modular_section(pop2):
+
     pop_all = copy.deepcopy(pop2)
     modular_type1 = [i for i in range(3)]
     #生成对每个模块的截面编号索引
@@ -269,27 +299,43 @@ def decoding_modular(pop2):
     for i in range(modular_num):
         modular_type_temp = []
         for j in range(len(modular_type1)):
-            modular_type_temp.append(modular_type1[j]+3*i)
+            modular_type_temp.append(num_var+num_room_type+modular_type1[j]+3*i)
         modular_type_all.append(modular_type_temp)
-    #生成截面表
+
+
+    #提取截面表
     pop1_all = []
     for i in range(len(pop_all)):
         pop1_section = []
-        for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
             for z in range(3):
                 sec = int(pop_all[i][j])
                 pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
         pop1_all.append(pop1_section)
+
+
     #生成支撑表
-    brace_sort = [i for i in range(section_num,section_num+brace_num)]
+    brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
     pop3_all = []
     for i in range(len(pop_all)):
         pop3_brace = []
-        for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
             bra = int(pop_all[i][j])
-            pop3_brace.append(pop_all[i][int(brace_sort[bra])])
+            if pop_all[i][int(brace_sort[bra])] ==0:
+                pop3_brace.append(0)
+            else:
+                pop3_brace.append(pop_all[i][num_var])
         pop3_all.append(pop3_brace)
-    return pop1_all,pop3_all
+    pop_3 =[]
+    for j in range(len(pop_all)):
+        temp2 = pop3_all[j]
+        brace_all = []
+        for i in range(len(labels)):
+            temp1 = int(labels[i])
+            brace_all.append(temp2[temp1])
+        pop_3.append(brace_all)
+
+    return pop1_all,pop_3
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
@@ -301,7 +347,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 
     modular_infos = {}
     # 每个房间定义梁柱截面信息
-    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room,story_num)
+    sr.run_column_room_modular_section(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room,story_num,zone_num)
     #
     for i in range(len(modulars_of_building)):
         modulars_of_building[i].Add_Info_And_Update_Modular(
@@ -632,7 +678,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
         pop2[i] = pop[int(idx[i])]
     return pop2
 
-def crossover_and_mutation_coding_modular(pop2,CROSSOVER_RATE):
+def crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE):
     pop = pop2
 
     new_pop = np.zeros((len(pop),len(pop[0])))
@@ -650,7 +696,7 @@ def crossover_and_mutation_coding_modular(pop2,CROSSOVER_RATE):
             exchan.append(cross_points1)
             for j in range(min(exchan),max(exchan)):
                 child[j] = mother[j]
-        mutation_1_stort_modular(child,MUTATION_RATE)
+        mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE)
         new_pop[i] = child
 
     for i in range(len(new_pop)):
@@ -666,19 +712,32 @@ def crossover_and_mutation_coding_modular(pop2,CROSSOVER_RATE):
 
     return new_pop
 
-def mutation_1_stort_modular(child,MUTATION_RATE):
-    section_num = 3*modular_num
-    brace_num = modular_num
+def mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE):
 
-    for j in range(section_num):
-        if np.random.rand() < MUTATION_RATE:
-            child[j] = randint(0,13)
-    for j in range(section_num,section_num+brace_num):
+    num_var = int(num_var)
+    room_nu = np.linspace(1, 12, 12)
+    num_room_type = int(num_room_type)
+    if num_var!=len(x):
+        for mutate_point in range(num_var):
+            x_var = list(map(int, x.tolist()))
+            for mutate_point_1 in range(num_var):
+                if child[mutate_point_1] in x_var:
+                    x_var.remove(child[mutate_point_1])
+            if np.random.rand() < MUTATION_RATE:  # 以MUTATION_RATE的概率进行变异
+                child[mutate_point] = np.random.choice(x_var)
+
+    for j in range(num_var,num_var+num_room_type):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(1,3)
-    for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
+    for j in range(num_var+num_room_type,num_var+num_room_type+section_num):
         if np.random.rand() < MUTATION_RATE:
-            child[j] = randint(0,modular_num-1)
+            child[j] = randint(0,num_var-1)
+    for j in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
+        if np.random.rand() < MUTATION_RATE:
+            child[j] = randint(0,1)
+    for j in range(num_var + num_room_type + section_num+ brace_num, num_var + num_room_type + section_num + brace_num+zone_num):
+        if np.random.rand() < MUTATION_RATE:
+            child[j] = randint(0, modular_num-1)
             # child[j] = 0
 
 def gx_Normalization(gx):
@@ -715,33 +774,58 @@ def gx_nonNormalization(gx):
         gx_demo[i][3] = gx_demo[i][3] * 0.05
     return gx_demo
 
-def generation_population_modular(best_indivi,rate):
-    section_num = 3*modular_num
-    brace_num = modular_num
+def generation_population_modular_section(best_indivi,rate):
 
     best_in = copy.deepcopy(best_indivi)
     best_in.tolist()
     pop = np.zeros((POP_SIZE,len(best_in)))
     for i in range(len(pop)):
-        for j in range(section_num):
-            if np.random.rand() < rate:
-                pop[i][j] = random.randint(0, 13)
-            else:
-                pop[i][j] = best_in[j]
-        for j in range(section_num, section_num + brace_num):
-            if np.random.rand() < rate:
+        if num_var != len(x):
+            for mutate_point in range(num_var):
+                x_var = list(map(int, x.tolist()))
+                for mutate_point_1 in range(num_var):
+                    if pop[i][mutate_point_1] in x_var:
+                        x_var.remove(pop[i][mutate_point_1])
+                if np.random.rand() < MUTATION_RATE:  # 以MUTATION_RATE的概率进行变异
+                    pop[i][mutate_point] = np.random.choice(x_var)
+                else:
+                    pop[i][mutate_point] = best_in[mutate_point]
+        for j in range(num_var, num_var + num_room_type):
+            if np.random.rand() < MUTATION_RATE:
                 pop[i][j] = randint(1, 3)
             else:
                 pop[i][j] = best_in[j]
-
-        for j in range(section_num + brace_num, section_num + brace_num + modular_length_num * 2 * story_num):
-            if np.random.rand() < rate:
+        for j in range(num_var + num_room_type, num_var + num_room_type + section_num):
+            if np.random.rand() < MUTATION_RATE:
+                pop[i][j] = randint(0, num_var - 1)
+            else:
+                pop[i][j] = best_in[j]
+        for j in range(num_var + num_room_type + section_num, num_var + num_room_type + section_num + brace_num):
+            if np.random.rand() < MUTATION_RATE:
+                pop[i][j] = randint(0, 1)
+            else:
+                pop[i][j] = best_in[j]
+        for j in range(num_var + num_room_type + section_num + brace_num,
+                       num_var + num_room_type + section_num + brace_num + zone_num):
+            if np.random.rand() < MUTATION_RATE:
                 pop[i][j] = randint(0, modular_num - 1)
             else:
                 pop[i][j] = best_in[j]
 
+    new_pop = copy.deepcopy(pop)
+    for i in range(len(new_pop)):
+        sec_sort = []
+        room_sort = []
+        for j in range(num_var):
+            sec_sort.append(new_pop[i][j])
+        sec_sort.sort()
+        for j in range(num_var):
+            new_pop[i][j] = sec_sort[j]
 
-    return pop
+
+
+
+    return new_pop
 
 def Gx_convert(fitness1):
     fitness3 = copy.deepcopy(fitness1)
@@ -772,8 +856,20 @@ def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
             exchan.append(cross_points1)
             for j in range(min(exchan),max(exchan)):
                 child[j] = mother[j]
-        mutation_GA_for_DNN_modular(child,num_var,MUTATION_RATE)
+        mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE)
         new_pop[i] = child
+
+
+    for i in range(len(new_pop)):
+        sec_sort = []
+        room_sort = []
+        for j in range(num_var):
+            sec_sort.append(new_pop[i][j])
+        sec_sort.sort()
+        for j in range(num_var):
+            new_pop[i][j] = sec_sort[j]
+
+
 
     return new_pop
 
@@ -839,7 +935,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     history_mae.append(history.history['mae'])
     pop_best = []
     for i in range(num_ind):
-        pop1 = generation_population_modular(best_indivi, 0.2)#根据最好个体生成种群
+        pop1 = generation_population_modular_section(best_indivi, 0.2)#根据最好个体生成种群
         pop2 = pop1
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
@@ -847,9 +943,9 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     return pop_best,model
 
 def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
-    pop2= generate_coding_modular()
+    pop2= generate_coding_modular_section(x)
     pop_decoe_1 = copy.deepcopy(pop2)
-    pop1,pop3 = decoding_modular(pop2)
+    pop1,pop3 = decoding_modular_section(pop2)
 
     pop_zhongqun_all = []  # 记录每代种群（不重复）
     pop_zhongqun_all_2 = []#记录种群所有
@@ -866,6 +962,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     weight_min=[]
     min_ru = []
     sap_run_time = 0
+    predict_time = 0
     for run_time in range(N_GENERATIONS):
         pop_zhongqun_all.append(pop1)
         pop_zhongqun_all_2.append(pop2)
@@ -893,11 +990,11 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
-        pop2 = crossover_and_mutation_coding_modular(pop2,CROSSOVER_RATE)
+        pop2 = crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE)
 
         # 引入新个体
         run_time +=1
-        if run_time % 3 == 0:
+        if run_time % 20 == 0:
             pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
@@ -911,10 +1008,17 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time % 3 == 0:
+            # 使用深度神经网络对记忆池中的所有个体进行预测
+            memorize_pool_temp = copy.deepcopy(memorize_pool)
+            memorize_pool_temp = np.array(memorize_pool_temp)
+            x_data_prediction = memorize_pool_temp
+            fitness_prediction = model.predict(x_data_prediction, verbose=0)
+            out_put_prediction_gx(fitness_prediction, predict_time)
+            predict_time = predict_time+1
+        if run_time % 20 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
-        pop1, pop3 = decoding_modular(pop2)
+        pop1, pop3 = decoding_modular_section(pop2)
 
         aaa = []
         aaa.append(pop1[0])
@@ -927,11 +1031,6 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
 
-    #使用深度神经网络对记忆池中的所有个体进行预测
-    memorize_pool_temp = copy.deepcopy(memorize_pool)
-    memorize_pool_temp= np.array(memorize_pool_temp)
-    x_data_prediction = memorize_pool_temp
-    fitness_prediction = model.predict(x_data_prediction, verbose=0)
 
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
@@ -949,14 +1048,24 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
 '''model data'''
 # modular size
+#建筑参数
 modular_length = 8000
 modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
-story_num = 6
 corridor_width = 4000
-modular_num = 6
+story_num = 12
+story_zone = 4#每组模块的分区数量
+story_group = 3#每组模块的楼层数
+modular_num = 6#整个建筑的模块种类
+
+zone_num = int(story_num / story_group * story_zone)
+section_num = 3 * modular_num
+brace_num = modular_num
+group_num = int(story_num / story_group)
+modular_all = modular_length_num * 2 *story_num
+
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
                                                                   cfg_file_name="Steel_section_data.ini")
@@ -970,18 +1079,25 @@ cor_edges = model_data[3]
 joint_hor = model_data[4]
 joint_ver = model_data[5]
 room_indx = model_data[6]
-
-POP_SIZE =3
-DNA_SIZE = story_num*3
+#优化参数
+DNA_SIZE = 4*story_num+modular_length_num*2*story_num
+POP_SIZE = 30
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 4
-num_thread =3
+N_GENERATIONS = 140
+num_thread =10
+
 min_genera = []
+
+num_room_type=1
+
+
+
+
 
 x = np.linspace(0, 13, 14)
 # x = np.array([2,4,6,8,10,12])
-num_var = 2
+
 num_room_type=1
 #全局记忆池
 memorize_pool = []
@@ -1010,11 +1126,17 @@ history_mae = []
 # for i in range(12):
 #     labels.extend(label)
 labels = []
-for i in range(1,story_num+1):
-    for j in range(modular_length_num*2):
-        labels.append(i)
+labels1 = []
+for i in range(group_num):
+    temp = []
+    for j in range(story_zone):
+        for z in range(int(modular_length_num/story_zone)):
+            temp.append(i*story_zone+j)
+    for j in range(2*story_group):
+        labels.extend(temp)
+        labels1.append(temp)
 
-for num_var in [14]:
+for num_var in [8]:
     for time in range(941,942):
         memorize_pool = []
         memorize_fit = []
@@ -1039,5 +1161,5 @@ for num_var in [14]:
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num,fitness_prediction)
-        draw_loss(num_var, time)
+        # draw_loss(num_var, time)
         gc.collect()

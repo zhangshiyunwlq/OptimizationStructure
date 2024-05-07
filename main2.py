@@ -2800,7 +2800,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 
     modular_infos = {}
     # 每个房间定义梁柱截面信息
-    sr.run_column_room_story1(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room)
+    sr.run_column_room_modular_section(labels,pop_room_label, modular_length_num * 2 * story_num, sections_data_c1, modular_infos, pop_room,story_num,zone_num)
     #
     for i in range(len(modulars_of_building)):
         modulars_of_building[i].Add_Info_And_Update_Modular(
@@ -2822,8 +2822,19 @@ modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
-story_num = 10
 corridor_width = 4000
+
+story_num = 12
+story_zone = 4#每组模块的分区数量
+story_group = 3#每组模块的楼层数
+modular_num = 6#整个建筑的模块种类
+
+zone_num = int(story_num / story_group * story_zone)
+section_num = 3 * modular_num
+brace_num = modular_num
+group_num = int(story_num / story_group)
+modular_all = modular_length_num * 2 *story_num
+
 
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
@@ -2906,31 +2917,44 @@ x = np.linspace(0, 12, 13)
 # beam_up_all= all_GA_infor[9]
 # pop_room = weight_fin
 
+#使用xlrd读取信息 从1开始不是0开始
 pop_room = []
 pop_room_label = []
-wb = xlrd.open_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_14_681.xls',
-    formatting_info=True)
-sheet1 = wb.sheet_by_index(0)
-for z in range(18):
-    rows = sheet1.row_values(1830)[z]
+# wb = xlrd.open_workbook(
+#     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_8_941.xlsx',
+#     formatting_info=True)
+# sheet1 = wb.sheet_by_index(0)
+# for z in range(18):
+#     rows = sheet1.row_values(1830)[z]
+#     pop_room.append(rows)
+# sheet1 = wb.sheet_by_index(2)
+# for z in range(96):
+#     rows = sheet1.row_values(1830)[z]
+#     pop_room_label.append(rows)
+
+#使用openxyxl读取信息
+
+wb = openpyxl.load_workbook(
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_8_941.xlsx',
+    )
+sheet1 = wb['pop1_all']
+for z in range(48):
+    rows = sheet1.cell(4311,z+1).value
     pop_room.append(rows)
-sheet1 = wb.sheet_by_index(2)
-for z in range(96):
-    rows = sheet1.row_values(1830)[z]
+sheet1 = wb['pop3_all']
+for z in range(modular_length_num*2*story_num):
+    rows = sheet1.cell(4311,z+1).value
     pop_room_label.append(rows)
 
 
 
-
-
-pop_room = []
-pop_room_label = []
-for i in range(story_num*3):
-    pop_room.append(11)
-# pop_room = all_GA_infor[0]
-for i in range(modular_length_num*2*story_num):
-    pop_room_label.append(0)
+# pop_room = []
+# pop_room_label = []
+# for i in range(story_num*3):
+#     pop_room.append(11)
+# # pop_room = all_GA_infor[0]
+# for i in range(modular_length_num*2*story_num):
+#     pop_room_label.append(0)
 
 
 

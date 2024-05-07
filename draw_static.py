@@ -2,25 +2,39 @@ import xlrd
 import matplotlib.pyplot as plt
 import copy
 import numpy as np
-
+import openpyxl
 def get_info(name1):
     all_value_str = []
     for i in range(len(name1)):
         value_str = []
-        wb = xlrd.open_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
-            formatting_info=True)
+        wb = openpyxl.load_workbook(
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
+            )
         # wb = xlrd.open_workbook(
         #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
         #     formatting_info=True)
         # wb = xlrd.open_workbook(
         #     filename=f'E:\C盘默认文件\\run\OptimizationStructure\分析数据\限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
         #     formatting_info=True)
-        sheet1 = wb.sheet_by_index(5)
+        sheet1 = wb['max_fitness']
         for z in range(name1[i][0]):
-            rows = sheet1.row_values(1)[z]
+            rows = sheet1.cell(2,z+1).value
             value_str.append(rows)
         all_value_str.append(value_str)
+
+        # value_str = []
+        # wb =  xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
+        #     formatting_info=True)
+        # # wb = xlrd.open_workbook(
+        # #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        # #     formatting_info=True)
+        # sheet1 = wb.sheet_by_index(5)
+        # for z in range(name1[i][0]):
+        #     rows = sheet1.row_values(1)[z]
+        #     value_str.append(rows)
+        # all_value_str.append(value_str)
+
     return all_value_str
 
 def draw_picture(info2,name,title_name):
@@ -41,25 +55,26 @@ def draw_picture(info2,name,title_name):
     info = copy.deepcopy(info2)
 
     for i in range(len(info)):
-        if name[i] =='0.6':
+        if name[i] =='200*200':
             co = 'r'
-        elif name[i] =='0.4':
+        elif name[i] =='8':
             co = 'black'
-        elif name[i] == '0.3':
+        elif name[i] == '100*100':
             co = 'blue'
 
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
         ax2.plot(bbb, ccc, linewidth=6, color=co)
-        legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
-                          plt.Line2D([0], [0], color='black', lw=2,linewidth=20)
-                          ]
-        legend_labels = ['0.6', '0.4']
-        plt.legend(legend_handles, legend_labels,fontsize=20)
+        # legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
+        #                   plt.Line2D([0], [0], color='black', lw=2,linewidth=20),
+        #                   plt.Line2D([0], [0], color='blue', lw=2, linewidth=20)
+        #                   ]
+        # legend_labels = ['200*200', '50*50', '100*100']
+        # plt.legend(legend_handles, legend_labels,fontsize=20)
 
-    ax2.set(xlim=(0, 160), ylim=(0, 400),
+    ax2.set(xlim=(0, 160), ylim=(0, 1000),
            xticks=np.arange(0, 160, 20),
-           yticks=np.arange(0, 400, 100))
+           yticks=np.arange(0, 1000, 100))
     plt.show()
 
 def draw_picture0(info2,name,title_name):
@@ -143,9 +158,9 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 
-data_info = [[140,14,79],[140,14,81],[140,14,99],[140,14,100]]
+data_info = [[140,8,941]]
 
-infor_name = ['0.6','0.6','0.4','0.4']
+infor_name = ['8','200*200','50*50','50*50','50*50','100*100','100*100']
 
 
 # data_info = [[200,14,65]]

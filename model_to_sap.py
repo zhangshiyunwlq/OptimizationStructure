@@ -197,7 +197,7 @@ def get_section_area(a,b):
     if b[1] == 'c0':
         area_1 = height * width - (height-2*t1)*(width-t2)
     elif b[1] == 'I0':
-        area_1 = height * width - 2*(height-2*t2)*(width-2*t1)
+        area_1 = height * width - (height-2*t1)*(width-t2)
     elif b[1] == 'b0':
         area_1 = height * width - (height - 2 * t2) * (width - 2 * t1)
 
