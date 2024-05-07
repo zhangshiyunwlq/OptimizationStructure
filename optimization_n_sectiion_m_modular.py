@@ -24,12 +24,12 @@ import openpyxl
 from CNN import create_model
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 '''
-功能：指定n种截面，m种模块然后整栋建筑的的模块都随机使用指定的模块，优化算法为HIGA
+功能：指定n种截面，m种模块然后整栋建筑的的模块都随机使用指定的模块，优化算法为HIGA,案例为case4
 
 '''
 
 def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight,time):
-    APIPath = os.path.join(os.getcwd(), 'out_all_infor')
+    APIPath = os.path.join(os.getcwd(), 'out_all_infor_case4')
     SpecifyPath = True
     if not os.path.exists(APIPath):
         try:
@@ -111,7 +111,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
 
 
 def out_put_prediction_gx(gx_prediction,time_pr):
-    APIPath = os.path.join(os.getcwd(), 'out_all_prediction')
+    APIPath = os.path.join(os.getcwd(), 'out_all_prediction_case4')
     SpecifyPath = True
     if not os.path.exists(APIPath):
         try:
@@ -133,7 +133,7 @@ def out_put_prediction_gx(gx_prediction,time_pr):
     wb1.close()
 
 def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num,gx_prediction):
-    APIPath = os.path.join(os.getcwd(), 'out_all_memorize')
+    APIPath = os.path.join(os.getcwd(), 'out_all_memorize_case4')
     SpecifyPath = True
     if not os.path.exists(APIPath):
         try:
@@ -1068,7 +1068,7 @@ modular_all = modular_length_num * 2 *story_num
 
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                  cfg_file_name="Steel_section_data.ini")
+                                                                  cfg_file_name="Steel_section_data_I_cube.ini")
 
 # generate model
 model_data = dj.generate_model_data(modular_length,modular_width,modular_heigth,modular_length_num,modular_dis,story_num,corridor_width)
@@ -1081,11 +1081,11 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 #优化参数
 DNA_SIZE = 4*story_num+modular_length_num*2*story_num
-POP_SIZE = 30
+POP_SIZE = 3
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 140
-num_thread =10
+N_GENERATIONS = 2
+num_thread =3
 
 min_genera = []
 

@@ -2838,7 +2838,7 @@ modular_all = modular_length_num * 2 *story_num
 
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                  cfg_file_name="Steel_section_data.ini")
+                                                                  cfg_file_name="Steel_section_data_I_cube.ini")
 
 # generate model
 model_data = dj.generate_model_data(modular_length,modular_width,modular_heigth,modular_length_num,modular_dis,story_num,corridor_width)
@@ -2876,7 +2876,7 @@ room_indx = model_data[6]
 # all_data = ms.Run_GA_sap(mySapObject, ModelPath, SapModel, modular_building,200,modular_length_num,story_num)
 
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                  cfg_file_name="Steel_section_data.ini")
+                                                                  cfg_file_name="Steel_section_data_I_cube.ini")
 modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
 # 按房间分好节点
 modulars_of_building = modular_building.building_modulars

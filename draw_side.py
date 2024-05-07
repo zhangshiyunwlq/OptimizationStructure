@@ -4,6 +4,8 @@ import xlrd
 import matplotlib.pyplot as plt
 import os
 import sys
+
+'''该部分代码用于绘制每层使用同一种模块侧视图，对应文件New_gaijin.py生成的文件'''
 def generate_data():
     node1 = [(0, 0), (8, 0), (0, 3), (8, 3), (11, 0), (19, 0), (11, 3), (19, 3)]
     nodes_all = []
