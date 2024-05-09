@@ -8,7 +8,7 @@ def get_info(name1):
     for i in range(len(name1)):
         value_str = []
         wb = openpyxl.load_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
             )
         # wb = xlrd.open_workbook(
         #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
@@ -57,7 +57,7 @@ def draw_picture(info2,name,title_name):
     for i in range(len(info)):
         if name[i] =='200*200':
             co = 'r'
-        elif name[i] =='8':
+        elif name[i] =='9-6':
             co = 'black'
         elif name[i] == '100*100':
             co = 'blue'
@@ -158,9 +158,9 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 
-data_info = [[140,8,941]]
+data_info = [[140,9,0]]
 
-infor_name = ['8','200*200','50*50','50*50','50*50','100*100','100*100']
+infor_name = ['9-6','200*200','50*50','50*50','50*50','100*100','100*100']
 
 
 # data_info = [[200,14,65]]

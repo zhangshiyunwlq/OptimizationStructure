@@ -37,7 +37,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'run_infor_{num_var}_{time}')
+    path1 = os.path.join(APIPath, f'run_infor_{num_var}_{modular_num}_{time}')
 
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
@@ -119,7 +119,7 @@ def out_put_prediction_gx(gx_prediction,time_pr):
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'prediction_infor_{num_var}_{time}')
+    path1 = os.path.join(APIPath, f'prediction_infor_{num_var}_{modular_num}_{time}')
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
@@ -141,7 +141,7 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'memorize_infor_{num_var}_{time}')
+    path1 = os.path.join(APIPath, f'memorize_infor_{num_var}_{modular_num}_{time}')
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
@@ -1081,11 +1081,11 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 #优化参数
 DNA_SIZE = 4*story_num+modular_length_num*2*story_num
-POP_SIZE = 3
+POP_SIZE = 30
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.1
-N_GENERATIONS = 2
-num_thread =3
+MUTATION_RATE = 0.2
+N_GENERATIONS = 140
+num_thread =10
 
 min_genera = []
 
@@ -1136,8 +1136,8 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-for num_var in [8]:
-    for time in range(941,942):
+for num_var in [9]:
+    for time in range(1,3):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

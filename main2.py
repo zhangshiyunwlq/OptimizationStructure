@@ -2935,7 +2935,7 @@ pop_room_label = []
 #使用openxyxl读取信息
 
 wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_8_941.xlsx',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_6_0.xlsx',
     )
 sheet1 = wb['pop1_all']
 for z in range(48):

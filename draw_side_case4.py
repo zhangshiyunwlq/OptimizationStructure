@@ -24,7 +24,7 @@ def all_modular_infor():
             temp.append(room1_indx[j] + 4 * i)
         all_room_indx.append(temp)
 
-    frame = [[0, 1], [2, 3], [0, 2], [1, 3]]
+    frame = [[2, 3], [0, 1], [0, 2], [1, 3]]
 
     joint_hor = [[1, 4], [2, 7]]
     story_joint_hor = []
@@ -76,7 +76,7 @@ def get_info(iter_num):
     pop_room = []
     pop_brace = []
     wb = openpyxl.load_workbook(
-        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_8_941.xlsx',
+        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_9_0.xlsx',
     )
     sheet1 = wb['pop1_all']
     for z in range(3*zone_num):
@@ -104,6 +104,89 @@ def draw_corr_conn(cons_all,nodes_all,corrs_all):
         plt.plot(x_values, y_values, 'b-', linewidth=2.5, color='grey')
     for node in nodes_all:
         plt.plot(node[0], node[1], 'ro', markersize=2.5, color='grey')
+
+
+def draw_frame():
+    for i in range(len(all_indx_draw)):
+
+        modular_type1 = [ii for ii in range(3)]
+        modular_type_all = []
+        for ii in range(zone_num):
+            modular_type_temp = []
+            for j in range(len(modular_type1)):
+                modular_type_temp.append(modular_type1[j] + 3 * ii)
+            modular_type_all.append(modular_type_temp)
+
+        column_frame = [[all_room_indx[i][frame[2][0]], all_room_indx[i][frame[2][1]]],
+                        [all_room_indx[i][frame[3][0]], all_room_indx[i][frame[3][1]]]]
+        bottom_frame = [[all_room_indx[i][frame[1][0]], all_room_indx[i][frame[1][1]]]]
+        top_frame = [[all_room_indx[i][frame[0][0]], all_room_indx[i][frame[0][1]]]]
+
+        for ii in range(len(top_frame)):
+            member_indx = pop_room[modular_type_all[labels[int(all_indx_draw[i])]][0]]
+            if member_indx <= 6:
+                c = 'red'
+                x_values = [nodes_all[top_frame[ii][0]][0],
+                            nodes_all[top_frame[ii][1]][0]]
+                y_values = [nodes_all[top_frame[ii][0]][1],
+                            nodes_all[top_frame[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)] * 0.6 + 1))
+            elif member_indx >= 6:
+                c = 'b'
+                x_values = [nodes_all[top_frame[ii][0]][0],
+                            nodes_all[top_frame[ii][1]][0]]
+                y_values = [nodes_all[top_frame[ii][0]][1],
+                            nodes_all[top_frame[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)] * 0.6 + 1))
+
+        for ii in range(len(bottom_frame)):
+            member_indx = pop_room[modular_type_all[labels[int(all_indx_draw[i])]][1]]
+            if member_indx <= 6:
+                c = 'red'
+                x_values = [nodes_all[bottom_frame[ii][0]][0],
+                            nodes_all[bottom_frame[ii][1]][0]]
+                y_values = [nodes_all[bottom_frame[ii][0]][1],
+                            nodes_all[bottom_frame[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)] * 0.6 + 1))
+            elif member_indx >= 6:
+                c = 'b'
+                x_values = [nodes_all[bottom_frame[ii][0]][0],
+                            nodes_all[bottom_frame[ii][1]][0]]
+                y_values = [nodes_all[bottom_frame[ii][0]][1],
+                            nodes_all[bottom_frame[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)] * 0.6 + 1))
+
+        for ii in range(len(column_frame)):
+            member_indx = pop_room[modular_type_all[labels[int(all_indx_draw[i])]][2]]
+            if member_indx <= 6:
+                c = 'red'
+                x_values = [nodes_all[column_frame[ii][0]][0],
+                            nodes_all[column_frame[ii][1]][0]]
+                y_values = [nodes_all[column_frame[ii][0]][1],
+                            nodes_all[column_frame[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)] * 0.6 + 1))
+            elif member_indx >= 6:
+                c = 'b'
+                x_values = [nodes_all[column_frame[ii][0]][0],
+                            nodes_all[column_frame[ii][1]][0]]
+                y_values = [nodes_all[column_frame[ii][0]][1],
+                            nodes_all[column_frame[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)] * 0.6 + 1))
+
+    for i in range(len(all_indx_draw)):
+        brace_frame_all = []
+        if int(pop_brace[int(all_indx_draw[i])]) != 0:
+            brace_type = brace_frame[int(pop_brace[int(all_indx_draw[i])]) - 1]
+            for ii in range(len(brace_type)):
+                temp = [brace_all_room_indx[i][brace_type[ii][0]], brace_all_room_indx[i][brace_type[ii][1]]]
+                brace_frame_all.append(temp)
+            for ii in range(len(brace_frame_all)):
+                c = 'grey'
+                x_values = [brace_nodes_all[brace_frame_all[ii][0]][0],
+                            brace_nodes_all[brace_frame_all[ii][1]][0]]
+                y_values = [brace_nodes_all[brace_frame_all[ii][0]][1],
+                            brace_nodes_all[brace_frame_all[ii][1]][1]]
+                plt.plot(x_values, y_values, 'b-', color=c, linewidth=2.5)
 
 
 '''model data'''
@@ -138,10 +221,11 @@ for i in range(group_num):
     for j in range(story_zone):
         for z in range(int(modular_length_num/story_zone)):
             temp.append(i*story_zone+j)
-    for j in range(story_group):
+    for j in range(2*story_group):
         labels.extend(temp)
         labels1.append(temp)
 
+#构件界面排序
 area = [3642,3910,4092,4392,5292,6156,6660,6800,7600,8400,9600,10800,11600,13600]
 fit_ini = copy.deepcopy(area)
 luyi = copy.deepcopy(area)
@@ -157,88 +241,18 @@ for i in range(len(fit_ini)):
 
 
 #读取优化信息
-pop_room,pop_brace,brace_dis = get_info(139)
-
-for i in range(len(labels)):
-
-    modular_type1 = [ii for ii in range(3)]
-    modular_type_all= []
-    for ii in range(zone_num):
-        modular_type_temp = []
-        for j in range(len(modular_type1)):
-            modular_type_temp.append(modular_type1[j]+3*ii)
-        modular_type_all.append(modular_type_temp)
-
-    column_frame = [[all_room_indx[i][frame[2][0]],all_room_indx[i][frame[2][1]]],[all_room_indx[i][frame[3][0]],all_room_indx[i][frame[3][1]]]]
-    bottom_frame = [[all_room_indx[i][frame[1][0]],all_room_indx[i][frame[1][1]]]]
-    top_frame = [[all_room_indx[i][frame[0][0]],all_room_indx[i][frame[0][1]]]]
-    brace_frame_all=[]
-    if int(pop_brace[int(labels[i])]) ==1:
-        brace_type = brace_frame[brace_dis-1]
-        for ii in range(len(brace_type)):
-            temp = [brace_all_room_indx[i][brace_type[ii][0]],brace_all_room_indx[i][brace_type[ii][1]]]
-            brace_frame_all.append(temp)
-
-    for ii in range(len(brace_frame_all)):
-        c = 'grey'
-        x_values = [brace_nodes_all[brace_frame_all[ii][0]][0],
-                    brace_nodes_all[brace_frame_all[ii][1]][0]]
-        y_values = [brace_nodes_all[brace_frame_all[ii][0]][1],
-                    brace_nodes_all[brace_frame_all[ii][1]][1]]
-        plt.plot(x_values, y_values, 'b-', color=c, linewidth=2.5)
+pop_room,pop_brace,brace_dis = get_info(6)
+#生成一个侧面的房间编号
+temp_indx = [i for i in range(8)]
+all_indx_draw = []
+for i in range(story_num):
+    te = []
+    for j in range(len(temp_indx)):
+        te.append(temp_indx[j]+i*modular_length_num*2)
+    all_indx_draw.extend(te)
 
 
-    for ii in range(len(top_frame)):
-        member_indx = pop_room[modular_type_all[int(labels[i])][0]]
-        if member_indx <= 6:
-            c = 'red'
-            x_values = [nodes_all[top_frame[ii][0]][0],
-                        nodes_all[top_frame[ii][1]][0]]
-            y_values = [nodes_all[top_frame[ii][0]][1],
-                        nodes_all[top_frame[ii][1]][1]]
-            plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)]*0.6 + 1))
-        elif member_indx >= 6:
-            c = 'b'
-            x_values = [nodes_all[top_frame[ii][0]][0],
-                        nodes_all[top_frame[ii][1]][0]]
-            y_values = [nodes_all[top_frame[ii][0]][1],
-                        nodes_all[top_frame[ii][1]][1]]
-            plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)]*0.6 + 1))
-
-    for ii in range(len(bottom_frame)):
-        member_indx = pop_room[modular_type_all[int(labels[i])][1]]
-        if member_indx <= 6:
-            c = 'red'
-            x_values = [nodes_all[bottom_frame[ii][0]][0],
-                        nodes_all[bottom_frame[ii][1]][0]]
-            y_values = [nodes_all[bottom_frame[ii][0]][1],
-                        nodes_all[bottom_frame[ii][1]][1]]
-            plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)]*0.6 + 1))
-        elif member_indx >= 6:
-            c = 'b'
-            x_values = [nodes_all[bottom_frame[ii][0]][0],
-                        nodes_all[bottom_frame[ii][1]][0]]
-            y_values = [nodes_all[bottom_frame[ii][0]][1],
-                        nodes_all[bottom_frame[ii][1]][1]]
-            plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)]*0.6 + 1))
-
-    for ii in range(len(column_frame)):
-        member_indx = pop_room[modular_type_all[int(labels[i])][2]]
-        if member_indx <= 6:
-            c = 'red'
-            x_values = [nodes_all[column_frame[ii][0]][0],
-                        nodes_all[column_frame[ii][1]][0]]
-            y_values = [nodes_all[column_frame[ii][0]][1],
-                        nodes_all[column_frame[ii][1]][1]]
-            plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)]*0.6 + 1))
-        elif member_indx >= 6:
-            c = 'b'
-            x_values = [nodes_all[column_frame[ii][0]][0],
-                        nodes_all[column_frame[ii][1]][0]]
-            y_values = [nodes_all[column_frame[ii][0]][1],
-                        nodes_all[column_frame[ii][1]][1]]
-            plt.plot(x_values, y_values, 'b-', color=c, linewidth=int(list_new[int(member_indx)]*0.6 + 1))
-
+draw_frame()
 draw_corr_conn(all_joint_hor,nodes_all,all_joint_ver)
 
 
