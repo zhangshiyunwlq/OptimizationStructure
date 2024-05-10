@@ -110,7 +110,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
     wb1.close()
 
 
-def out_put_prediction_gx(gx_prediction,time_pr):
+def out_put_prediction_gx(gx_all,time_pr):
     APIPath = os.path.join(os.getcwd(), 'out_all_prediction_case4')
     SpecifyPath = True
     if not os.path.exists(APIPath):
@@ -123,12 +123,13 @@ def out_put_prediction_gx(gx_prediction,time_pr):
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
-    gx_pred = wb1.add_worksheet(f'gx_prediction_{time_pr}')
-    loc = 0
-    for i in range(len(gx_prediction)):
-        for j in range(len(gx_prediction[i])):
-            gx_pred.write(loc, j, gx_prediction[i][j])
-        loc += 1
+    for ii in range(len(gx_all)):
+        gx_pred = wb1.add_worksheet(f'gx_prediction_{ii}')
+        loc = 0
+        for i in range(len(gx_all[ii])):
+            for j in range(len(gx_all[ii][i])):
+                gx_pred.write(loc, j, gx_all[ii][i][j])
+            loc += 1
 
     wb1.close()
 
@@ -313,6 +314,14 @@ def decoding_modular_section(pop2):
                 pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
         pop1_all.append(pop1_section)
 
+    #解码pop1_1all
+    pop1_decoding = []
+    for i in range(len(pop1_all)):
+        pop1_temp = []
+        for j in range(len(pop1_all[i])):
+            pop1_temp.append(pop_all[i][int(pop1_all[i][j])])
+        pop1_decoding.append(pop1_temp)
+
 
     #生成支撑表
     brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
@@ -335,7 +344,7 @@ def decoding_modular_section(pop2):
             brace_all.append(temp2[temp1])
         pop_3.append(brace_all)
 
-    return pop1_all,pop_3
+    return pop1_decoding,pop_3
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
@@ -963,6 +972,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     min_ru = []
     sap_run_time = 0
     predict_time = 0
+    all_pred = []
     for run_time in range(N_GENERATIONS):
         pop_zhongqun_all.append(pop1)
         pop_zhongqun_all_2.append(pop2)
@@ -1012,9 +1022,12 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             memorize_pool_temp = copy.deepcopy(memorize_pool)
             memorize_pool_temp = np.array(memorize_pool_temp)
             x_data_prediction = memorize_pool_temp
+
+
             fitness_prediction = model.predict(x_data_prediction, verbose=0)
-            out_put_prediction_gx(fitness_prediction, predict_time)
-            predict_time = predict_time+1
+            all_pred.append(fitness_prediction)
+
+
         if run_time % 20 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
@@ -1031,7 +1044,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             pop2[0] = mm2_all
             pop3[0] = mm2_all3
 
-
+    out_put_prediction_gx(all_pred, predict_time)
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
         SapModel_name[i] = None

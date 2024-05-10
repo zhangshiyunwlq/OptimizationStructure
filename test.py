@@ -89,6 +89,14 @@ def decoding_modular_section(pop2):
         pop1_all.append(pop1_section)
 
 
+    #解码pop1_1all
+    pop1_decoding = []
+    for i in range(len(pop1_all)):
+        pop1_temp = []
+        for j in range(len(pop1_all[i])):
+            pop1_temp.append(pop_all[i][int(pop1_all[i][j])])
+        pop1_decoding.append(pop1_temp)
+
     #生成支撑表
     brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
     pop3_all = []
@@ -110,7 +118,7 @@ def decoding_modular_section(pop2):
             brace_all.append(temp2[temp1])
         pop_3.append(brace_all)
 
-    return pop1_all,pop_3
+    return pop1_decoding,pop_3
 
 
 

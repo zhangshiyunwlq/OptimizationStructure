@@ -76,7 +76,7 @@ def get_info(iter_num):
     pop_room = []
     pop_brace = []
     wb = openpyxl.load_workbook(
-        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_9_0.xlsx',
+        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_7_6_1.xlsx',
     )
     sheet1 = wb['pop1_all']
     for z in range(3*zone_num):
@@ -241,7 +241,7 @@ for i in range(len(fit_ini)):
 
 
 #读取优化信息
-pop_room,pop_brace,brace_dis = get_info(6)
+pop_room,pop_brace,brace_dis = get_info(139)
 #生成一个侧面的房间编号
 temp_indx = [i for i in range(8)]
 all_indx_draw = []

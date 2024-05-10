@@ -8,7 +8,7 @@ def get_info(name1):
     for i in range(len(name1)):
         value_str = []
         wb = openpyxl.load_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{name1[i][1]}_{modular_num}_{name1[i][2]}.xlsx'
             )
         # wb = xlrd.open_workbook(
         #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
@@ -136,7 +136,7 @@ def static_braced(name1):
         pop_room = []
         pop_room_label = []
         wb = xlrd.open_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{modular_num}_{name1[i][2]}.xls',
             formatting_info=True)
         sheet1 = wb.sheet_by_index(2)
         for z in range(6):
@@ -157,10 +157,10 @@ def static_braced(name1):
 # data_info = [[140,14,74],[140,14,75],[140,14,76],[140,14,77],[140,14,78],[140,14,79],[140,14,81]]
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
+modular_num = 6
+data_info = [[140,9,1]]
 
-data_info = [[140,9,0]]
-
-infor_name = ['9-6','200*200','50*50','50*50','50*50','100*100','100*100']
+infor_name = ['9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
 
 # data_info = [[200,14,65]]

@@ -168,11 +168,11 @@ modular_all = modular_length_num * 2 *story_num
 num_var = 9
 num_room_type = 1
 num_room = 1
-pop_num =6#第n代种群
+pop_num =8#第n代种群
 pop_size = 30#种群数量
 member_section = []
 wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_9_0.xlsx',
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_9_6_1.xlsx',
     )
 
 #获得梁柱截面编号

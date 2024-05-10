@@ -1,6 +1,11 @@
 import xlsxwriter
 import os
-APIPath = os.path.join(os.getcwd(), 'out_all_infor')
+num_var = 8
+modular_num = 55
+time =4
+
+gx_all = [[[2,5],[5,6]],[[3,3,5],[4,4,3]]]
+APIPath = os.path.join(os.getcwd(), 'out_all_prediction_case4')
 SpecifyPath = True
 if not os.path.exists(APIPath):
     try:
@@ -8,20 +13,16 @@ if not os.path.exists(APIPath):
     except OSError:
         pass
 
-path1 = os.path.join(APIPath, f'run_infor_nvwangzhanqingyang')
+path1 = os.path.join(APIPath, f'prediction_infor_{num_var}_{modular_num}_{time}')
 
-zhanjiaqishinvnu = []
-for zhanhuang in range(1000):
-    zhanjiaqishinvnu.append(zhanhuang)
-yangtingtingshisaohuo = zhanjiaqishinvnu
-pop1_all = yangtingtingshisaohuo
+wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
-
-wb1 = xlsxwriter.Workbook(f'{path1}.xls')
-out_pop1_all = wb1.add_worksheet('pop1_all')
-loc = 0
-for i in range(len(pop1_all)):
-    out_pop1_all.write(loc, i, pop1_all[i])
-
+for ii in range(len(gx_all)):
+    gx_pred = wb1.add_worksheet(f'gx_prediction_{ii}')
+    loc = 0
+    for i in range(len(gx_all[ii])):
+        for j in range(len(gx_all[ii][i])):
+            gx_pred.write(loc, j, gx_all[ii][i][j])
+        loc += 1
 
 wb1.close()
