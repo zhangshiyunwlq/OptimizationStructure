@@ -76,7 +76,7 @@ def get_info(iter_num):
     pop_room = []
     pop_brace = []
     wb = openpyxl.load_workbook(
-        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_7_6_1.xlsx',
+        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{al_time}.xlsx',
     )
     sheet1 = wb['pop1_all']
     for z in range(3*zone_num):
@@ -106,7 +106,7 @@ def draw_corr_conn(cons_all,nodes_all,corrs_all):
         plt.plot(node[0], node[1], 'ro', markersize=2.5, color='grey')
 
 
-def draw_frame():
+def draw_frame(all_indx_draw,pop_room,pop_brace):
     for i in range(len(all_indx_draw)):
 
         modular_type1 = [ii for ii in range(3)]
@@ -189,6 +189,36 @@ def draw_frame():
                 plt.plot(x_values, y_values, 'b-', color=c, linewidth=2.5)
 
 
+def all_indx(all_it):
+    for ite in all_it:
+        # 读取优化信息
+        pop_room, pop_brace, brace_dis = get_info(ite)
+        # 生成一个侧面的房间编号
+        temp_indx = [i for i in range(8)]
+        all_indx_draw = []
+        for i in range(story_num):
+            te = []
+            for j in range(len(temp_indx)):
+                te.append(temp_indx[j] + i * modular_length_num * 2)
+            all_indx_draw.extend(te)
+
+        draw_frame(all_indx_draw, pop_room, pop_brace)
+        draw_corr_conn(all_joint_hor, nodes_all, all_joint_ver)
+
+        # 设置坐标轴范围
+        plt.xlim(-3, 80)
+        plt.ylim(-5, 90)
+
+        # 设置坐标轴标签
+        plt.xlabel('X')
+        plt.ylabel('Y')
+
+        # 显示图形
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.show()
+
+
+
 '''model data'''
 # modular size
 #建筑参数
@@ -201,9 +231,9 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 6#整个建筑的模块种类
+modular_num = 3#整个建筑的模块种类
 
-num_var = 8
+
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -238,33 +268,9 @@ for i in range(len(fit_ini)):
 for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
 
+num_var = 5
+al_time = 4
 
+all_in=[249]
+all_indx(all_in)
 
-#读取优化信息
-pop_room,pop_brace,brace_dis = get_info(139)
-#生成一个侧面的房间编号
-temp_indx = [i for i in range(8)]
-all_indx_draw = []
-for i in range(story_num):
-    te = []
-    for j in range(len(temp_indx)):
-        te.append(temp_indx[j]+i*modular_length_num*2)
-    all_indx_draw.extend(te)
-
-
-draw_frame()
-draw_corr_conn(all_joint_hor,nodes_all,all_joint_ver)
-
-
-
-# 设置坐标轴范围
-plt.xlim(-3, 80)
-plt.ylim(-5,90)
-
-# 设置坐标轴标签
-plt.xlabel('X')
-plt.ylabel('Y')
-
-# 显示图形
-plt.gca().set_aspect('equal', adjustable='box')
-plt.show()

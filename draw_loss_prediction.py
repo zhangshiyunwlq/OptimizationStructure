@@ -10,16 +10,28 @@ import numpy as np
 
 
 def draw_gx(gx_nor_data, gx_prediction_data):
-    gx_prediction_nonnor = gx_nonNormalization(gx_prediction_data)
-    gx_nor_nonnor = gx_nonNormalization(gx_nor_data)
+    #归一化还原
+    # gx_prediction_nonnor = gx_nonNormalization(gx_prediction_data)
+    # gx_nor_nonnor = gx_nonNormalization(gx_nor_data)
 
-    gx_prediction_draw = copy.deepcopy(gx_prediction_nonnor)
-    gx_nor_draw = copy.deepcopy(gx_nor_nonnor)
+    gx_prediction_nonnor = gx_prediction_data
+    gx_nor_nonnor = gx_nor_data
 
+
+    gx_prediction_draw1 = copy.deepcopy(gx_prediction_nonnor)
+    gx_nor_draw1 = copy.deepcopy(gx_nor_nonnor)
+
+    gx_prediction_draw = []
+    gx_nor_draw = []
+    time_num = 0
     for i in range(len(gx_prediction_nonnor)):
-        gx_prediction_draw[i] = sum(gx_prediction_draw[i])
-        gx_nor_draw[i] = sum(gx_nor_draw[i])
-
+        gx_prediction_draw.append(sum(gx_prediction_draw1[i]))
+        gx_nor_draw.append(sum(gx_nor_draw1[i]))
+        # gx_prediction_draw.append((gx_prediction_draw1[i][0]))
+        # gx_nor_draw.append((gx_nor_draw1[i][0]))
+        if gx_nor_draw[i]-gx_prediction_draw[i]<=0.3 and gx_nor_draw[i]-gx_prediction_draw[i]>=-0.3:
+            time_num +=1
+    gx_cha_num.append(time_num/len(gx_prediction_draw))
     fig2 = plt.figure(2)
     ax2 = fig2.add_subplot()
     ax2.tick_params(labelsize=30)
@@ -70,22 +82,32 @@ def gx_nonNormalization(gx):
         gx_demo[i][3] = gx_demo[i][3] * 0.05
     return gx_demo
 
-path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_9_6_0.xlsx"
-gx_prediction = pd.read_excel(io=path_memo, sheet_name="gx_prediction")
-gx_prediction_data = gx_prediction.values.tolist()
+def get_info():
+    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{time}.xlsx"
+    path_pred = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_prediction_case4\prediction_infor_{num_var}_{modular_num}_{time}.xlsx"
 
-gx_nor = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor")
-gx_nor_data = gx_nor.values.tolist()
+    gx_prediction = pd.read_excel(io=path_pred, sheet_name=f"gx_prediction_{num}")
+    gx_prediction_data = gx_prediction.values.tolist()
 
-loss = pd.read_excel(io=path_memo, sheet_name="memorize_loss")
-loss_data = loss.values.tolist()
+    gx_nor = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor")
+    gx_nor_data = gx_nor.values.tolist()
 
-loss_all = []
-for i in range(len(loss_data)):
-    loss_all.extend(loss_data[i])
+    loss = pd.read_excel(io=path_memo, sheet_name="memorize_loss")
+    loss_data = loss.values.tolist()
 
-# draw_loss(loss_all)
+    loss_all = []
+    for i in range(len(loss_data)):
+        loss_all.extend(loss_data[i])
+    # draw_loss(loss_all)
+    draw_gx(gx_nor_data,gx_prediction_data)
 
-draw_gx(gx_nor_data,gx_prediction_data)
 
 
+num_var = 9
+modular_num = 6
+time = 0
+num_pred = 7
+gx_cha_num = []
+for num in range(num_pred):
+    get_info()
+print(gx_cha_num)

@@ -349,7 +349,7 @@ def decoding_modular_section(pop2):
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
     sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                      cfg_file_name="Steel_section_data.ini")
+                                                                      cfg_file_name="Steel_section_data_I_cube.ini")
     modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
     # 按房间分好节点
     modulars_of_building = modular_building.building_modulars
@@ -370,7 +370,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
     ret = SapModel.SetModelIsLocked(False)
     return aa,bb,cc,dd,ee,ff,gg,hh,ii
 
-def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
+def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     g_col_all = 0
     g_beam_all = 0
     Y_dis_radio_all = 0
@@ -430,8 +430,13 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     dis_all_max = max(dis_all[5])
     interdis_max = max(dis_all[7])
     g_all_max = max(g_col_max,g_beam_max)
-    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
-    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
+    rate_nonzero = copy.deepcopy(rate)
+    if rate_nonzero<=0.3:
+        rate_nonzero =0
+    else:
+        rate_nonzero=rate_nonzero
+    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all)+rate_nonzero)
+    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max),rate]
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
 
@@ -493,8 +498,9 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
                                                                                              pop,
                                                                                              pop_room_label)
-
-            res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000)
+            num_zero = pop_room_label.count(0)
+            nonzero_rate = (len(pop_room_label)-num_zero)/len(pop_room_label)
+            res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000,nonzero_rate)
 
             # num3 += 1
             weight_1[time] = res2
@@ -572,7 +578,9 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
         # wb2_examine_ind.save('examine_individual.xlsx')
         # pop_all.append(pop)
         we,co,be,r1,r2,r3,r4,dis_all,force_all =mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop,pop_room_label)
-        res1,res2,gx,gx_demo = Fun_1(we, co, be,dis_all,force_all, 10000)
+        num_zero = pop_room_label.count(0)
+        nonzero_rate = (len(pop_room_label) - num_zero) / len(pop_room_label)
+        res1,res2,gx,gx_demo = Fun_1(we, co, be,dis_all,force_all, 10000,nonzero_rate)
         # num3 += 1
         weight_1.append(res2)
         col_up.append(co)
@@ -1004,7 +1012,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
         # 引入新个体
         run_time +=1
-        if run_time % 20 == 0:
+        if run_time % 3 == 0:
             pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
@@ -1028,7 +1036,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             all_pred.append(fitness_prediction)
 
 
-        if run_time % 20 == 0:
+        if run_time % 3 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding_modular_section(pop2)
@@ -1071,7 +1079,7 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 6#整个建筑的模块种类
+modular_num = 3#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -1094,11 +1102,11 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 #优化参数
 DNA_SIZE = 4*story_num+modular_length_num*2*story_num
-POP_SIZE = 30
+POP_SIZE = 3
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.2
-N_GENERATIONS = 140
-num_thread =10
+MUTATION_RATE = 0.1
+N_GENERATIONS = 4
+num_thread =3
 
 min_genera = []
 
@@ -1108,7 +1116,7 @@ num_room_type=1
 
 
 
-x = np.linspace(0, 13, 14)
+x = np.linspace(0, 11, 12)
 # x = np.array([2,4,6,8,10,12])
 
 num_room_type=1
@@ -1149,8 +1157,8 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-for num_var in [9]:
-    for time in range(1,3):
+for num_var in [5]:
+    for time in range(66,67):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

@@ -69,7 +69,7 @@ def area_sort():
     return list_new
 
 
-def draw_3d_modular():
+def draw_3d_modular(brace_dis,brace_type,member_section):
     p = pv.Plotter(shape=(1, 1))
     x = all_draw_node[:, 0]
     y = all_draw_node[:, 1]
@@ -143,10 +143,39 @@ def draw_3d_modular():
     p.set_background('white')
     p.show()
 
+def draw_all():
+    member_section = []
+    wb = openpyxl.load_workbook(
+        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{time}.xlsx',
+        )
+    for pop_num in all_it:
+        #获得梁柱截面编号
+        sheet2 = wb['pop2_all']
+        all_code =[]
+        for z in range(num_var):
+            rows = sheet2.cell(pop_num * (pop_size + 1) + 2, z + 1).value
+            all_code.append(rows)
+
+        member_section_temp = []
+        for z in range(num_var+num_room_type,num_var+num_room_type+section_num):
+            rows = sheet2.cell(pop_num * (pop_size + 1) + 2, z + 1).value
+            member_section_temp.append(rows)
+
+        for i in range(len(member_section_temp)):
+            member_section.append(all_code[int(member_section_temp[i])])
+        #获得支撑类型
+        brace_type = sheet2.cell(pop_num * (pop_size + 1) + 2, num_var + 1).value
+        #获得支撑分布情况
+        brace_dis = []
+        for z in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
+            rows = sheet2.cell(pop_num * (pop_size + 1) + 2, z + 1).value
+            brace_dis.append(rows)
+
+        draw_3d_modular(brace_dis,brace_type,member_section)
 
 #模块定位点
 # location = [[0,0,0],[6000,0,0],[12000,0,0],[18000,0,0],[24000,0,0],[0,0,12000],[6000,0,12000],[12000,0,12000],[18000,0,12000],[24000,0,12000]]
-location = [[0,0,0],[6000,0,0],[12000,0,0],[0,0,9000],[6000,0,9000],[12000,0,9000]]
+location = [[0,0,0],[6000,0,0],[12000,0,0]]
 #一个模块所有点坐标，柱编号、顶梁编号、底梁编号、所有模块的节点、支撑数据,模块节点编号
 all_point,column_num,top_beam_num,bottom_beam_num,all_draw_node,brace_data,modular_num_all,modular_sectione_all = generative_data()
 #按照截面大小排序
@@ -156,7 +185,7 @@ modular_length_num= 8
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 6#整个建筑的模块种类
+modular_num = 3#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -165,30 +194,12 @@ group_num = int(story_num / story_group)
 modular_all = modular_length_num * 2 *story_num
 
 
-num_var = 9
+num_var = 5
+time = 4
 num_room_type = 1
 num_room = 1
-pop_num =8#第n代种群
 pop_size = 30#种群数量
-member_section = []
-wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_9_6_1.xlsx',
-    )
+all_it = [139]
 
-#获得梁柱截面编号
-sheet2 = wb['pop2_all']
-for z in range(num_var+num_room_type,num_var+num_room_type+section_num):
-    rows = sheet2.cell(pop_num * (pop_size + 1) + 2, z + 1).value
-    member_section.append(rows)
-#获得支撑类型
-brace_type = sheet2.cell(pop_num * (pop_size + 1) + 2, num_var + 1).value
-#获得支撑分布情况
-brace_dis = []
-for z in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
-    rows = sheet2.cell(pop_num * (pop_size + 1) + 2, z + 1).value
-    brace_dis.append(rows)
-
-draw_3d_modular()
-
-
+draw_all()
 

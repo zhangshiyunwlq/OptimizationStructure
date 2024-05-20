@@ -2797,6 +2797,12 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
     return result,weight,gx,gx_demo
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
+    # 建立房间信息
+    sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
+                                                                      cfg_file_name="Steel_section_data_I_cube.ini")
+    modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
+    # 按房间分好节点
+    modulars_of_building = modular_building.building_modulars
 
     modular_infos = {}
     # 每个房间定义梁柱截面信息
@@ -2934,27 +2940,27 @@ pop_room_label = []
 
 #使用openxyxl读取信息
 
-wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_6_0.xlsx',
-    )
-sheet1 = wb['pop1_all']
-for z in range(48):
-    rows = sheet1.cell(4311,z+1).value
-    pop_room.append(rows)
-sheet1 = wb['pop3_all']
-for z in range(modular_length_num*2*story_num):
-    rows = sheet1.cell(4311,z+1).value
-    pop_room_label.append(rows)
+# wb = openpyxl.load_workbook(
+#     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_6_0.xlsx',
+#     )
+# sheet1 = wb['pop1_all']
+# for z in range(48):
+#     rows = sheet1.cell(4311,z+1).value
+#     pop_room.append(rows)
+# sheet1 = wb['pop3_all']
+# for z in range(modular_length_num*2*story_num):
+#     rows = sheet1.cell(4311,z+1).value
+#     pop_room_label.append(rows)
+#
 
 
-
-# pop_room = []
-# pop_room_label = []
-# for i in range(story_num*3):
-#     pop_room.append(11)
-# # pop_room = all_GA_infor[0]
-# for i in range(modular_length_num*2*story_num):
-#     pop_room_label.append(0)
+pop_room = []
+pop_room_label = []
+for i in range(48):
+    pop_room.append(12)
+# pop_room = all_GA_infor[0]
+for i in range(modular_length_num*2*story_num):
+    pop_room_label.append(0)
 
 
 

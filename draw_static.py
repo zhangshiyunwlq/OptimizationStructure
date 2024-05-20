@@ -72,8 +72,8 @@ def draw_picture(info2,name,title_name):
         # legend_labels = ['200*200', '50*50', '100*100']
         # plt.legend(legend_handles, legend_labels,fontsize=20)
 
-    ax2.set(xlim=(0, 160), ylim=(0, 1000),
-           xticks=np.arange(0, 160, 20),
+    ax2.set(xlim=(0, 280), ylim=(0, 1000),
+           xticks=np.arange(0, 280, 20),
            yticks=np.arange(0, 1000, 100))
     plt.show()
 
@@ -120,10 +120,11 @@ def draw_plot_picture(info2,data_infor):
         fit.append(info2[i][len(info2[i])-1])
 
     plt.figure(figsize=(10, 10), dpi=100)
-    plt.xticks(range(0, 12, 1))
+    plt.xticks(range(0, 14, 1))
     # plt.yticks(range(100, 500, 50))
-    plt.ylim((150, 400))
-    plt.ylim((150, 400))
+    plt.ylim((0, 700))
+    plt.xlim((0, 14))
+    z = [433.72,446.06,443.39,436.44]
     plt.scatter(num_var, fit, s=13, label='fitness')
     plt.xlabel("The number of variable", fontdict={'size': 16})
     plt.ylabel("Fitness", fontdict={'size': 16})
@@ -157,10 +158,10 @@ def static_braced(name1):
 # data_info = [[140,14,74],[140,14,75],[140,14,76],[140,14,77],[140,14,78],[140,14,79],[140,14,81]]
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
-modular_num = 6
-data_info = [[140,9,1]]
-
-infor_name = ['9-6','9-6','50*50','50*50','50*50','100*100','100*100']
+modular_num = 3
+data_info = [[140,2,0],[140,2,1],[140,3,0],[140,3,1],[140,5,0],[140,5,1],[140,5,2],[140,5,3],[140,6,0],[140,6,1],[250,5,4],[250,5,5],[250,5,6],[250,5,7]]
+data_info = [[140,5,0],[140,5,1],[140,5,2],[140,5,3],[250,5,4],[250,5,5],[250,5,6],[250,5,7]]
+infor_name = ['9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
 
 # data_info = [[200,14,65]]
@@ -171,6 +172,5 @@ infor_all = get_info(data_info)
 title_name = 'Fitness'
 
 
-draw_picture(infor_all,infor_name,title_name)
-# draw_plot_picture(infor_all,data_info)
-# static_braced(data_info)
+# draw_picture(infor_all,infor_name,title_name)
+draw_plot_picture(infor_all,data_info)
