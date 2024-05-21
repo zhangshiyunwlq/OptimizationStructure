@@ -2143,7 +2143,8 @@ def Run_GA_sap_2(mySapObject, ModelPath, SapModel, ModularBuilding,pop_room_labe
     frame_reactions_all = all_force_information[4]
     all_up_fream_name = all_force_information[5]
     all_up_fream_data = all_force_information[6]
-    weight_all1 = all_force_information[7] + weight_brace
+    # weight_all1 = all_force_information[7] + weight_brace
+    weight_all1 = all_force_information[7]
     all_up_num = all_force_information[11]
     mmm = all_force_information[8]
 

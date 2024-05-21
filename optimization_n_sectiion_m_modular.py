@@ -431,7 +431,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     interdis_max = max(dis_all[7])
     g_all_max = max(g_col_max,g_beam_max)
     rate_nonzero = copy.deepcopy(rate)
-    if rate_nonzero<=0.3:
+    if rate_nonzero<=0.4:
         rate_nonzero =0
     else:
         rate_nonzero=rate_nonzero
@@ -1012,7 +1012,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
         # 引入新个体
         run_time +=1
-        if run_time % 3 == 0:
+        if run_time % 20 == 0:
             pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
@@ -1036,7 +1036,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             all_pred.append(fitness_prediction)
 
 
-        if run_time % 3 == 0:
+        if run_time % 20 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding_modular_section(pop2)
@@ -1102,11 +1102,11 @@ joint_ver = model_data[5]
 room_indx = model_data[6]
 #优化参数
 DNA_SIZE = 4*story_num+modular_length_num*2*story_num
-POP_SIZE = 3
+POP_SIZE = 30
 CROSSOVER_RATE = 0.6
 MUTATION_RATE = 0.1
-N_GENERATIONS = 4
-num_thread =3
+N_GENERATIONS = 140
+num_thread =10
 
 min_genera = []
 
@@ -1157,8 +1157,8 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-for num_var in [5]:
-    for time in range(66,67):
+for num_var in [3]:
+    for time in range(2):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

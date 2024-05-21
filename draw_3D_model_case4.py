@@ -55,7 +55,7 @@ def generative_data():
     return all_point,column_num,top_beam_num,bottom_beam_num,all_draw_node,brace_data,modular_num_all,modular_sectione_all
 
 def area_sort():
-    area = [3642,3910,4092,4392,5292,6156,6660,6800,7600,8400,9600,10800,11600,13600]
+    area = [2080,3642,4392,5292,6660,2256,3584,4400,5600,6800,7600,8400]
     fit_ini = copy.deepcopy(area)
     luyi = copy.deepcopy(area)
     luyi.sort()

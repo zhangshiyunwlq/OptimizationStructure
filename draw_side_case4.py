@@ -256,7 +256,7 @@ for i in range(group_num):
         labels1.append(temp)
 
 #构件界面排序
-area = [3642,3910,4092,4392,5292,6156,6660,6800,7600,8400,9600,10800,11600,13600]
+area = [2080,3642,4392,5292,6660,2256,3584,4400,5600,6800,7600,8400]
 fit_ini = copy.deepcopy(area)
 luyi = copy.deepcopy(area)
 luyi.sort()
@@ -268,9 +268,9 @@ for i in range(len(fit_ini)):
 for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
 
-num_var = 5
-al_time = 4
+num_var = 3
+al_time = 0
 
-all_in=[249]
+all_in=[139]
 all_indx(all_in)
 

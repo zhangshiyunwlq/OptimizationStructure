@@ -72,8 +72,8 @@ def draw_picture(info2,name,title_name):
         # legend_labels = ['200*200', '50*50', '100*100']
         # plt.legend(legend_handles, legend_labels,fontsize=20)
 
-    ax2.set(xlim=(0, 280), ylim=(0, 1000),
-           xticks=np.arange(0, 280, 20),
+    ax2.set(xlim=(0, 150), ylim=(0, 1000),
+           xticks=np.arange(0, 150, 20),
            yticks=np.arange(0, 1000, 100))
     plt.show()
 
@@ -160,7 +160,7 @@ def static_braced(name1):
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
 data_info = [[140,2,0],[140,2,1],[140,3,0],[140,3,1],[140,5,0],[140,5,1],[140,5,2],[140,5,3],[140,6,0],[140,6,1],[250,5,4],[250,5,5],[250,5,6],[250,5,7]]
-data_info = [[140,5,0],[140,5,1],[140,5,2],[140,5,3],[250,5,4],[250,5,5],[250,5,6],[250,5,7]]
+data_info = [[140,3,0]]
 infor_name = ['9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
 
@@ -172,5 +172,5 @@ infor_all = get_info(data_info)
 title_name = 'Fitness'
 
 
-# draw_picture(infor_all,infor_name,title_name)
-draw_plot_picture(infor_all,data_info)
+draw_picture(infor_all,infor_name,title_name)
+# draw_plot_picture(infor_all,data_info)
