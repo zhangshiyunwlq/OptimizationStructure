@@ -55,7 +55,7 @@ def draw_picture(info2,name,title_name):
     info = copy.deepcopy(info2)
 
     for i in range(len(info)):
-        if name[i] =='200*200':
+        if name[i] =='GA':
             co = 'r'
         elif name[i] =='9-6':
             co = 'black'
@@ -119,15 +119,26 @@ def draw_plot_picture(info2,data_infor):
         num_var.append(data_infor[i][1])
         fit.append(info2[i][len(info2[i])-1])
 
-    plt.figure(figsize=(10, 10), dpi=100)
-    plt.xticks(range(0, 14, 1))
+    fig2 =plt.figure(figsize=(10, 10), dpi=100)
+    ax2 = fig2.add_subplot(111)
+    ax2.set(xlim=(0, 14), ylim=(0, 700),
+           xticks=np.arange(0, 14, 1),
+           yticks=np.arange(0, 700, 100))
+    # ax2.xticks(range(0, 14, 1))
     # plt.yticks(range(100, 500, 50))
-    plt.ylim((0, 700))
-    plt.xlim((0, 14))
+    # ax2.ylim((0, 700))
+    # ax2.xlim((0, 14))
+    ax2.spines['bottom'].set_linewidth(3);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(3)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
     z = [433.72,446.06,443.39,436.44]
-    plt.scatter(num_var, fit, s=13, label='fitness')
-    plt.xlabel("The number of variable", fontdict={'size': 16})
-    plt.ylabel("Fitness", fontdict={'size': 16})
+    ax2.scatter(num_var, fit, s=18, label='fitness')
+    ax2.set_xlabel("The number of section", fontsize=30)
+    ax2.set_ylabel("Fitness", fontsize=30)
+    ax2.tick_params(labelsize=25)
+    # ax2.xlabel("The number of variable", fontdict={'size': 16})
+    # ax2.ylabel("Fitness", fontdict={'size': 16})
     # plt.title("历年天猫双11总成交额", fontdict={'size': 20})
     plt.show()
 
@@ -159,9 +170,9 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
-data_info = [[140,2,0],[140,2,1],[140,3,0],[140,3,1],[140,5,0],[140,5,1],[140,5,2],[140,5,3],[140,6,0],[140,6,1],[250,5,4],[250,5,5],[250,5,6],[250,5,7]]
-data_info = [[140,3,0]]
-infor_name = ['9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
+data_info = [[140,3,0],[140,3,1],[140,5,2],[140,5,6],[140,7,0]]
+# data_info = [[140,3,1]]
+infor_name = ['GA','GA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
 
 # data_info = [[200,14,65]]
@@ -172,5 +183,5 @@ infor_all = get_info(data_info)
 title_name = 'Fitness'
 
 
-draw_picture(infor_all,infor_name,title_name)
-# draw_plot_picture(infor_all,data_info)
+# draw_picture(infor_all,infor_name,title_name)
+draw_plot_picture(infor_all,data_info)

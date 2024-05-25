@@ -436,7 +436,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     else:
         rate_nonzero=rate_nonzero
     G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all)+rate_nonzero)
-    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max),rate]
+    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max),rate,weight]
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
 
@@ -444,13 +444,13 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     if gx_demo[0]>=5:
         gx_demo[0]=1
     elif gx_demo[0]<=-1:
-        gx_demo[0] = -1
+        gx_demo[0] = 0
     elif gx_demo[0]<=5 and gx_demo[0]>=-1:
         gx_demo[0]=(gx_demo[0]+1)/6
     if gx_demo[1]>=2:
         gx_demo[1]=1
     elif gx_demo[1]<=-1:
-        gx_demo[1] = -1
+        gx_demo[1] = 0
     elif gx_demo[1]<=2 and gx_demo[1]>=-1:
         gx_demo[1]=(gx_demo[1]+1)/3
     if gx_demo[2] >= 0.05:
@@ -461,6 +461,12 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
         gx_demo[3] = 0.05
     else:
         gx_demo[3] = gx_demo[3] / 0.05
+    if gx_demo[5] >= 700:
+        gx_demo[5] = 1
+    elif gx_demo[5] <= 350:
+        gx_demo[5] = 0
+    elif gx_demo[5] <= 750 and gx_demo[5] >= 350:
+        gx_demo[5] = (gx_demo[5]-350)/350
     return result,weight,gx,gx_demo
 
 def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
@@ -763,13 +769,13 @@ def gx_Normalization(gx):
         if gx_demo[i][0]>=5:
             gx_demo[i][0]=1
         elif gx_demo[i][0]<=-1:
-            gx_demo[i][0] = -1
+            gx_demo[i][0] = 0
         elif gx_demo[i][0]<=5 and gx_demo[i][0]>=-1:
             gx_demo[i][0]=(gx_demo[i][0]+1)/6
         if gx_demo[i][1]>=2:
             gx_demo[i][1]=1
         elif gx_demo[i][1]<=-1:
-            gx_demo[i][1] = -1
+            gx_demo[i][1] = 0
         elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
             gx_demo[i][1]=(gx_demo[i][1]+1)/3
         if gx_demo[i][2] >= 0.05:
@@ -780,6 +786,12 @@ def gx_Normalization(gx):
             gx_demo[i][3] = 0.05
         else:
             gx_demo[i][3] = gx_demo[i][3] / 0.05
+        if gx_demo[5] >= 700:
+            gx_demo[5] = 1
+        elif gx_demo[5] <= 350:
+            gx_demo[5] = 0
+        elif gx_demo[5] <= 750 and gx_demo[5] >= 350:
+            gx_demo[5] = (gx_demo[5] - 350) / 350
     return gx_demo
 
 def gx_nonNormalization(gx):
@@ -789,6 +801,7 @@ def gx_nonNormalization(gx):
         gx_demo[i][1] = gx_demo[i][1] * 3-1
         gx_demo[i][2] = gx_demo[i][2] * 0.05
         gx_demo[i][3] = gx_demo[i][3] * 0.05
+        gx_demo[i][5] = gx_demo[i][3] * 350+350
     return gx_demo
 
 def generation_population_modular_section(best_indivi,rate):
@@ -851,8 +864,19 @@ def Gx_convert(fitness1):
     for j in range(len(fitness3)):
         fitness4.append(fitness3[j].tolist())
     fitness4=gx_nonNormalization(fitness4)
+    fitness5 = copy.deepcopy(fitness4)
     for j in range(len(fitness3)):
-        fitness2.append(sum(fitness4[j]))
+        # fitness2.append(sum(fitness4[j]))
+        if fitness5[j][0]<=0:
+            fitness5[j][0] =0
+        if fitness5[j][1] <= 0:
+            fitness5[j][1] = 0
+        if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
+            fitness5[j][2] =0
+        if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
+            fitness5[j][3] = 0
+
+        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+fitness5[j][4]))
     return fitness2
 
 def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
@@ -996,7 +1020,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         col_up_all.append(clo_up_1)
         beam_up_all.append(beam_up_1)
         pop_all_weight.append(weight_pop)
-        fitness2 =result1
+        fitness2 =copy.deepcopy(result1)
         pop_all_fitness.append(fitness2)
         mm = fitness2.index(min(fitness2))
         weight_min.append(weight_pop[mm])
@@ -1065,6 +1089,87 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction
 
+def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
+    pop2= generate_coding_modular_section(x)
+    pop_decoe_1 = copy.deepcopy(pop2)
+    pop1,pop3 = decoding_modular_section(pop2)
+
+    pop_zhongqun_all = []  # 记录每代种群（不重复）
+    pop_zhongqun_all_2 = []#记录种群所有
+    pop_zhongqun_all_3 = []
+    memory_pools_all = []
+    memory_pools_fit = []
+    memory_pools_weight = []
+    memory_pools_col = []
+    memory_pools_beam = []
+    col_up_all= []
+    beam_up_all=[]
+    pop_all_weight=[]
+    pop_all_fitness=[]
+    weight_min=[]
+    min_ru = []
+    sap_run_time = 0
+    predict_time = 0
+    all_pred = []
+    for run_time in range(N_GENERATIONS):
+        pop_zhongqun_all.append(pop1)
+        pop_zhongqun_all_2.append(pop2)
+        pop_zhongqun_all_3.append(pop3)
+
+        # 计算fitness等参数
+        fit = [0 for i in range(len(pop2))]
+        weight = [0 for i in range(len(pop2))]
+        clo_val = [0 for i in range(len(pop2))]
+        beam_val = [0 for i in range(len(pop2))]
+        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
+
+        col_up_all.append(clo_up_1)
+        beam_up_all.append(beam_up_1)
+        pop_all_weight.append(weight_pop)
+        fitness2 =result1
+        pop_all_fitness.append(fitness2)
+        mm = fitness2.index(min(fitness2))
+        weight_min.append(weight_pop[mm])
+        min1 = min(fitness2)
+        mm2 = pop1[mm]# 最小值对应pop1编码
+        mm2_all = pop2[mm]# 最小值对应pop2编码
+        mm2_all3 = pop3[mm]  # 最小值对应pop3编码
+        min_ru.append(min(fitness2))# 统计历代最小值
+        #选择
+        pop2 = select_2(pop2, fitness2)
+        #交叉变异
+        pop2 = crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE)
+
+
+
+        if run_time % 20 == 0:
+            print(run_time)
+            print(f'记忆池数量:{len(memorize_pool)}')
+        pop1, pop3 = decoding_modular_section(pop2)
+
+        aaa = []
+        aaa.append(pop1[0])
+        pop3_ga = []
+        pop3_ga.append(pop3[0])
+        # if max1 <= m.log(GA(aaa,pop3_ga)[0][0]):
+        if min1 <=GA_examine(ModelPath_name[0],mySapObject_name[0], SapModel_name[0],aaa, pop3_ga)[0][0]:
+            sap_run_time += 1
+            pop1[0] = mm2
+            pop2[0] = mm2_all
+            pop3[0] = mm2_all3
+
+    # out_put_prediction_gx(all_pred, predict_time)
+    for i in range(len(mySapObject_name)):
+        ret = mySapObject_name[i].ApplicationExit(False)
+        SapModel_name[i] = None
+        mySapObject_name[i] = None
+
+
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
+
+
+
+    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
 
 '''model data'''
@@ -1104,7 +1209,7 @@ room_indx = model_data[6]
 DNA_SIZE = 4*story_num+modular_length_num*2*story_num
 POP_SIZE = 30
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.1
+MUTATION_RATE = 0.2
 N_GENERATIONS = 140
 num_thread =10
 
@@ -1157,8 +1262,8 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-for num_var in [3]:
-    for time in range(2):
+for num_var in [5]:
+    for time in range(7,9):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1181,6 +1286,8 @@ for num_var in [3]:
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        # zhan, jia, qi = GA_run_modular(ModelPath_name, mySapObject_name, SapModel_name, num_var,
+        #                                                    num_room_type, x, labels, time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num,fitness_prediction)
         # draw_loss(num_var, time)
         gc.collect()

@@ -103,9 +103,9 @@ def get_info():
 
 
 
-num_var = 9
-modular_num = 6
-time = 0
+num_var = 5
+modular_num = 3
+time = 7
 num_pred = 7
 gx_cha_num = []
 for num in range(num_pred):
