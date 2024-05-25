@@ -786,12 +786,12 @@ def gx_Normalization(gx):
             gx_demo[i][3] = 0.05
         else:
             gx_demo[i][3] = gx_demo[i][3] / 0.05
-        if gx_demo[5] >= 700:
-            gx_demo[5] = 1
-        elif gx_demo[5] <= 350:
-            gx_demo[5] = 0
-        elif gx_demo[5] <= 750 and gx_demo[5] >= 350:
-            gx_demo[5] = (gx_demo[5] - 350) / 350
+        if gx_demo[i][5] >= 700:
+            gx_demo[i][5] = 1
+        elif gx_demo[i][5] <= 350:
+            gx_demo[i][5] = 0
+        elif gx_demo[i][5] <= 750 and gx_demo[i][5] >= 350:
+            gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
     return gx_demo
 
 def gx_nonNormalization(gx):
@@ -801,7 +801,7 @@ def gx_nonNormalization(gx):
         gx_demo[i][1] = gx_demo[i][1] * 3-1
         gx_demo[i][2] = gx_demo[i][2] * 0.05
         gx_demo[i][3] = gx_demo[i][3] * 0.05
-        gx_demo[i][5] = gx_demo[i][3] * 350+350
+        gx_demo[i][5] = gx_demo[i][5] * 350+350
     return gx_demo
 
 def generation_population_modular_section(best_indivi,rate):
@@ -1209,7 +1209,7 @@ room_indx = model_data[6]
 DNA_SIZE = 4*story_num+modular_length_num*2*story_num
 POP_SIZE = 30
 CROSSOVER_RATE = 0.6
-MUTATION_RATE = 0.2
+MUTATION_RATE = 0.1
 N_GENERATIONS = 140
 num_thread =10
 
@@ -1263,7 +1263,7 @@ for i in range(group_num):
         labels1.append(temp)
 
 for num_var in [5]:
-    for time in range(7,9):
+    for time in range(9,10):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
