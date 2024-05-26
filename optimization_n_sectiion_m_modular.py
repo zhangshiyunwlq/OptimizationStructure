@@ -714,9 +714,9 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
     # for i in range(len(list_new)):
     #     list_new[i] = m.e ** (list_new[i] * 1.5)
-    idx = np.random.choice(np.arange(POP_SIZE), size=POP_SIZE, replace=True,
+    idx = np.random.choice(np.arange(len(pop)), size=len(pop), replace=True,
                            p=np.array(sort_num) / (sum(sort_num)))
-    pop2 = np.zeros((POP_SIZE, len(pop[0])))
+    pop2 = np.zeros((len(pop), len(pop[0])))
     for i in range(len(pop2)):
         pop2[i] = pop[int(idx[i])]
     return pop2
@@ -1112,7 +1112,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction
-
+#GA算法
 def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_coding_modular_section(x)
     pop_decoe_1 = copy.deepcopy(pop2)
@@ -1195,6 +1195,9 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
+#续跑算法
+def continue_DNN_GA():
+    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{time}.xlsx"
 
 '''model data'''
 # modular size
@@ -1288,7 +1291,7 @@ for i in range(group_num):
         labels1.append(temp)
 
 for num_var in [5]:
-    for time in range(9,10):
+    for time in range(11,12):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
