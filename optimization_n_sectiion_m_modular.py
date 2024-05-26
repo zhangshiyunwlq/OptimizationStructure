@@ -1308,6 +1308,7 @@ for num_var in [5]:
         memorize_gx_local = []
         history_loss = []
         history_mae = []
+        DNN_prediction_fitness = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
