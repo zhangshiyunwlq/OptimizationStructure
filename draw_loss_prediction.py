@@ -8,6 +8,20 @@ import pandas as pd
 import math
 import numpy as np
 
+def gx_data_convert(gx_prediction_draw):
+    fitness5 = copy.deepcopy(gx_prediction_draw)
+    gx_prediction = []
+    for j in range(len(gx_prediction_draw)):
+        if fitness5[j][0]<=0:
+            fitness5[j][0] =0
+        if fitness5[j][1] <= 0:
+            fitness5[j][1] = 0
+        if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
+            fitness5[j][2] =0
+        if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
+            fitness5[j][3] = 0
+        gx_prediction.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+fitness5[j][4]))
+    return gx_prediction
 
 def draw_gx(gx_nor_data, gx_prediction_data):
     #归一化还原
@@ -25,13 +39,16 @@ def draw_gx(gx_nor_data, gx_prediction_data):
     gx_nor_draw = []
     time_num = 0
     for i in range(len(gx_prediction_nonnor)):
-        gx_prediction_draw.append(sum(gx_prediction_draw1[i]))
-        gx_nor_draw.append(sum(gx_nor_draw1[i]))
+        # gx_prediction_draw.append(sum(gx_prediction_draw1[i]))
+        # gx_nor_draw.append(sum(gx_nor_draw1[i]))
         # gx_prediction_draw.append((gx_prediction_draw1[i][0]))
         # gx_nor_draw.append((gx_nor_draw1[i][0]))
-        if gx_nor_draw[i]-gx_prediction_draw[i]<=0.3 and gx_nor_draw[i]-gx_prediction_draw[i]>=-0.3:
-            time_num +=1
-    gx_cha_num.append(time_num/len(gx_prediction_draw))
+        gx_prediction_draw = gx_data_convert(gx_prediction_draw1)
+        gx_nor_draw2 = gx_data_convert(gx_nor_draw1)
+        gx_nor_draw = gx_nor_draw2[0:len(gx_prediction_draw)]
+    #     if gx_nor_draw[i]-gx_prediction_draw[i]<=0.3 and gx_nor_draw[i]-gx_prediction_draw[i]>=-0.3:
+    #         time_num +=1
+    # gx_cha_num.append(time_num/len(gx_prediction_draw))
     fig2 = plt.figure(2)
     ax2 = fig2.add_subplot()
     ax2.tick_params(labelsize=30)
@@ -105,7 +122,7 @@ def get_info():
 
 num_var = 5
 modular_num = 3
-time = 7
+time = 9
 num_pred = 7
 gx_cha_num = []
 for num in range(num_pred):

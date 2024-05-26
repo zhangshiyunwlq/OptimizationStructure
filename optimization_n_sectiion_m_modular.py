@@ -109,6 +109,26 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
 
     wb1.close()
 
+def out_put_fitness_prediction(DNN_fit_pred):
+    APIPath = os.path.join(os.getcwd(), 'out_all_DNN_fitness_case4')
+    SpecifyPath = True
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+
+    path1 = os.path.join(APIPath, f'prediction_fitness_{num_var}_{modular_num}_{time}')
+    wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
+    fit_pred = wb1.add_worksheet(f'DNN_fitness')
+    loc = 0
+    for ii in range(len(DNN_fit_pred)):
+
+        for i in range(len(DNN_fit_pred[ii])):
+            fit_pred.write(loc,i, DNN_fit_pred[ii][i])
+        loc += 1
+
+    wb1.close()
 
 def out_put_prediction_gx(gx_all,time_pr):
     APIPath = os.path.join(os.getcwd(), 'out_all_prediction_case4')
@@ -808,7 +828,7 @@ def generation_population_modular_section(best_indivi,rate):
 
     best_in = copy.deepcopy(best_indivi)
     best_in.tolist()
-    pop = np.zeros((POP_SIZE,len(best_in)))
+    pop = np.zeros((50,len(best_in)))
     for i in range(len(pop)):
         if num_var != len(x):
             for mutate_point in range(num_var):
@@ -931,20 +951,23 @@ def mutation_GA_for_DNN_modular(child,num_var,MUTATION_RATE):
 
 
 def GA_for_DNN(run_time,pop2,model):
+    fitness_pred = []
     for i in range(run_time):
         fitness1 = model.predict(pop2,verbose=0)
         fitness2 = Gx_convert(fitness1)#归一化还原，并将每个染色体对应的gx累加
         mm = fitness2.index(min(fitness2))
         min1 = min(fitness2)
+        fitness_pred.append(min1)
         mm2_all = pop2[mm]
         #选择
         pop2 = select_2(pop2, fitness2)
         # 交叉变异
-        pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE*0.5)
+        pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE)
         fit_pred = model.predict(pop2,verbose=0)
         fit_pred2=Gx_convert(fit_pred)
         if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
+    DNN_prediction_fitness.append(fitness_pred)
     return pop2
 
 def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
@@ -976,8 +999,8 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     history_mae.append(history.history['mae'])
     pop_best = []
     for i in range(num_ind):
-        pop1 = generation_population_modular_section(best_indivi, 0.2)#根据最好个体生成种群
-        pop2 = pop1
+        pop1 = generation_population_modular_section(best_indivi, 0.25)#根据最好个体生成种群
+        pop2 = copy.deepcopy(pop1)
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
@@ -1037,7 +1060,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         # 引入新个体
         run_time +=1
         if run_time % 20 == 0:
-            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
+            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],400)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
                 pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
@@ -1077,6 +1100,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             pop3[0] = mm2_all3
 
     out_put_prediction_gx(all_pred, predict_time)
+
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
         SapModel_name[i] = None
@@ -1084,7 +1108,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
 
     out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
-
+    out_put_fitness_prediction(DNN_prediction_fitness)
 
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction
@@ -1247,6 +1271,7 @@ memorize_beam_local=[]
 memorize_gx_local=[]
 history_loss = []
 history_mae = []
+DNN_prediction_fitness= []
 # label=[1,1,1,1,2,2,2,2]
 # labels = []
 # for i in range(12):
