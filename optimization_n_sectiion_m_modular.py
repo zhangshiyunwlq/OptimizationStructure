@@ -8,6 +8,7 @@ import threading
 import queue
 import math as m
 import os
+import pandas as pd
 import sys
 import xlrd
 import matplotlib.pyplot as plt
@@ -1195,10 +1196,169 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
-#续跑算法
-def continue_DNN_GA():
-    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{time}.xlsx"
 
+def get_continue_data():
+    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{time}.xlsx"
+    path_infor = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{time}.xlsx"
+    gx_nor = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor")
+    gx_nor_data = gx_nor.values.tolist()
+
+    memorize_pool_pop1 = pd.read_excel(io=path_memo, sheet_name="memorize_pool")
+    memorize_pool = memorize_pool_pop1.values.tolist()
+
+    memorize_fit1 = pd.read_excel(io=path_memo, sheet_name="memorize_fit")
+    memorize_fit = memorize_fit1.values.tolist()
+
+    memorize_weight1 = pd.read_excel(io=path_memo, sheet_name="memorize_weight")
+    memorize_weight = memorize_weight1.values.tolist()
+
+    memorize_gx1 = pd.read_excel(io=path_memo, sheet_name="memorize_gx")
+    memorize_gx = memorize_gx1.values.tolist()
+
+    gx_prediction1 = pd.read_excel(io=path_memo, sheet_name="gx_prediction")
+    gx_prediction = gx_prediction1.values.tolist()
+
+    memorize_loss1 = pd.read_excel(io=path_memo, sheet_name="memorize_loss")
+    memorize_loss = memorize_loss1.values.tolist()
+
+    memorize_mae1 = pd.read_excel(io=path_memo, sheet_name="memorize_mae")
+    memorize_mae = memorize_mae1.values.tolist()
+
+    memorize_gx_nor1 = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor")
+    memorize_gx_nor = memorize_gx_nor1.values.tolist()
+
+    memorize_num1 = pd.read_excel(io=path_memo, sheet_name="memorize_num")
+    memorize_num = memorize_num1.values.tolist()
+
+    pop2_best1 = pd.read_excel(io=path_infor, sheet_name="pop2_all")
+    pop2_fitness1 = pd.read_excel(io=path_infor, sheet_name="pop_all_fitness")
+    pop2_pool_all = pop2_best1.values.tolist()
+    fitness_pool_all = pop2_fitness1.values.tolist()
+    pop2_remove = []
+    fitness_remove = []
+    for i in range(len(pop2_pool_all)):
+        if i <= len(pop2_pool_all):
+            if type(pop2_pool_all[i][0]) == str:
+                pop2_remove.append(i)
+
+    for i in range(len(fitness_pool_all)):
+        if i <= len(pop2_pool_all):
+            if type(fitness_pool_all[i][0]) == str:
+                fitness_remove.append(i)
+
+    for i in range(len(pop2_remove)):
+        pop2_pool_all.remove(pop2_pool_all[int(pop2_remove[len(pop2_remove) - 1 - i])])
+
+    for i in range(len(fitness_remove)):
+        fitness_pool_all.remove(fitness_pool_all[int(fitness_remove[len(fitness_remove) - 1 - i])])
+
+    pop2_best = pop2_pool_all[(N_GENERATIONS - 1) * POP_SIZE]
+    fitness_best = fitness_pool_all[N_GENERATIONS - 1][0]
+    return fitness_best
+#续跑算法
+def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2):
+    best_individual = get_continue_data()
+    pop2_new, model = DNN_GA(num_var, num_room_type, POP_SIZE, best_individual, 400)
+    pop2_new[0] = best_individual
+    pop1, pop3 = decoding_modular_section(pop2_new)
+
+    pop_zhongqun_all = []  # 记录每代种群（不重复）
+    pop_zhongqun_all_2 = []#记录种群所有
+    pop_zhongqun_all_3 = []
+
+    col_up_all= []
+    beam_up_all=[]
+    pop_all_weight=[]
+    pop_all_fitness=[]
+    weight_min=[]
+    min_ru = []
+    sap_run_time = 0
+    predict_time = 0
+    all_pred = []
+    for run_time in range(N1,N2):
+        pop_zhongqun_all.append(pop1)
+        pop_zhongqun_all_2.append(pop2)
+        pop_zhongqun_all_3.append(pop3)
+
+        # 计算fitness等参数
+        fit = [0 for i in range(len(pop2))]
+        weight = [0 for i in range(len(pop2))]
+        clo_val = [0 for i in range(len(pop2))]
+        beam_val = [0 for i in range(len(pop2))]
+        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
+
+        col_up_all.append(clo_up_1)
+        beam_up_all.append(beam_up_1)
+        pop_all_weight.append(weight_pop)
+        fitness2 =copy.deepcopy(result1)
+        pop_all_fitness.append(fitness2)
+        mm = fitness2.index(min(fitness2))
+        weight_min.append(weight_pop[mm])
+        min1 = min(fitness2)
+        mm2 = pop1[mm]# 最小值对应pop1编码
+        mm2_all = pop2[mm]# 最小值对应pop2编码
+        mm2_all3 = pop3[mm]  # 最小值对应pop3编码
+        min_ru.append(min(fitness2))# 统计历代最小值
+        #选择
+        pop2 = select_2(pop2, fitness2)
+        #交叉变异
+        pop2 = crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE)
+
+        # 引入新个体
+        run_time +=1
+        if run_time % 20 == 0:
+            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],400)
+            exchange_num = int(0.9*len(pop2))
+            for ex_num in range(exchange_num):
+                pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
+            memorize_num.append(len(memorize_pool))
+            memorize_sum_loacl = []
+            memorize_pool_loacl = []
+            memorize_fit_loacl = []
+            memorize_weight_loacl = []
+            memorize_col_loacl = []
+            memorize_beam_loacl = []
+            memorize_gx_loacl = []
+
+            # 使用深度神经网络对记忆池中的所有个体进行预测
+            memorize_pool_temp = copy.deepcopy(memorize_pool)
+            memorize_pool_temp = np.array(memorize_pool_temp)
+            x_data_prediction = memorize_pool_temp
+
+
+            fitness_prediction = model.predict(x_data_prediction, verbose=0)
+            all_pred.append(fitness_prediction)
+
+
+        if run_time % 20 == 0:
+            print(run_time)
+            print(f'记忆池数量:{len(memorize_pool)}')
+        pop1, pop3 = decoding_modular_section(pop2)
+
+        aaa = []
+        aaa.append(pop1[0])
+        pop3_ga = []
+        pop3_ga.append(pop3[0])
+        # if max1 <= m.log(GA(aaa,pop3_ga)[0][0]):
+        if min1 <=GA_examine(ModelPath_name[0],mySapObject_name[0], SapModel_name[0],aaa, pop3_ga)[0][0]:
+            sap_run_time += 1
+            pop1[0] = mm2
+            pop2[0] = mm2_all
+            pop3[0] = mm2_all3
+
+    out_put_prediction_gx(all_pred, predict_time)
+
+    for i in range(len(mySapObject_name)):
+        ret = mySapObject_name[i].ApplicationExit(False)
+        SapModel_name[i] = None
+        mySapObject_name[i] = None
+
+
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
+    out_put_fitness_prediction(DNN_prediction_fitness)
+
+
+    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction
 '''model data'''
 # modular size
 #建筑参数
@@ -1314,9 +1474,17 @@ for num_var in [5]:
         DNN_prediction_fitness = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        #跑HIGA用
         zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
+                         memorize_gx_nor, memorize_num, fitness_prediction)
+        #跑GA用
         # zhan, jia, qi = GA_run_modular(ModelPath_name, mySapObject_name, SapModel_name, num_var,
         #                                                    num_room_type, x, labels, time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num,fitness_prediction)
+        #续跑HIGA用
+        # continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time, 140,
+        #                 200)
+        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
+        #                  memorize_gx_nor, memorize_num, fitness_prediction)
         # draw_loss(num_var, time)
         gc.collect()
