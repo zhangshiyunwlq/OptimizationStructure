@@ -511,16 +511,7 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
                     beam_up[time]=memorize_beam[i]
                     value = 1
                     break
-        # if value ==0:
-        #     if sap_run_time00<num_thread:
-        #         we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
-        #                                                                              pop,
-        #                                                                              pop_room_label)
-        #         sap_run_time00 =sap_run_time00+1
-        #     else:
-        #         we, co, be, r1, r2, r3, r4, dis_all, force_all= mulit_Sap_analy_allroom_low(ModelPath, mySapObject, SapModel,
-        #                                                                              pop,
-        #                                                                              pop_room_label)
+
         if value == 0:
             we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
                                                                                              pop,
@@ -551,6 +542,46 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
             memorize_col_local.append(col_up[time])
             memorize_beam_local.append(beam_up[time])
             memorize_gx_local.append(gx)
+
+def mulitrun_GA_continue(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
+    while True:
+        if q.empty():
+            break
+        time = q.get()
+        pop = pop1[time]
+        pop_room_label = pop3[time]
+        pop2= pop_all[time]
+
+
+        we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
+                                                                                         pop,
+                                                                                         pop_room_label)
+        num_zero = pop_room_label.count(0)
+        nonzero_rate = (len(pop_room_label)-num_zero)/len(pop_room_label)
+        res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000,nonzero_rate)
+
+        # num3 += 1
+        weight_1[time] = res2
+        col_up[time] = co
+        beam_up[time] = be
+        result[time] = res1
+        #全局记忆池
+        memorize_sum.append(sum(pop2))
+        memorize_pool.append(pop2)
+        memorize_fit.append(res1)
+        memorize_weight.append(res2)
+        memorize_col.append(col_up[time])
+        memorize_beam.append(beam_up[time])
+        memorize_gx.append(gx)
+        memorize_gx_nor.append(gx_demo)
+        # 局部记忆池
+        memorize_sum_local.append(sum(pop2))
+        memorize_pool_local.append(pop2)
+        memorize_fit_local.append(res1)
+        memorize_weight_local.append(res2)
+        memorize_col_local.append(col_up[time])
+        memorize_beam_local.append(beam_up[time])
+        memorize_gx_local.append(gx)
 
 def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
     result = []
@@ -703,6 +734,30 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
     for i in threads:
         i.join()
     return result,weight_1,col_up,beam_up
+
+def thread_sap_continue(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up):
+
+
+    pop_n = [0 for i in range(len(pop2[0]))]
+
+    q = queue.Queue()
+    threads = []
+    for i in range(len(pop1)):
+        q.put(i)
+    for i in range(num_thread):
+        if len(ModelPath_name)!=num_thread:
+            for j in range(len(ModelPath_name),num_thread):
+                mySapObject_name.append(f"mySapObject{j}")
+                SapModel_name.append(f"SapModel{j}")
+                ModelPath_name.append(f"ModelPath{j}")
+                mySapObject_name[j], ModelPath_name[j], SapModel_name[j] = SAPanalysis_GA_run2(os.path.join(os.getcwd(), f"cases{j}"))
+        t = threading.Thread(target=mulitrun_GA_continue, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00))
+        t.start()
+        threads.append(t)
+    for i in threads:
+        i.join()
+    return result,weight_1,col_up,beam_up
+
 
 def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
@@ -1197,9 +1252,9 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
 
-def get_continue_data():
-    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{time}.xlsx"
-    path_infor = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{time}.xlsx"
+def get_continue_data(file_time):
+    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{file_time}.xlsx"
+    path_infor = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{file_time}.xlsx"
     gx_nor = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor")
     gx_nor_data = gx_nor.values.tolist()
 
@@ -1254,10 +1309,9 @@ def get_continue_data():
 
     pop2_best = pop2_pool_all[(N_GENERATIONS - 1) * POP_SIZE]
     fitness_best = fitness_pool_all[N_GENERATIONS - 1][0]
-    return fitness_best
+    return fitness_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
 #续跑算法
-def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2):
-    best_individual = get_continue_data()
+def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2,best_individual):
     pop2_new, model = DNN_GA(num_var, num_room_type, POP_SIZE, best_individual, 400)
     pop2_new[0] = best_individual
     pop1, pop3 = decoding_modular_section(pop2_new)
@@ -1285,7 +1339,7 @@ def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_ro
         weight = [0 for i in range(len(pop2))]
         clo_val = [0 for i in range(len(pop2))]
         beam_val = [0 for i in range(len(pop2))]
-        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
+        result1,weight_pop,clo_up_1,beam_up_1=thread_sap_continue(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
 
         col_up_all.append(clo_up_1)
         beam_up_all.append(beam_up_1)
@@ -1472,17 +1526,18 @@ for num_var in [5]:
         history_loss = []
         history_mae = []
         DNN_prediction_fitness = []
-        mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+        # mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         #跑HIGA用
-        zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
-                         memorize_gx_nor, memorize_num, fitness_prediction)
+        # zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
+        #                  memorize_gx_nor, memorize_num, fitness_prediction)
         #跑GA用
         # zhan, jia, qi = GA_run_modular(ModelPath_name, mySapObject_name, SapModel_name, num_var,
         #                                                    num_room_type, x, labels, time)
         #续跑HIGA用
-        # continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time, 140,
+        best_individual,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num = get_continue_data(0)
+        # zhan, jia, qi,fitness_prediction = continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time, 140,
         #                 200)
         # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
         #                  memorize_gx_nor, memorize_num, fitness_prediction)
