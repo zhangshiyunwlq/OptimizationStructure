@@ -475,11 +475,11 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     elif gx_demo[1]<=2 and gx_demo[1]>=-1:
         gx_demo[1]=(gx_demo[1]+1)/3
     if gx_demo[2] >= 0.05:
-        gx_demo[2] = 0.05
+        gx_demo[2] = 1
     else:
         gx_demo[2] = gx_demo[2] / 0.05
     if gx_demo[3] >= 0.05:
-        gx_demo[3] = 0.05
+        gx_demo[3] = 1
     else:
         gx_demo[3] = gx_demo[3] / 0.05
     if gx_demo[5] >= 700:
@@ -855,11 +855,11 @@ def gx_Normalization(gx):
         elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
             gx_demo[i][1]=(gx_demo[i][1]+1)/3
         if gx_demo[i][2] >= 0.05:
-            gx_demo[i][2] = 0.05
+            gx_demo[i][2] = 1
         else:
             gx_demo[i][2] = gx_demo[i][2] / 0.05
         if gx_demo[i][3] >= 0.05:
-            gx_demo[i][3] = 0.05
+            gx_demo[i][3] = 1
         else:
             gx_demo[i][3] = gx_demo[i][3] / 0.05
         if gx_demo[i][5] >= 700:
@@ -949,9 +949,12 @@ def Gx_convert(fitness1):
             fitness5[j][1] = 0
         if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
             fitness5[j][2] =0
+        else:
+            fitness5[j][2] = abs(fitness5[j][2])
         if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
             fitness5[j][3] = 0
-
+        else:
+            fitness5[j][3] = abs(fitness5[j][3])
         fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+fitness5[j][4]))
     return fitness2
 
