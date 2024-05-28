@@ -1505,7 +1505,7 @@ for i in range(group_num):
         labels1.append(temp)
 
 for num_var in [5]:
-    for time in range(11,12):
+    for time in range(12,13):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1526,19 +1526,19 @@ for num_var in [5]:
         history_loss = []
         history_mae = []
         DNN_prediction_fitness = []
-        # mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
+        mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         #跑HIGA用
-        # zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
-        # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
-        #                  memorize_gx_nor, memorize_num, fitness_prediction)
+        zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
+                         memorize_gx_nor, memorize_num, fitness_prediction)
         #跑GA用
         # zhan, jia, qi = GA_run_modular(ModelPath_name, mySapObject_name, SapModel_name, num_var,
         #                                                    num_room_type, x, labels, time)
         #续跑HIGA用
-        best_individual,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num = get_continue_data(0)
+        # best_individual,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num = get_continue_data(0)
         # zhan, jia, qi,fitness_prediction = continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time, 140,
-        #                 200)
+        #                 200,np.array(best_individual))
         # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
         #                  memorize_gx_nor, memorize_num, fitness_prediction)
         # draw_loss(num_var, time)

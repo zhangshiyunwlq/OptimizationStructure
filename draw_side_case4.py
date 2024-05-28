@@ -269,7 +269,7 @@ for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
 
 num_var = 5
-al_time = 9
+al_time = 11
 
 all_in=[139]
 all_indx(all_in)
