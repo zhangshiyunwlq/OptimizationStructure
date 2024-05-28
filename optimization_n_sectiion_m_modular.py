@@ -1028,15 +1028,16 @@ def GA_for_DNN(run_time,pop2,model):
 
 def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     #局部训练
-    pool_local = copy.deepcopy(memorize_pool_local)
-    x_train1_local = np.array(pool_local)
-    x_train_local = x_train1_local#提取用于训练的x_train部分
-    gx_local = copy.deepcopy(memorize_gx_local)
-    y_train_local = np.array(gx_local)
-    y_train_local= gx_Normalization(y_train_local)#归一化
-    model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
-    #verbose取消打印损失
-    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32,verbose=0)#训练模型
+    if len(memorize_pool_local)!=0:
+        pool_local = copy.deepcopy(memorize_pool_local)
+        x_train1_local = np.array(pool_local)
+        x_train_local = x_train1_local#提取用于训练的x_train部分
+        gx_local = copy.deepcopy(memorize_gx_local)
+        y_train_local = np.array(gx_local)
+        y_train_local= gx_Normalization(y_train_local)#归一化
+        model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
+        #verbose取消打印损失
+        model.fit(x_train_local, y_train_local, epochs=100, batch_size=32,verbose=0)#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -1309,12 +1310,12 @@ def get_continue_data(file_time):
 
     pop2_best = pop2_pool_all[(N_GENERATIONS - 1) * POP_SIZE]
     fitness_best = fitness_pool_all[N_GENERATIONS - 1][0]
-    return fitness_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
+    return pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
 #续跑算法
 def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2,best_individual):
-    pop2_new, model = DNN_GA(num_var, num_room_type, POP_SIZE, best_individual, 400)
-    pop2_new[0] = best_individual
-    pop1, pop3 = decoding_modular_section(pop2_new)
+    pop2, model = DNN_GA(num_var, num_room_type, POP_SIZE, best_individual, 400)
+    pop2[0] = best_individual
+    pop1, pop3 = decoding_modular_section(pop2)
 
     pop_zhongqun_all = []  # 记录每代种群（不重复）
     pop_zhongqun_all_2 = []#记录种群所有
