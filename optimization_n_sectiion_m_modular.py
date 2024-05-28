@@ -955,7 +955,7 @@ def Gx_convert(fitness1):
             fitness5[j][3] = 0
         else:
             fitness5[j][3] = abs(fitness5[j][3])
-        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+fitness5[j][4]))
+        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+abs(fitness5[j][4])))
     return fitness2
 
 def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
@@ -1266,10 +1266,16 @@ def get_continue_data(file_time):
     memorize_pool = memorize_pool_pop1.values.tolist()
 
     memorize_fit1 = pd.read_excel(io=path_memo, sheet_name="memorize_fit")
-    memorize_fit = memorize_fit1.values.tolist()
+    memorize_fit2 = memorize_fit1.values.tolist()
+    memorize_fit = []
+    for i in range(len(memorize_fit2)):
+        memorize_fit.append(memorize_fit2[i][0])
 
     memorize_weight1 = pd.read_excel(io=path_memo, sheet_name="memorize_weight")
-    memorize_weight = memorize_weight1.values.tolist()
+    memorize_weight2 = memorize_weight1.values.tolist()
+    memorize_weight = []
+    for i in range(len(memorize_weight2)):
+        memorize_weight.append(memorize_weight2[i][0])
 
     memorize_gx1 = pd.read_excel(io=path_memo, sheet_name="memorize_gx")
     memorize_gx = memorize_gx1.values.tolist()
@@ -1287,7 +1293,10 @@ def get_continue_data(file_time):
     memorize_gx_nor = memorize_gx_nor1.values.tolist()
 
     memorize_num1 = pd.read_excel(io=path_memo, sheet_name="memorize_num")
-    memorize_num = memorize_num1.values.tolist()
+    memorize_num2 = memorize_num1.values.tolist()
+    memorize_num = []
+    for i in range(len(memorize_num2)):
+        memorize_num.append(memorize_num2[i][0])
 
     pop2_best1 = pd.read_excel(io=path_infor, sheet_name="pop2_all")
     pop2_fitness1 = pd.read_excel(io=path_infor, sheet_name="pop_all_fitness")
