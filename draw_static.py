@@ -37,6 +37,41 @@ def get_info(name1):
 
     return all_value_str
 
+
+def get_info_continue(name1):
+    all_value_str = []
+    for i in range(len(name1)):
+        value_str = []
+        wb = openpyxl.load_workbook(
+            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{name1[i][1]}_{modular_num}_{name1[i][2]}.xlsx'
+            )
+        # wb = xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)
+        # wb = xlrd.open_workbook(
+        #     filename=f'E:\C盘默认文件\\run\OptimizationStructure\分析数据\限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)
+        sheet1 = wb['max_fitness']
+        for z in range(name1[i][0]):
+            rows = sheet1.cell(2,z+1).value
+            value_str.append(rows)
+        all_value_str.extend(value_str)
+
+        # value_str = []
+        # wb =  xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
+        #     formatting_info=True)
+        # # wb = xlrd.open_workbook(
+        # #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        # #     formatting_info=True)
+        # sheet1 = wb.sheet_by_index(5)
+        # for z in range(name1[i][0]):
+        #     rows = sheet1.row_values(1)[z]
+        #     value_str.append(rows)
+        # all_value_str.append(value_str)
+
+    return all_value_str
+
 def draw_picture(info2,name,title_name):
     num1 = 0.8
     num2 = 0.8
@@ -57,9 +92,9 @@ def draw_picture(info2,name,title_name):
     for i in range(len(info)):
         if name[i] =='GA':
             co = 'r'
-        elif name[i] =='9-6':
+        elif name[i] =='HIGA':
             co = 'black'
-        elif name[i] == '100*100':
+        elif name[i] == 'HIGA2':
             co = 'blue'
 
         bbb = np.arange(0, len(info[i]))
@@ -76,6 +111,47 @@ def draw_picture(info2,name,title_name):
            xticks=np.arange(0, 150, 20),
            yticks=np.arange(0, 1000, 100))
     plt.show()
+
+def draw_picture_continue(info2,name,title_name,length):
+    num1 = 0.8
+    num2 = 0.8
+    num3 = 3
+    num4 = 0
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel(title_name, fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(2);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    plt.ylim((150, 400))
+    info = copy.deepcopy(info2)
+
+    bbb = np.arange(0, length[0])
+    ccc = info[0:length[0]]
+    ax2.plot(bbb, ccc, linewidth=6, color='red')
+
+    bbb = np.arange(length[0], length[1]+length[0])
+    ccc = info[length[0]:length[1]+length[0]]
+    ax2.plot(bbb, ccc, linewidth=6, color='blue')
+
+    bbb = np.arange(length[1]+length[0], length[2]+length[1]+length[0])
+    ccc = info[length[1]+length[0]:length[2]+length[1]+length[0]]
+    ax2.plot(bbb, ccc, linewidth=6, color='black')
+        # legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
+        #                   plt.Line2D([0], [0], color='black', lw=2,linewidth=20),
+        #                   plt.Line2D([0], [0], color='blue', lw=2, linewidth=20)
+        #                   ]
+        # legend_labels = ['200*200', '50*50', '100*100']
+        # plt.legend(legend_handles, legend_labels,fontsize=20)
+
+    ax2.set(xlim=(0, length[2]+length[1]+length[0]), ylim=(0, 1000),
+           xticks=np.arange(0, length[2]+length[1]+length[0], 20),
+           yticks=np.arange(0, 1000, 100))
+    plt.show()
+
 
 def draw_picture0(info2,name,title_name):
     num1 = 0.8
@@ -170,18 +246,20 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
-data_info = [[140,3,0],[140,3,1],[140,5,2],[140,5,6],[140,7,0]]
+data_info = [[140,7,3],[100,7,5],[100,7,6]]
 # data_info = [[140,3,1]]
-infor_name = ['GA','GA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
+infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
-
-# data_info = [[200,14,65]]
-# infor_name = ['GA']
-infor_all = get_info(data_info)
+# infor_all = get_info(data_info)
 #普通遗传算法
-# infor_name = ['14_8','14_13','14_14','14_15','14_16']
 title_name = 'Fitness'
 
 
 # draw_picture(infor_all,infor_name,title_name)
-draw_plot_picture(infor_all,data_info)
+# draw_plot_picture(infor_all,data_info)
+
+#绘制连续跑的曲线
+length = [140,100,100]
+infor_all = get_info_continue(data_info)
+
+draw_picture_continue(infor_all,infor_name,title_name,length)

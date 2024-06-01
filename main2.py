@@ -2940,27 +2940,27 @@ pop_room_label = []
 
 #使用openxyxl读取信息
 
-# wb = openpyxl.load_workbook(
-#     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_6_0.xlsx',
-#     )
-# sheet1 = wb['pop1_all']
-# for z in range(48):
-#     rows = sheet1.cell(4311,z+1).value
-#     pop_room.append(rows)
-# sheet1 = wb['pop3_all']
-# for z in range(modular_length_num*2*story_num):
-#     rows = sheet1.cell(4311,z+1).value
-#     pop_room_label.append(rows)
-#
+wb = openpyxl.load_workbook(
+    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_7_3_2.xlsx',
+    )
+sheet1 = wb['pop1_all']
+for z in range(48):
+    rows = sheet1.cell(4311,z+1).value
+    pop_room.append(rows)
+sheet1 = wb['pop3_all']
+for z in range(modular_length_num*2*story_num):
+    rows = sheet1.cell(4311,z+1).value
+    pop_room_label.append(rows)
 
 
-pop_room = []
-pop_room_label = []
-for i in range(48):
-    pop_room.append(12)
-# pop_room = all_GA_infor[0]
-for i in range(modular_length_num*2*story_num):
-    pop_room_label.append(0)
+
+# pop_room = []
+# pop_room_label = []
+# for i in range(48):
+#     pop_room.append(12)
+# # pop_room = all_GA_infor[0]
+# for i in range(modular_length_num*2*story_num):
+#     pop_room_label.append(0)
 
 
 

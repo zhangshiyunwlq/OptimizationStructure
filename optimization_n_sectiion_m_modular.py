@@ -892,28 +892,28 @@ def generation_population_modular_section(best_indivi,rate):
                 for mutate_point_1 in range(num_var):
                     if pop[i][mutate_point_1] in x_var:
                         x_var.remove(pop[i][mutate_point_1])
-                if np.random.rand() < MUTATION_RATE:  # 以MUTATION_RATE的概率进行变异
+                if np.random.rand() <0.25:  # 以MUTATION_RATE的概率进行变异
                     pop[i][mutate_point] = np.random.choice(x_var)
                 else:
                     pop[i][mutate_point] = best_in[mutate_point]
         for j in range(num_var, num_var + num_room_type):
-            if np.random.rand() < MUTATION_RATE:
+            if np.random.rand() < 0.25:
                 pop[i][j] = randint(1, 3)
             else:
                 pop[i][j] = best_in[j]
         for j in range(num_var + num_room_type, num_var + num_room_type + section_num):
-            if np.random.rand() < MUTATION_RATE:
+            if np.random.rand() < 0.25:
                 pop[i][j] = randint(0, num_var - 1)
             else:
                 pop[i][j] = best_in[j]
         for j in range(num_var + num_room_type + section_num, num_var + num_room_type + section_num + brace_num):
-            if np.random.rand() < MUTATION_RATE:
+            if np.random.rand() < 0.25:
                 pop[i][j] = randint(0, 1)
             else:
                 pop[i][j] = best_in[j]
         for j in range(num_var + num_room_type + section_num + brace_num,
                        num_var + num_room_type + section_num + brace_num + zone_num):
-            if np.random.rand() < MUTATION_RATE:
+            if np.random.rand() < 0.25:
                 pop[i][j] = randint(0, modular_num - 1)
             else:
                 pop[i][j] = best_in[j]
@@ -1518,7 +1518,7 @@ for i in range(group_num):
         labels1.append(temp)
 
 for num_var in [5]:
-    for time in range(12,13):
+    for time in range(14,16):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
