@@ -174,7 +174,7 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
 
     for i in range(len(memorize_pool)):
         pool_list = copy.deepcopy(memorize_pool[i])
-        pool_list.tolist()
+        # pool_list.tolist()
         for j in range(len(pool_list)):
             out_pop1_all.write(loc, j, pool_list[j])
         loc += 1
@@ -1256,7 +1256,7 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
 
-def get_continue_data(file_time):
+def get_continue_data(file_time,num_continue):
     path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{file_time}.xlsx"
     path_infor = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{file_time}.xlsx"
     gx_nor = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor")
@@ -1320,8 +1320,8 @@ def get_continue_data(file_time):
     for i in range(len(fitness_remove)):
         fitness_pool_all.remove(fitness_pool_all[int(fitness_remove[len(fitness_remove) - 1 - i])])
 
-    pop2_best = pop2_pool_all[(N_GENERATIONS - 1) * POP_SIZE]
-    fitness_best = fitness_pool_all[N_GENERATIONS - 1][0]
+    pop2_best = pop2_pool_all[(num_continue - 1) * POP_SIZE]
+    fitness_best = fitness_pool_all[num_continue - 1][0]
     return pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
 #续跑算法
 def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2,best_individual):
@@ -1517,8 +1517,8 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-for num_var in [5]:
-    for time in range(14,16):
+for num_var in [12]:
+    for time in range(1):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1549,7 +1549,7 @@ for num_var in [5]:
         # zhan, jia, qi = GA_run_modular(ModelPath_name, mySapObject_name, SapModel_name, num_var,
         #                                                    num_room_type, x, labels, time)
         #续跑HIGA用
-        # best_individual,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num = get_continue_data(0)
+        # best_individual,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num = get_continue_data(0,num_continue)
         # zhan, jia, qi,fitness_prediction = continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time, 140,
         #                 200,np.array(best_individual))
         # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,

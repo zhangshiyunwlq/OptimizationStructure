@@ -137,9 +137,9 @@ def draw_picture_continue(info2,name,title_name,length):
     ccc = info[length[0]:length[1]+length[0]]
     ax2.plot(bbb, ccc, linewidth=6, color='blue')
 
-    bbb = np.arange(length[1]+length[0], length[2]+length[1]+length[0])
-    ccc = info[length[1]+length[0]:length[2]+length[1]+length[0]]
-    ax2.plot(bbb, ccc, linewidth=6, color='black')
+    # bbb = np.arange(length[1]+length[0], length[2]+length[1]+length[0])
+    # ccc = info[length[1]+length[0]:length[2]+length[1]+length[0]]
+    # ax2.plot(bbb, ccc, linewidth=6, color='black')
         # legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
         #                   plt.Line2D([0], [0], color='black', lw=2,linewidth=20),
         #                   plt.Line2D([0], [0], color='blue', lw=2, linewidth=20)
@@ -147,8 +147,8 @@ def draw_picture_continue(info2,name,title_name,length):
         # legend_labels = ['200*200', '50*50', '100*100']
         # plt.legend(legend_handles, legend_labels,fontsize=20)
 
-    ax2.set(xlim=(0, length[2]+length[1]+length[0]), ylim=(0, 1000),
-           xticks=np.arange(0, length[2]+length[1]+length[0], 20),
+    ax2.set(xlim=(0, length[1]+length[0]), ylim=(0, 1000),
+           xticks=np.arange(0, +length[1]+length[0], 20),
            yticks=np.arange(0, 1000, 100))
     plt.show()
 
@@ -246,7 +246,7 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
-data_info = [[140,7,3],[100,7,5],[100,7,6]]
+data_info = [[140,7,7],[100,7,8]]
 # data_info = [[140,3,1]]
 infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
@@ -259,7 +259,7 @@ title_name = 'Fitness'
 # draw_plot_picture(infor_all,data_info)
 
 #绘制连续跑的曲线
-length = [140,100,100]
+length = [140,100]
 infor_all = get_info_continue(data_info)
 
 draw_picture_continue(infor_all,infor_name,title_name,length)
