@@ -17,7 +17,3 @@ memorize_sum = []
 memorize_gx = []
 memorize_gx_nor = []
 memorize_num = []
-
-a = [[1,2,3],[2,5,8],[3,5,7]]
-a = np.array(a)
-b = a.tolist()

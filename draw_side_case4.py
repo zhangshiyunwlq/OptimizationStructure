@@ -3,6 +3,8 @@ import random
 import xlrd
 import matplotlib.pyplot as plt
 import openpyxl
+import evaluation_DNN as ed
+
 
 def all_modular_infor():
     node1 = [(0, 0), (6, 0), (6, 6), (0, 6)]
@@ -217,6 +219,35 @@ def all_indx(all_it):
         plt.gca().set_aspect('equal', adjustable='box')
         plt.show()
 
+def draw_pred(pop1,pop2,pop3):
+    for ite in range(len(pop1)):
+        # 读取优化信息
+        pop_room=pop1[ite]
+        brace_dis=pop2[ite][num_var]
+        pop_brace =pop3[ite]
+        # 生成一个侧面的房间编号
+        temp_indx = [i for i in range(8)]
+        all_indx_draw = []
+        for i in range(story_num):
+            te = []
+            for j in range(len(temp_indx)):
+                te.append(temp_indx[j] + i * modular_length_num * 2)
+            all_indx_draw.extend(te)
+
+        draw_frame(all_indx_draw, pop_room, pop_brace)
+        draw_corr_conn(all_joint_hor, nodes_all, all_joint_ver)
+
+        # 设置坐标轴范围
+        plt.xlim(-3, 80)
+        plt.ylim(-5, 90)
+
+        # 设置坐标轴标签
+        plt.xlabel('X')
+        plt.ylabel('Y')
+
+        # 显示图形
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.show()
 
 
 '''model data'''
@@ -268,9 +299,12 @@ for i in range(len(fit_ini)):
 for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
 
-num_var = 12
-al_time = 0
+num_var = 5
+al_time = 15
 
-all_in=[139]
-all_indx(all_in)
+# all_in=[19]
+# all_indx(all_in)
 
+fit1,fit2,pop2 = ed.get_DNN_GA(15,27,20)
+pop1,pop3=ed.decoding_modular_section(pop2)
+draw_pred(pop1,pop2,pop3)

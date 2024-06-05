@@ -392,74 +392,52 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
     return aa,bb,cc,dd,ee,ff,gg,hh,ii
 
 def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
-    g_col_all = 0
-    g_beam_all = 0
-    Y_dis_radio_all = 0
-    Y_interdis_all = 0
-    Y_interdis_radio_all = 0
-    floor_radio = 0
-    g_col1 = copy.deepcopy(g_col)
-    g_beam1 = copy.deepcopy(g_beam)
-    dis_all5 = copy.deepcopy(dis_all[5])
-    dis_all7 = copy.deepcopy(dis_all[7])
-    for i in range(len(g_col1)):
-        if g_col1[i]<= 0:
-            g_col1[i] = 0
-        else:
-            g_col1[i] = g_col1[i]
-        g_col_all += g_col1[i]
-    for i in range(len(g_beam1)):
-        if g_beam1[i]<= 0:
-            g_beam1[i] = 0
-        else:
-            g_beam1[i] = g_beam1[i]
-        g_beam_all += g_beam1[i]
-    #y dis ratio
-    for i in range(len(dis_all5)):
-        if dis_all5[i] <= 0.00167 and dis_all5[i] >= -0.00167:
-            dis_all5[i] = 0
-        else:
-            dis_all5[i] = dis_all5[i]
-        # Y_dis_radio_all += dis_all5[i]
-    Y_dis_radio_all = max(dis_all5)
-    Y_dis_radio_all = Y_dis_radio_all*100
-    # y interdis max
-    for i in range(len(dis_all7)):
-        if dis_all7[i] <= 0.004 and dis_all7[i] >= -0.004:
-            dis_all7[i] = 0
-        else:
-            dis_all7[i] = dis_all7[i]
-        # Y_interdis_all += dis_all7[i]
-    Y_interdis_all = max(dis_all7)
-    Y_interdis_all = Y_interdis_all*100
-    # # y interdis radio
-    # for i in range(len(dis_all[11])):
-    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
-    #         dis_all[11][i] = 0
-    #     else:
-    #         dis_all[11][i] = dis_all[11][i]
-    #     Y_interdis_radio_all += dis_all[11][i]
-    # # x interdis ratio
-    # for i in range(len(all_force[10])):
-    #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
-    #         all_force[10][i] = 0
-    #     else:
-    #         all_force[10][i] = all_force[10][i]
-    #     floor_radio += all_force[10][i]
+
     g_col_max= max(g_col)
     g_beam_max = max(g_beam)
-    dis_all_max = max(dis_all[5])
-    interdis_max = max(dis_all[7])
-    g_all_max = max(g_col_max,g_beam_max)
+
+    dis_all5_abs = copy.deepcopy(dis_all[5])
+    for i in range(len(dis_all5_abs)):
+        dis_all5_abs[i] = abs(dis_all5_abs[i])
+
+    dis_all7_abs = copy.deepcopy(dis_all[7])
+    for i in range(len(dis_all7_abs)):
+        dis_all7_abs[i] = abs(dis_all7_abs[i])
+
+    dis_all_max = max(dis_all5_abs)
+    interdis_max = max(dis_all7_abs)
+
     rate_nonzero = copy.deepcopy(rate)
     if rate_nonzero<=0.4:
         rate_nonzero =0
     else:
         rate_nonzero=rate_nonzero
-    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all)+rate_nonzero)
-    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max),rate,weight]
+
+    if g_col_max<=0:
+        g_col_fit = 0
+    else:
+        g_col_fit = g_col_max
+
+    if g_beam_max<=0:
+        g_beam_fit =0
+    else:
+        g_beam_fit = g_beam_max
+
+    if dis_all_max<= 0.00167 and dis_all_max >= -0.00167:
+        dis_all_fit = 0
+    else:
+        dis_all_fit = dis_all_max
+
+    if interdis_max<= 0.004 and interdis_max >= -0.004:
+        interdis_all_fit = 0
+    else:
+        interdis_all_fit = interdis_max
+
+    G_value=u * (g_col_fit + g_beam_fit + 100*dis_all_fit + 100*interdis_all_fit +rate_nonzero)
+    gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
     result = weight + G_value
+
 
     gx_demo = copy.deepcopy(gx)
     if gx_demo[0]>=5:
@@ -489,7 +467,6 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     elif gx_demo[5] <= 750 and gx_demo[5] >= 350:
         gx_demo[5] = (gx_demo[5]-350)/350
     return result,weight,gx,gx_demo
-
 def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
     while True:
         if q.empty():
@@ -1120,10 +1097,11 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         # 引入新个体
         run_time +=1
         if run_time % 20 == 0:
-            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],400)
-            exchange_num = int(0.9*len(pop2))
-            for ex_num in range(exchange_num):
-                pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
+            pop2_new,model = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400)
+            exchange_num = int(1*len(pop2))
+            # for ex_num in range(exchange_num):
+            #     pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
+            pop2 = copy.deepcopy(pop2_new)
             memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
             memorize_pool_loacl = []
@@ -1518,7 +1496,7 @@ for i in range(group_num):
         labels1.append(temp)
 
 for num_var in [12]:
-    for time in range(1):
+    for time in range(1,2):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
