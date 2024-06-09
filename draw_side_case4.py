@@ -3,8 +3,8 @@ import random
 import xlrd
 import matplotlib.pyplot as plt
 import openpyxl
-import evaluation_DNN as ed
-
+# import evaluation_DNN as ed
+import pandas as pd
 
 def all_modular_infor():
     node1 = [(0, 0), (6, 0), (6, 6), (0, 6)]
@@ -93,6 +93,62 @@ def get_info(iter_num):
 
 
     return pop_room,pop_brace,brace_dis
+
+def decoding_modular_section(pop2):
+
+    pop_all = copy.deepcopy(pop2)
+    modular_type1 = [i for i in range(3)]
+    #生成对每个模块的截面编号索引
+    modular_type_all= []
+    for i in range(modular_num):
+        modular_type_temp = []
+        for j in range(len(modular_type1)):
+            modular_type_temp.append(num_var+num_room_type+modular_type1[j]+3*i)
+        modular_type_all.append(modular_type_temp)
+
+
+    #提取截面表
+    pop1_all = []
+    for i in range(len(pop_all)):
+        pop1_section = []
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            for z in range(3):
+                sec = int(pop_all[i][j])
+                pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
+        pop1_all.append(pop1_section)
+
+    #解码pop1_1all
+    pop1_decoding = []
+    for i in range(len(pop1_all)):
+        pop1_temp = []
+        for j in range(len(pop1_all[i])):
+            pop1_temp.append(pop_all[i][int(pop1_all[i][j])])
+        pop1_decoding.append(pop1_temp)
+
+
+    #生成支撑表
+    brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
+    pop3_all = []
+    for i in range(len(pop_all)):
+        pop3_brace = []
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            bra = int(pop_all[i][j])
+            if pop_all[i][int(brace_sort[bra])] ==0:
+                pop3_brace.append(0)
+            else:
+                pop3_brace.append(pop_all[i][num_var])
+        pop3_all.append(pop3_brace)
+    pop_3 =[]
+    for j in range(len(pop_all)):
+        temp2 = pop3_all[j]
+        brace_all = []
+        for i in range(len(labels)):
+            temp1 = int(labels[i])
+            brace_all.append(temp2[temp1])
+        pop_3.append(brace_all)
+
+    return pop1_decoding,pop_3
+
 
 def draw_corr_conn(cons_all,nodes_all,corrs_all):
     for line in cons_all:
@@ -263,7 +319,7 @@ story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
 modular_num = 3#整个建筑的模块种类
-
+num_room_type =1
 
 
 zone_num = int(story_num / story_group * story_zone)
@@ -301,10 +357,17 @@ for i in range(len(fit_ini)):
 
 num_var = 5
 al_time = 15
-
+#绘制某个pop中的最有个体
 # all_in=[19]
 # all_indx(all_in)
+#数据文件中生成pop2
+# fit1,fit2,pop2 = ed.get_DNN_GA(15,27,20)
+# pop1,pop3=ed.decoding_modular_section(pop2)
+# draw_pred(pop1,pop2,pop3)
 
-fit1,fit2,pop2 = ed.get_DNN_GA(15,27,20)
-pop1,pop3=ed.decoding_modular_section(pop2)
+#数据文件中获得pop2
+path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_2.xlsx"
+pop2 = pd.read_excel(io=path_memo, sheet_name="pop2_all", header=None)
+pop2 = pop2.values.tolist()
+pop1,pop3=decoding_modular_section(pop2)
 draw_pred(pop1,pop2,pop3)

@@ -13,7 +13,8 @@ import queue
 import configparser
 import comtypes.client
 import sys
-
+import xlsxwriter
+import matplotlib.pyplot as plt
 def gx_nonNormalization(gx):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
@@ -24,30 +25,6 @@ def gx_nonNormalization(gx):
         gx_demo[i][5] = gx_demo[i][5] * 350+350
     return gx_demo
 
-def Gx_convert(fitness1):
-    fitness3 = copy.deepcopy(fitness1)
-    fitness4 = []  # 储存所有gx
-    fitness2 = []  # 所有gx的和
-    for j in range(len(fitness3)):
-        fitness4.append(fitness3[j].tolist())
-    fitness4=gx_nonNormalization(fitness4)
-    fitness5 = copy.deepcopy(fitness4)
-    for j in range(len(fitness3)):
-        # fitness2.append(sum(fitness4[j]))
-        if fitness5[j][0]<=0:
-            fitness5[j][0] =0
-        if fitness5[j][1] <= 0:
-            fitness5[j][1] = 0
-        if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
-            fitness5[j][2] =0
-        else:
-            fitness5[j][2] = abs(fitness5[j][2])
-        if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
-            fitness5[j][3] = 0
-        else:
-            fitness5[j][3] = abs(fitness5[j][3])
-        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+abs(fitness5[j][4])))
-    return fitness2
 def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
     fit_ini = copy.deepcopy(fitness)
@@ -65,7 +42,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
     for i in range(len(pop2)):
         pop2[i] = pop[int(idx[i])]
     return pop2
-#改
+#处理交叉后出现相同截面的问题
 def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
     pop = pop2
 
@@ -87,8 +64,8 @@ def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
         mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE)
         new_pop[i] = child
 
-
     for i in range(len(new_pop)):
+
         sec_sort = []
         room_sort = []
         for j in range(num_var):
@@ -97,7 +74,22 @@ def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
         for j in range(num_var):
             new_pop[i][j] = sec_sort[j]
 
+        for mutate_point in range(num_var):
+            x_var = list(map(int, x.tolist()))
+            for mutate_point_1 in range(num_var):
+                if pop[i][mutate_point_1] in x_var:
+                    x_var.remove(pop[i][mutate_point_1])
+            if pop[i][mutate_point] == pop[i][
+                mutate_point + 1] and mutate_point <= num_var - 2:  # 以MUTATION_RATE的概率进行变异
+                pop[i][mutate_point] = np.random.choice(x_var)
 
+        sec_sort = []
+        room_sort = []
+        for j in range(num_var):
+            sec_sort.append(new_pop[i][j])
+        sec_sort.sort()
+        for j in range(num_var):
+            new_pop[i][j] = sec_sort[j]
 
     return new_pop
 
@@ -129,8 +121,8 @@ def mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE):
             child[j] = randint(0, modular_num-1)
             # child[j] = 0
 
-
-def GA_for_DNN(run_time,pop2,model):
+#修改输入输出接口
+def GA_for_DNN(run_time,pop2,model,fitness_best):
     fitness_pred = []
     for i in range(run_time):
         fitness1 = model.predict(pop2,verbose=0)
@@ -148,7 +140,8 @@ def GA_for_DNN(run_time,pop2,model):
         if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
     DNN_prediction_fitness.append(fitness_pred)
-    return pop2
+    fitness_best.append(min(min1,fit_pred2[0]))
+    return pop2,fitness_best
 
 def generation_population_modular_section(best_indivi,rate):
 
@@ -190,6 +183,7 @@ def generation_population_modular_section(best_indivi,rate):
 
     new_pop = copy.deepcopy(pop)
     for i in range(len(new_pop)):
+
         sec_sort = []
         room_sort = []
         for j in range(num_var):
@@ -198,7 +192,21 @@ def generation_population_modular_section(best_indivi,rate):
         for j in range(num_var):
             new_pop[i][j] = sec_sort[j]
 
+        for mutate_point in range(num_var):
+            x_var = list(map(int, x.tolist()))
+            for mutate_point_1 in range(num_var):
+                if pop[i][mutate_point_1] in x_var:
+                    x_var.remove(pop[i][mutate_point_1])
+            if pop[i][mutate_point] ==pop[i][mutate_point+1] and mutate_point <= num_var-2 :  # 以MUTATION_RATE的概率进行变异
+                pop[i][mutate_point] = np.random.choice(x_var)
 
+        sec_sort = []
+        room_sort = []
+        for j in range(num_var):
+            sec_sort.append(new_pop[i][j])
+        sec_sort.sort()
+        for j in range(num_var):
+            new_pop[i][j] = sec_sort[j]
 
 
     return new_pop
@@ -230,7 +238,7 @@ def gx_Normalization(gx):
             gx_demo[i][5] = 1
         elif gx_demo[i][5] <= 350:
             gx_demo[i][5] = 0
-        elif gx_demo[i][5] <= 750 and gx_demo[i][5] >= 350:
+        elif gx_demo[i][5] <= 700 and gx_demo[i][5] >= 350:
             gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
     return gx_demo
 def mulit_get_sap(num_thread):
@@ -316,7 +324,8 @@ def get_continue_data(file_time,num_continue):
     fitness_best = fitness_pool_all[num_continue - 1][0]
     return pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
 
-def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
+#输入输出修改,
+def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_var,num_room_type,num_ind,best_indivi,run_time):
     #局部训练
     if len(memorize_pool_local)!=0:
         pool_local = copy.deepcopy(memorize_pool_local)
@@ -345,13 +354,14 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     history_loss.append(history.history['loss'])
     history_mae.append(history.history['mae'])
     pop_best = []
+    fitness_best=[]#新增内容
     for i in range(num_ind):
-        pop1 = generation_population_modular_section(best_indivi, 0.25)#根据最好个体生成种群
+        pop1 = generation_population_modular_section(best_indivi, 0.15)#根据最好个体生成种群
         pop2 = copy.deepcopy(pop1)
-        pop2 = GA_for_DNN(run_time, pop2, model)
+        pop2,fitness_best = GA_for_DNN(run_time, pop2, model,fitness_best)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
-    return pop_best,model
+    return pop_best,model,fitness_best
 
 def decoding_modular_section(pop2):
 
@@ -506,7 +516,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
         gx_demo[5] = 1
     elif gx_demo[5] <= 350:
         gx_demo[5] = 0
-    elif gx_demo[5] <= 750 and gx_demo[5] >= 350:
+    elif gx_demo[5] <= 700 and gx_demo[5] >= 350:
         gx_demo[5] = (gx_demo[5]-350)/350
     return result,weight,gx,gx_demo
 def get_analysis(ModelPath_name,mySapObject_name,SapModel_name,pop1,pop2,pop3):
@@ -633,7 +643,7 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
     for i in threads:
         i.join()
     return result,weight_1,col_up,beam_up
-
+#增加支撑百分比
 def Gx_convert(fitness1):
     fitness3 = copy.deepcopy(fitness1)
     fitness4 = []  # 储存所有gx
@@ -656,7 +666,9 @@ def Gx_convert(fitness1):
             fitness5[j][3] = 0
         else:
             fitness5[j][3] = abs(fitness5[j][3])
-        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+abs(fitness5[j][4])))
+        if fitness5[j][4] <= 0.4:
+            fitness5[j][4] = 0
+        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
     return fitness2
 
 def get_pred_fit(pop2_best,num_indi,num_iter):
@@ -761,6 +773,88 @@ def get_DNN_GA(file_time,num_pred_fit,num_run_DNN):
         pop_min_pred.append(pop2_pool_all[i*20*30+19*30+3+min_fit_index[i]])
     return pop2_DNN_fit,pop_DNN_divided,pop_min_pred
 
+#按照局部记忆池划分全局记忆池
+def get_local_global_data(file_time):
+    path_infor = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{file_time}.xlsx"
+    path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{file_time}.xlsx"
+    global_get_pop = pd.read_excel(io=path_memo, sheet_name="memorize_pool",header=None)
+    global_get_pop = global_get_pop.values.tolist()
+    local_pop = pd.read_excel(io=path_memo, sheet_name="memorize_num",header=None)
+    local_pop = local_pop.values.tolist()
+    global_get_gx = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor",header=None)
+    global_get_gx = global_get_gx.values.tolist()
+    local_num = []
+    for i in range(len(local_pop)):
+        local_num.append(local_pop[i][0])
+    local_each_num = [local_num[0]]
+    for i in range(1,len(local_num)):
+        local_each_num.append(local_num[i]-local_num[i-1])
+
+    pop2_remove = []
+    pop2_best1 = pd.read_excel(io=path_infor, sheet_name="pop2_all", header=None)
+    pop2_pool_all = pop2_best1.values.tolist()
+    for i in range(len(pop2_pool_all)):
+        if i <= len(pop2_pool_all):
+            if type(pop2_pool_all[i][0]) == str:
+                pop2_remove.append(i)
+
+    for i in range(len(pop2_remove)):
+        pop2_pool_all.remove(pop2_pool_all[int(pop2_remove[len(pop2_remove) - 1 - i])])
+
+    pop_best = []
+    for i in range(len(local_num)):
+        pop_best.append(pop2_pool_all[i*20*30+19*30])
+
+
+
+    local_memorize_pop = []
+    local_memorize_gx = []
+    for i in range(len(local_num)):
+        if i ==0:
+            local_memorize_pop.append(global_get_pop[0:local_num[i]])
+            local_memorize_gx.append(global_get_gx[0:local_num[i]])
+        else:
+            local_memorize_pop.append(global_get_pop[local_num[i-1]:local_num[i]])
+            local_memorize_gx.append(global_get_gx[local_num[i-1]:local_num[i]])
+
+    return local_memorize_pop,local_memorize_gx,pop_best
+
+def run_DNN_GA(local_pop,local_gx,pop_best):
+    global_pop = []
+    global_gx = []
+    all_pop2=[]
+    fit_pred_all =[]
+    pop_best=np.array(pop_best)
+    for i in range(len(local_pop)):
+        global_pop.extend(local_pop[i])
+        global_gx.extend(local_gx[i])
+        global_pop_train = copy.deepcopy(global_pop)
+        global_gx_train = copy.deepcopy(global_gx)
+        local_pop_train = copy.deepcopy(local_pop[i])
+        local_gx_train = copy.deepcopy(local_gx[i])
+        pop2,model,fit_best=DNN_GA(local_pop_train, local_gx_train, global_pop_train, global_gx_train, num_var, num_room_type, 10,
+               pop_best[i], 400)
+        all_pop2.append(pop2)
+        fit_pred_all.append(fit_best)
+        print(f'完成进度{i+1}/{len(local_pop)}')
+    return all_pop2,fit_pred_all,DNN_prediction_fitness
+
+def get_fitness(all_pop2):
+    fit_truth = []
+    mySapObject_name, ModelPath_name, SapModel_name = mulit_get_sap(num_thread)
+    for i in range(len(all_pop2)):
+        pop_temp = copy.deepcopy(all_pop2[i])
+        pop2=pop_temp.tolist()
+        pop1,pop3 = decoding_modular_section(pop2)
+        fitness, weight = get_analysis(ModelPath_name, mySapObject_name, SapModel_name, pop1, pop2, pop3)
+        fit_truth.append(fitness)
+        print(f'完成sap计算进度{i+1}/{len(all_pop2)}')
+    for i in range(len(mySapObject_name)):
+        ret = mySapObject_name[i].ApplicationExit(False)
+        SapModel_name[i] = None
+        mySapObject_name[i] = None
+
+    return fit_truth
 
 def fit_sort(fit_pred,fit_truth):
     fitness_pred = copy.deepcopy(fit_pred)
@@ -771,6 +865,123 @@ def fit_sort(fit_pred,fit_truth):
         fitness_pred_sort.append((np.argsort(fitness_pred[i])).tolist())
         fitness_truth_sort.append((np.argsort(fitness_truth[i])).tolist())
     return fitness_pred_sort,fitness_truth_sort
+
+def draw_min_pop(all_pop2,fit_pred,fit_truth,memorize_gx_no,memorize_gx):
+    pop_pred_best = []
+    pop_truth_best = []
+    index = []
+    for i in range(len(fit_pred)):
+        ind = fit_pred[i].index(min(fit_pred[i]))
+        ind2 = fit_truth[i].index(min(fit_truth[i]))
+        pop_pred_best.append(all_pop2[i][ind].tolist())
+        pop_truth_best.append(all_pop2[i][ind2].tolist())
+        index.append(ind2)
+    # pop1, pop3 = decoding_modular_section(pop_pred_best)
+
+    gx_nor_divided = []
+    gx_divided = []
+    num = int(len(memorize_gx_no)/len(pop_pred_best))
+    for i in range(len(pop_pred_best)):
+        temp = []
+        temp1 = []
+        for j in range(num):
+            temp.append(memorize_gx_no[i*num+j])
+            temp1.append(memorize_gx[i * num + j])
+        gx_nor_divided.append(temp)
+        gx_divided.append(temp1)
+
+    gx_truth_min = []
+    gx_min = []
+    for i in range(len(index)):
+        gx_truth_min.append(gx_nor_divided[i][index[i]])
+        gx_min.append(gx_divided[i][index[i]])
+    return pop_pred_best,pop_truth_best,gx_truth_min,gx_min
+
+def output_data(pop2_all,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,time):
+    APIPath = os.path.join(os.getcwd(), 'DNN_test_data')
+    SpecifyPath = True
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+
+    path1 = os.path.join(APIPath, f'all_data_{time}')
+
+
+    wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
+
+    out_fit_pred_all = wb1.add_worksheet('fit_pred_all')
+    loc = 0
+    for i in range(len(fit_pred_all)):
+        for j in range(len(fit_pred_all[i])):
+            out_fit_pred_all.write(loc, j, fit_pred_all[i][j])
+        loc += 1
+
+    out_pop2 = wb1.add_worksheet('pred_pop2_all')
+    loc = 0
+    for i in range(len(all_pop2)):
+        out_pop2.write(loc, 0, f'{[i]}')
+        for j in range(len(all_pop2[i])):
+            loc += 1
+            for z in range(len(all_pop2[i][j])):
+                out_pop2.write(loc, z, all_pop2[i][j][z])
+        loc += 1
+
+
+    out_fit_truth_all = wb1.add_worksheet('fit_truth')
+    loc = 0
+    for i in range(len(fit_truth)):
+        for j in range(len(fit_truth[i])):
+            out_fit_truth_all.write(loc, j, fit_truth[i][j])
+        loc += 1
+
+    out_pop2_all = wb1.add_worksheet('pop2_all')
+    loc = 0
+    for i in range(len(pop2_all)):
+        for j in range(len(pop2_all[i])):
+            out_pop2_all.write(loc, j, pop2_all[i][j])
+        loc += 1
+
+    DNN_fit_all = wb1.add_worksheet('DNN_prediction_fitness')
+    loc = 0
+    for i in range(len(DNN_prediction_fitness)):
+        for j in range(len(DNN_prediction_fitness[i])):
+            DNN_fit_all.write(loc, j, DNN_prediction_fitness[i][j])
+        loc += 1
+    wb1.close()
+
+
+def draw_fit_truth(data1):
+    data = copy.deepcopy(data1)
+    data.pop(16)
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration", fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel('fitness', fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(4);  ###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    # plt.ylim((150, 400))
+    bbb = np.arange(0, len(data))
+
+    ax2.plot(bbb, data, linewidth=6, color='r')
+
+    ax2.set(xlim=(0, len(data)),
+            xticks=np.arange(0, len(data), 10),
+            )
+    for i in range(7):
+        x_te = []
+        for j in range(10):
+            x_te.append(20 * i - 1)
+        x_te = np.array(x_te)
+        y_te = np.linspace(0, 5, 10)
+        ax2.plot(x_te, y_te, linewidth=1, color='black')
+    plt.show()
+
+
 modular_length = 8000
 modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
@@ -866,11 +1077,20 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-fit_pred,fit_truth,pop_min_pred = get_DNN_GA(file_time,27,20)
-sort_pred,sort_truth=fit_sort(fit_pred,fit_truth)
+
+#获得每隔N代的新种群finess，与真实fitness排序
+# fit_pred,fit_truth,pop_min_pred = get_DNN_GA(file_time,27,20)
+# sort_pred,sort_truth=fit_sort(fit_pred,fit_truth)
 #静态训练以及sap计算对比
 # pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num=get_continue_data(file_time,num_continue)
 # fitness_prediction2,fitness,DNN_prediction_fitness,gx_truth_all,gx_pred_all=get_pred_fit(pop2_best,10,400)
+#在线训练神经网络生成最优个体
+local_memorize_pop,local_memorize_gx,pop_best=get_local_global_data(file_time)
+all_pop2,fit_pred_all,DNN_prediction_fitness=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+fit_truth = get_fitness(all_pop2)
+sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
+pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
+output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,2)
 
-#
+draw_fit_truth(memorize_fit)
 

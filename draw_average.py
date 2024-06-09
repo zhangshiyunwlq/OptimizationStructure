@@ -84,32 +84,116 @@ def drwa_loss(path_m):
     plt.show()
 
 
+def fit_data(num, path):
+    fitness_all = get_data(num, path)
+    fitness_max = []
+    fitness_min = []
+    fitness_ave = []
+    for i in range(len(fitness_all)):
+        fitness_min.append(math.log(min(fitness_all[i]), 100))
+        fitness_max.append(math.log(max(fitness_all[i]), 100))
+        fitness_ave.append(math.log(np.mean(fitness_all[i]), 100))
+
+    # 取部分
+    fitness_max_local = []
+    fitness_min_local = []
+    fitness_ave_local = []
+    for i in range(len(fitness_all)):
+        local_fit = []
+        for j in range(len(fitness_all[i]) - 5, len(fitness_all[i])):
+            local_fit.append(fitness_all[i][j])
+        fitness_min_local.append(math.log(min(local_fit), 100))
+        fitness_max_local.append(math.log(max(local_fit), 100))
+        fitness_ave_local.append(math.log(np.mean(local_fit), 100))
+    return fitness_max, fitness_ave, fitness_min, fitness_max_local, fitness_ave_local, fitness_min_local
+
+def DNN_fit(path):
+
+    fit_pred = pd.read_excel(io=path, sheet_name="fit_pred_all", header=None)
+    fit_pred = fit_pred.values.tolist()
+
+    fit_truth = pd.read_excel(io=path, sheet_name="fit_truth", header=None)
+    fit_truth = fit_truth.values.tolist()
+    fitness_pred_max = []
+    fitness_pred_min = []
+    fitness_pred_ave = []
+    for i in range(len(fit_pred)):
+        fitness_pred_min.append(math.log(min(fit_pred[i]), 10))
+        fitness_pred_max.append(math.log(max(fit_pred[i]), 10))
+        fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 10))
+    fitness_truth_max = []
+    fitness_truth_min = []
+    fitness_truth_ave = []
+    for i in range(len(fit_truth)):
+        fitness_truth_min.append(math.log(min(fit_truth[i]), 10))
+        fitness_truth_max.append(math.log(max(fit_truth[i]), 10))
+        fitness_truth_ave.append(math.log(np.mean(fit_truth[i]), 10))
+
+    return fitness_pred_max,fitness_pred_min,fitness_pred_ave,fitness_truth_max,fitness_truth_min,fitness_truth_ave
+
+def DNN_fit_draw(data):
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel('fitness', fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(4);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    # plt.ylim((150, 400))
+    bbb = np.arange(0, len(data[0]))
+    for i in range(len(data)):
+        # if i == 3:
+        #     ax2.plot(bbb, data[i], linewidth=6, color='r',linestyle='dashed')
+        # if i == 4:
+        #     ax2.plot(bbb, data[i], linewidth=6, color='b',linestyle='dashed')
+        # if i == 5:
+        #     ax2.plot(bbb, data[i], linewidth=6, color='g',linestyle='dashed')
+        if i == 0:
+            ax2.plot(bbb, data[i], linewidth=6, color='r')
+        if i == 1:
+            ax2.plot(bbb, data[i], linewidth=6, color='b')
+        if i == 2:
+            ax2.plot(bbb, data[i], linewidth=6, color='g')
+    ax2.set(xlim=(0, len(data[0])),
+            xticks=np.arange(0, len(data[0]), 10),
+            )
+    for i in range(7):
+        x_te = []
+        for j in range(10):
+            x_te.append(10*i)
+        x_te = np.array(x_te)
+        y_te = np.linspace(0, 90000, 10)
+        ax2.plot(x_te, y_te, linewidth=1, color='black')
+    plt.show()
+
 num = 2400
 path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_5_3_3.xlsx"
 path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
+path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_2.xlsx"
 # drwa_loss(path_memo)
-fitness_all = get_data(num,path)
-fitness_max = []
-fitness_min = []
-fitness_ave = []
-for i in range(len(fitness_all)):
-    fitness_min.append(math.log(min(fitness_all[i]),100))
-    fitness_max.append(math.log(max(fitness_all[i]),100))
-    fitness_ave.append(math.log(np.mean(fitness_all[i]),100))
 
-#取部分
-fitness_max_local = []
-fitness_min_local = []
-fitness_ave_local = []
-for i in range(len(fitness_all)):
-    local_fit = []
-    for j in range(len(fitness_all[i])-5,len(fitness_all[i])):
-        local_fit.append(fitness_all[i][j])
-    fitness_min_local.append(math.log(min(local_fit),100))
-    fitness_max_local.append(math.log(max(local_fit),100))
-    fitness_ave_local.append(math.log(np.mean(local_fit),100))
+#绘制优化后的数据
+# fitness_max,fitness_ave,fitness_min,fitness_max_local,fitness_ave_local,fitness_min_local = fit_data(num,path)
+# draw = [fitness_max,fitness_ave,fitness_min]
+# draw2 = [fitness_max_local,fitness_ave_local,fitness_min_local]
+# draw_picture(draw)
 
-draw = [fitness_max,fitness_ave,fitness_min]
-draw2 = [fitness_max_local,fitness_ave_local,fitness_min_local]
+#绘制DNN预测后的数据
+# fitness_pred_max,fitness_pred_min,fitness_pred_ave,fitness_truth_max,fitness_truth_min,fitness_truth_ave = DNN_fit(path_DNN)
+fit_pred = pd.read_excel(io=path_DNN, sheet_name="DNN_prediction_fitness", header=None)
+fit_pred = fit_pred.values.tolist()
 
-draw_picture(draw)
+fitness_pred_max = []
+fitness_pred_min = []
+fitness_pred_ave = []
+for i in range(len(fit_pred)):
+    # fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
+    # fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
+    # fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
+    fitness_pred_min.append(min(fit_pred[i]))
+    fitness_pred_max.append(max(fit_pred[i]))
+    fitness_pred_ave.append(np.mean(fit_pred[i]))
+data = [fitness_pred_max,fitness_pred_min,fitness_pred_ave]
+DNN_fit_draw(data)

@@ -464,7 +464,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
         gx_demo[5] = 1
     elif gx_demo[5] <= 350:
         gx_demo[5] = 0
-    elif gx_demo[5] <= 750 and gx_demo[5] >= 350:
+    elif gx_demo[5] <= 700 and gx_demo[5] >= 350:
         gx_demo[5] = (gx_demo[5]-350)/350
     return result,weight,gx,gx_demo
 def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
@@ -754,7 +754,7 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
         pop2[i] = pop[int(idx[i])]
     return pop2
 
-def crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE):
+def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
     pop = pop2
 
     new_pop = np.zeros((len(pop),len(pop[0])))
@@ -762,7 +762,7 @@ def crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE):
         father = pop[i]
         child = father
         if np.random.rand() < CROSSOVER_RATE:
-            mother = pop[np.random.randint(POP_SIZE)]
+            mother = pop[np.random.randint(len(pop2))]
             cross_points1 = np.random.randint(low=0, high=len(pop[0]))
             cross_points2 = np.random.randint(low=0, high=len(pop[0]))
             while cross_points2==cross_points1:
@@ -776,6 +776,7 @@ def crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE):
         new_pop[i] = child
 
     for i in range(len(new_pop)):
+
         sec_sort = []
         room_sort = []
         for j in range(num_var):
@@ -784,7 +785,22 @@ def crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE):
         for j in range(num_var):
             new_pop[i][j] = sec_sort[j]
 
+        for mutate_point in range(num_var):
+            x_var = list(map(int, x.tolist()))
+            for mutate_point_1 in range(num_var):
+                if pop[i][mutate_point_1] in x_var:
+                    x_var.remove(pop[i][mutate_point_1])
+            if pop[i][mutate_point] == pop[i][
+                mutate_point + 1] and mutate_point <= num_var - 2:  # 以MUTATION_RATE的概率进行变异
+                pop[i][mutate_point] = np.random.choice(x_var)
 
+        sec_sort = []
+        room_sort = []
+        for j in range(num_var):
+            sec_sort.append(new_pop[i][j])
+        sec_sort.sort()
+        for j in range(num_var):
+            new_pop[i][j] = sec_sort[j]
 
     return new_pop
 
@@ -932,7 +948,9 @@ def Gx_convert(fitness1):
             fitness5[j][3] = 0
         else:
             fitness5[j][3] = abs(fitness5[j][3])
-        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+abs(fitness5[j][4])))
+        if fitness5[j][4] <= 0.4:
+            fitness5[j][4] = 0
+        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
     return fitness2
 
 def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
