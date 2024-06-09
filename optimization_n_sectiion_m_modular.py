@@ -1110,7 +1110,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
-        pop2 = crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE)
+        pop2 = crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
 
         # 引入新个体
         run_time +=1
@@ -1218,7 +1218,7 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
-        pop2 = crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE)
+        pop2 = crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
 
 
 
@@ -1365,7 +1365,7 @@ def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_ro
         #选择
         pop2 = select_2(pop2, fitness2)
         #交叉变异
-        pop2 = crossover_and_mutation_coding_modular_section(pop2,CROSSOVER_RATE)
+        pop2 = crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE)
 
         # 引入新个体
         run_time +=1
