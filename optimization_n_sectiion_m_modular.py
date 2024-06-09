@@ -953,40 +953,40 @@ def Gx_convert(fitness1):
         fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
     return fitness2
 
-def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
-    pop = pop2
-
-    new_pop = np.zeros((len(pop),len(pop[0])))
-    for i in range(len(pop)):
-        father = pop[i]
-        child = father
-        if np.random.rand() < CROSSOVER_RATE:
-            mother = pop[np.random.randint(POP_SIZE)]
-            cross_points1 = np.random.randint(low=0, high=len(pop[0]))
-            cross_points2 = np.random.randint(low=0, high=len(pop[0]))
-            while cross_points2==cross_points1:
-                cross_points2 = np.random.randint(low=0, high=len(pop[0]))
-            exchan = []
-            exchan.append(cross_points2)
-            exchan.append(cross_points1)
-            for j in range(min(exchan),max(exchan)):
-                child[j] = mother[j]
-        mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE)
-        new_pop[i] = child
-
-
-    for i in range(len(new_pop)):
-        sec_sort = []
-        room_sort = []
-        for j in range(num_var):
-            sec_sort.append(new_pop[i][j])
-        sec_sort.sort()
-        for j in range(num_var):
-            new_pop[i][j] = sec_sort[j]
-
-
-
-    return new_pop
+# def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
+#     pop = pop2
+#
+#     new_pop = np.zeros((len(pop),len(pop[0])))
+#     for i in range(len(pop)):
+#         father = pop[i]
+#         child = father
+#         if np.random.rand() < CROSSOVER_RATE:
+#             mother = pop[np.random.randint(POP_SIZE)]
+#             cross_points1 = np.random.randint(low=0, high=len(pop[0]))
+#             cross_points2 = np.random.randint(low=0, high=len(pop[0]))
+#             while cross_points2==cross_points1:
+#                 cross_points2 = np.random.randint(low=0, high=len(pop[0]))
+#             exchan = []
+#             exchan.append(cross_points2)
+#             exchan.append(cross_points1)
+#             for j in range(min(exchan),max(exchan)):
+#                 child[j] = mother[j]
+#         mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE)
+#         new_pop[i] = child
+#
+#
+#     for i in range(len(new_pop)):
+#         sec_sort = []
+#         room_sort = []
+#         for j in range(num_var):
+#             sec_sort.append(new_pop[i][j])
+#         sec_sort.sort()
+#         for j in range(num_var):
+#             new_pop[i][j] = sec_sort[j]
+#
+#
+#
+#     return new_pop
 
 #用于GA_forDNN中的交叉变异
 def mutation_GA_for_DNN_modular(child,num_var,MUTATION_RATE):
