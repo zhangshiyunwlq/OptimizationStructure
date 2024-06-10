@@ -391,82 +391,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
     ret = SapModel.SetModelIsLocked(False)
     return aa,bb,cc,dd,ee,ff,gg,hh,ii
 
-def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
 
-    g_col_max= max(g_col)
-    g_beam_max = max(g_beam)
-
-    dis_all5_abs = copy.deepcopy(dis_all[5])
-    for i in range(len(dis_all5_abs)):
-        dis_all5_abs[i] = abs(dis_all5_abs[i])
-
-    dis_all7_abs = copy.deepcopy(dis_all[7])
-    for i in range(len(dis_all7_abs)):
-        dis_all7_abs[i] = abs(dis_all7_abs[i])
-
-    dis_all_max = max(dis_all5_abs)
-    interdis_max = max(dis_all7_abs)
-
-    rate_nonzero = copy.deepcopy(rate)
-    if rate_nonzero<=0.4:
-        rate_nonzero =0
-    else:
-        rate_nonzero=rate_nonzero
-
-    if g_col_max<=0:
-        g_col_fit = 0
-    else:
-        g_col_fit = g_col_max
-
-    if g_beam_max<=0:
-        g_beam_fit =0
-    else:
-        g_beam_fit = g_beam_max
-
-    if dis_all_max<= 0.00167 and dis_all_max >= -0.00167:
-        dis_all_fit = 0
-    else:
-        dis_all_fit = dis_all_max
-
-    if interdis_max<= 0.004 and interdis_max >= -0.004:
-        interdis_all_fit = 0
-    else:
-        interdis_all_fit = interdis_max
-
-    G_value=u * (g_col_fit + g_beam_fit + 100*dis_all_fit + 100*interdis_all_fit +rate_nonzero)
-    gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
-    # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
-    result = weight + G_value
-
-
-    gx_demo = copy.deepcopy(gx)
-    if gx_demo[0]>=5:
-        gx_demo[0]=1
-    elif gx_demo[0]<=-1:
-        gx_demo[0] = 0
-    elif gx_demo[0]<=5 and gx_demo[0]>=-1:
-        gx_demo[0]=(gx_demo[0]+1)/6
-    if gx_demo[1]>=2:
-        gx_demo[1]=1
-    elif gx_demo[1]<=-1:
-        gx_demo[1] = 0
-    elif gx_demo[1]<=2 and gx_demo[1]>=-1:
-        gx_demo[1]=(gx_demo[1]+1)/3
-    if gx_demo[2] >= 0.05:
-        gx_demo[2] = 1
-    else:
-        gx_demo[2] = gx_demo[2] / 0.05
-    if gx_demo[3] >= 0.05:
-        gx_demo[3] = 1
-    else:
-        gx_demo[3] = gx_demo[3] / 0.05
-    if gx_demo[5] >= 700:
-        gx_demo[5] = 1
-    elif gx_demo[5] <= 350:
-        gx_demo[5] = 0
-    elif gx_demo[5] <= 700 and gx_demo[5] >= 350:
-        gx_demo[5] = (gx_demo[5]-350)/350
-    return result,weight,gx,gx_demo
 def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
     while True:
         if q.empty():
@@ -832,46 +757,6 @@ def mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE):
             child[j] = randint(0, modular_num-1)
             # child[j] = 0
 
-def gx_Normalization(gx):
-    gx_demo = copy.deepcopy(gx)
-    for i in range(len(gx_demo)):
-        if gx_demo[i][0]>=5:
-            gx_demo[i][0]=1
-        elif gx_demo[i][0]<=-1:
-            gx_demo[i][0] = 0
-        elif gx_demo[i][0]<=5 and gx_demo[i][0]>=-1:
-            gx_demo[i][0]=(gx_demo[i][0]+1)/6
-        if gx_demo[i][1]>=2:
-            gx_demo[i][1]=1
-        elif gx_demo[i][1]<=-1:
-            gx_demo[i][1] = 0
-        elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
-            gx_demo[i][1]=(gx_demo[i][1]+1)/3
-        if gx_demo[i][2] >= 0.05:
-            gx_demo[i][2] = 1
-        else:
-            gx_demo[i][2] = gx_demo[i][2] / 0.05
-        if gx_demo[i][3] >= 0.05:
-            gx_demo[i][3] = 1
-        else:
-            gx_demo[i][3] = gx_demo[i][3] / 0.05
-        if gx_demo[i][5] >= 700:
-            gx_demo[i][5] = 1
-        elif gx_demo[i][5] <= 350:
-            gx_demo[i][5] = 0
-        elif gx_demo[i][5] <= 750 and gx_demo[i][5] >= 350:
-            gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
-    return gx_demo
-
-def gx_nonNormalization(gx):
-    gx_demo = copy.deepcopy(gx)
-    for i in range(len(gx_demo)):
-        gx_demo[i][0]=gx_demo[i][0]*6-1
-        gx_demo[i][1] = gx_demo[i][1] * 3-1
-        gx_demo[i][2] = gx_demo[i][2] * 0.05
-        gx_demo[i][3] = gx_demo[i][3] * 0.05
-        gx_demo[i][5] = gx_demo[i][5] * 350+350
-    return gx_demo
 
 def generation_population_modular_section(best_indivi,rate):
 
@@ -926,6 +811,16 @@ def generation_population_modular_section(best_indivi,rate):
 
     return new_pop
 
+def gx_nonNormalization(gx):
+    gx_demo = copy.deepcopy(gx)
+    for i in range(len(gx_demo)):
+        gx_demo[i][0]=gx_demo[i][0]*3-1
+        gx_demo[i][1] = gx_demo[i][1] * 1.5-1
+        gx_demo[i][2] = gx_demo[i][2] * 0.02
+        gx_demo[i][3] = gx_demo[i][3] * 0.02
+        gx_demo[i][5] = gx_demo[i][5] * 350+350
+    return gx_demo
+#修改区间
 def Gx_convert(fitness1):
     fitness3 = copy.deepcopy(fitness1)
     fitness4 = []  # 储存所有gx
@@ -952,7 +847,37 @@ def Gx_convert(fitness1):
             fitness5[j][4] = 0
         fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
     return fitness2
-
+#修改区间
+def gx_Normalization(gx):
+    gx_demo = copy.deepcopy(gx)
+    for i in range(len(gx_demo)):
+        if gx_demo[i][0]>=2:
+            gx_demo[i][0]=1
+        elif gx_demo[i][0]<=-1:
+            gx_demo[i][0] = 0
+        elif gx_demo[i][0]<=2 and gx_demo[i][0]>=-1:
+            gx_demo[i][0]=(gx_demo[i][0]+1)/3
+        if gx_demo[i][1]>=0.5:
+            gx_demo[i][1]=1
+        elif gx_demo[i][1]<=-1:
+            gx_demo[i][1] = 0
+        elif gx_demo[i][1]<=0.5 and gx_demo[i][1]>=-1:
+            gx_demo[i][1]=(gx_demo[i][1]+1)/1.5
+        if gx_demo[i][2] >= 0.02:
+            gx_demo[i][2] = 1
+        else:
+            gx_demo[i][2] = gx_demo[i][2] / 0.02
+        if gx_demo[i][3] >= 0.02:
+            gx_demo[i][3] = 1
+        else:
+            gx_demo[i][3] = gx_demo[i][3] / 0.02
+        if gx_demo[i][5] >= 700:
+            gx_demo[i][5] = 1
+        elif gx_demo[i][5] <= 350:
+            gx_demo[i][5] = 0
+        elif gx_demo[i][5] <= 700 and gx_demo[i][5] >= 350:
+            gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
+    return gx_demo
 # def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
 #     pop = pop2
 #
@@ -1251,7 +1176,82 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3
 
+def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
 
+    g_col_max= max(g_col)
+    g_beam_max = max(g_beam)
+
+    dis_all5_abs = copy.deepcopy(dis_all[5])
+    for i in range(len(dis_all5_abs)):
+        dis_all5_abs[i] = abs(dis_all5_abs[i])
+
+    dis_all7_abs = copy.deepcopy(dis_all[7])
+    for i in range(len(dis_all7_abs)):
+        dis_all7_abs[i] = abs(dis_all7_abs[i])
+
+    dis_all_max = max(dis_all5_abs)
+    interdis_max = max(dis_all7_abs)
+
+    rate_nonzero = copy.deepcopy(rate)
+    if rate_nonzero<=0.4:
+        rate_nonzero =0
+    else:
+        rate_nonzero=rate_nonzero
+
+    if g_col_max<=0:
+        g_col_fit = 0
+    else:
+        g_col_fit = g_col_max
+
+    if g_beam_max<=0:
+        g_beam_fit =0
+    else:
+        g_beam_fit = g_beam_max
+
+    if dis_all_max<= 0.00167 and dis_all_max >= -0.00167:
+        dis_all_fit = 0
+    else:
+        dis_all_fit = dis_all_max
+
+    if interdis_max<= 0.004 and interdis_max >= -0.004:
+        interdis_all_fit = 0
+    else:
+        interdis_all_fit = interdis_max
+
+    G_value=u * (g_col_fit + g_beam_fit + 100*dis_all_fit + 100*interdis_all_fit +rate_nonzero)
+    gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
+    # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
+    result = weight + G_value
+
+
+    gx_demo = copy.deepcopy(gx)
+    if gx_demo[0]>=2:
+        gx_demo[0]=1
+    elif gx_demo[0]<=-1:
+        gx_demo[0] = 0
+    elif gx_demo[0]<=2 and gx_demo[0]>=-1:
+        gx_demo[0]=(gx_demo[0]+1)/3
+    if gx_demo[1]>=0.5:
+        gx_demo[1]=1
+    elif gx_demo[1]<=-1:
+        gx_demo[1] = 0
+    elif gx_demo[1]<=0.5 and gx_demo[1]>=-1:
+        gx_demo[1]=(gx_demo[1]+1)/1.5
+    if gx_demo[2] >= 0.02:
+        gx_demo[2] = 1
+    else:
+        gx_demo[2] = gx_demo[2] / 0.02
+    if gx_demo[3] >= 0.02:
+        gx_demo[3] = 1
+    else:
+        gx_demo[3] = gx_demo[3] / 0.02
+    if gx_demo[5] >= 700:
+        gx_demo[5] = 1
+    elif gx_demo[5] <= 350:
+        gx_demo[5] = 0
+    elif gx_demo[5] <= 700 and gx_demo[5] >= 350:
+        gx_demo[5] = (gx_demo[5]-350)/350
+    return result,weight,gx,gx_demo
 def get_continue_data(file_time,num_continue):
     path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize_case4\memorize_infor_{num_var}_{modular_num}_{file_time}.xlsx"
     path_infor = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{file_time}.xlsx"

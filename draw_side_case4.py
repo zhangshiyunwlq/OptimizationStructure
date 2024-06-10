@@ -366,7 +366,7 @@ al_time = 15
 # draw_pred(pop1,pop2,pop3)
 
 #数据文件中获得pop2
-path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_2.xlsx"
+path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_3.xlsx"
 pop2 = pd.read_excel(io=path_memo, sheet_name="pop2_all", header=None)
 pop2 = pop2.values.tolist()
 pop1,pop3=decoding_modular_section(pop2)

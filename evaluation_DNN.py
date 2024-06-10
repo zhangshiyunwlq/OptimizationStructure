@@ -15,16 +15,74 @@ import comtypes.client
 import sys
 import xlsxwriter
 import matplotlib.pyplot as plt
+#修改区间
 def gx_nonNormalization(gx):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
-        gx_demo[i][0]=gx_demo[i][0]*6-1
-        gx_demo[i][1] = gx_demo[i][1] * 3-1
-        gx_demo[i][2] = gx_demo[i][2] * 0.05
-        gx_demo[i][3] = gx_demo[i][3] * 0.05
+        gx_demo[i][0]=gx_demo[i][0]*3-1
+        gx_demo[i][1] = gx_demo[i][1] * 1.5-1
+        gx_demo[i][2] = gx_demo[i][2] * 0.02
+        gx_demo[i][3] = gx_demo[i][3] * 0.02
         gx_demo[i][5] = gx_demo[i][5] * 350+350
     return gx_demo
-
+#修改区间
+def Gx_convert(fitness1):
+    fitness3 = copy.deepcopy(fitness1)
+    fitness4 = []  # 储存所有gx
+    fitness2 = []  # 所有gx的和
+    for j in range(len(fitness3)):
+        fitness4.append(fitness3[j].tolist())
+    fitness4=gx_nonNormalization(fitness4)
+    fitness5 = copy.deepcopy(fitness4)
+    for j in range(len(fitness3)):
+        # fitness2.append(sum(fitness4[j]))
+        if fitness5[j][0]<=0:
+            fitness5[j][0] =0
+        if fitness5[j][1] <= 0:
+            fitness5[j][1] = 0
+        if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
+            fitness5[j][2] =0
+        else:
+            fitness5[j][2] = abs(fitness5[j][2])
+        if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
+            fitness5[j][3] = 0
+        else:
+            fitness5[j][3] = abs(fitness5[j][3])
+        if fitness5[j][4] <= 0.4:
+            fitness5[j][4] = 0
+        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
+    return fitness2
+#修改区间
+def gx_Normalization(gx):
+    gx_demo = copy.deepcopy(gx)
+    for i in range(len(gx_demo)):
+        if gx_demo[i][0]>=2:
+            gx_demo[i][0]=1
+        elif gx_demo[i][0]<=-1:
+            gx_demo[i][0] = 0
+        elif gx_demo[i][0]<=2 and gx_demo[i][0]>=-1:
+            gx_demo[i][0]=(gx_demo[i][0]+1)/3
+        if gx_demo[i][1]>=0.5:
+            gx_demo[i][1]=1
+        elif gx_demo[i][1]<=-1:
+            gx_demo[i][1] = 0
+        elif gx_demo[i][1]<=0.5 and gx_demo[i][1]>=-1:
+            gx_demo[i][1]=(gx_demo[i][1]+1)/1.5
+        if gx_demo[i][2] >= 0.02:
+            gx_demo[i][2] = 1
+        else:
+            gx_demo[i][2] = gx_demo[i][2] / 0.02
+        if gx_demo[i][3] >= 0.02:
+            gx_demo[i][3] = 1
+        else:
+            gx_demo[i][3] = gx_demo[i][3] / 0.02
+        if gx_demo[i][5] >= 700:
+            gx_demo[i][5] = 1
+        elif gx_demo[i][5] <= 350:
+            gx_demo[i][5] = 0
+        elif gx_demo[i][5] <= 700 and gx_demo[i][5] >= 350:
+            gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
+    return gx_demo
 def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
     fit_ini = copy.deepcopy(fitness)
@@ -125,10 +183,12 @@ def mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE):
 def GA_for_DNN(run_time,pop2,model,fitness_best):
     fitness_pred = []
     for i in range(run_time):
+        temp = []
         fitness1 = model.predict(pop2,verbose=0)
         fitness2 = Gx_convert(fitness1)#归一化还原，并将每个染色体对应的gx累加
         mm = fitness2.index(min(fitness2))
         min1 = min(fitness2)
+        temp.append(fitness1[mm])
         fitness_pred.append(min1)
         mm2_all = pop2[mm]
         #选择
@@ -139,6 +199,7 @@ def GA_for_DNN(run_time,pop2,model,fitness_best):
         fit_pred2=Gx_convert(fit_pred)
         if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
+    gx_pred_best.append(temp)
     DNN_prediction_fitness.append(fitness_pred)
     fitness_best.append(min(min1,fit_pred2[0]))
     return pop2,fitness_best
@@ -211,36 +272,7 @@ def generation_population_modular_section(best_indivi,rate):
 
     return new_pop
 
-def gx_Normalization(gx):
-    gx_demo = copy.deepcopy(gx)
-    for i in range(len(gx_demo)):
-        if gx_demo[i][0]>=5:
-            gx_demo[i][0]=1
-        elif gx_demo[i][0]<=-1:
-            gx_demo[i][0] = 0
-        elif gx_demo[i][0]<=5 and gx_demo[i][0]>=-1:
-            gx_demo[i][0]=(gx_demo[i][0]+1)/6
-        if gx_demo[i][1]>=2:
-            gx_demo[i][1]=1
-        elif gx_demo[i][1]<=-1:
-            gx_demo[i][1] = 0
-        elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
-            gx_demo[i][1]=(gx_demo[i][1]+1)/3
-        if gx_demo[i][2] >= 0.05:
-            gx_demo[i][2] = 1
-        else:
-            gx_demo[i][2] = gx_demo[i][2] / 0.05
-        if gx_demo[i][3] >= 0.05:
-            gx_demo[i][3] = 1
-        else:
-            gx_demo[i][3] = gx_demo[i][3] / 0.05
-        if gx_demo[i][5] >= 700:
-            gx_demo[i][5] = 1
-        elif gx_demo[i][5] <= 350:
-            gx_demo[i][5] = 0
-        elif gx_demo[i][5] <= 700 and gx_demo[i][5] >= 350:
-            gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
-    return gx_demo
+
 def mulit_get_sap(num_thread):
     case_name = []
     APIPath_name = []
@@ -492,26 +524,26 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
 
 
     gx_demo = copy.deepcopy(gx)
-    if gx_demo[0]>=5:
+    if gx_demo[0]>=2:
         gx_demo[0]=1
     elif gx_demo[0]<=-1:
         gx_demo[0] = 0
-    elif gx_demo[0]<=5 and gx_demo[0]>=-1:
-        gx_demo[0]=(gx_demo[0]+1)/6
-    if gx_demo[1]>=2:
+    elif gx_demo[0]<=2 and gx_demo[0]>=-1:
+        gx_demo[0]=(gx_demo[0]+1)/3
+    if gx_demo[1]>=0.5:
         gx_demo[1]=1
     elif gx_demo[1]<=-1:
         gx_demo[1] = 0
-    elif gx_demo[1]<=2 and gx_demo[1]>=-1:
-        gx_demo[1]=(gx_demo[1]+1)/3
-    if gx_demo[2] >= 0.05:
+    elif gx_demo[1]<=0.5 and gx_demo[1]>=-1:
+        gx_demo[1]=(gx_demo[1]+1)/1.5
+    if gx_demo[2] >= 0.02:
         gx_demo[2] = 1
     else:
-        gx_demo[2] = gx_demo[2] / 0.05
-    if gx_demo[3] >= 0.05:
+        gx_demo[2] = gx_demo[2] / 0.02
+    if gx_demo[3] >= 0.02:
         gx_demo[3] = 1
     else:
-        gx_demo[3] = gx_demo[3] / 0.05
+        gx_demo[3] = gx_demo[3] / 0.02
     if gx_demo[5] >= 700:
         gx_demo[5] = 1
     elif gx_demo[5] <= 350:
@@ -644,32 +676,6 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
         i.join()
     return result,weight_1,col_up,beam_up
 #增加支撑百分比
-def Gx_convert(fitness1):
-    fitness3 = copy.deepcopy(fitness1)
-    fitness4 = []  # 储存所有gx
-    fitness2 = []  # 所有gx的和
-    for j in range(len(fitness3)):
-        fitness4.append(fitness3[j].tolist())
-    fitness4=gx_nonNormalization(fitness4)
-    fitness5 = copy.deepcopy(fitness4)
-    for j in range(len(fitness3)):
-        # fitness2.append(sum(fitness4[j]))
-        if fitness5[j][0]<=0:
-            fitness5[j][0] =0
-        if fitness5[j][1] <= 0:
-            fitness5[j][1] = 0
-        if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
-            fitness5[j][2] =0
-        else:
-            fitness5[j][2] = abs(fitness5[j][2])
-        if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
-            fitness5[j][3] = 0
-        else:
-            fitness5[j][3] = abs(fitness5[j][3])
-        if fitness5[j][4] <= 0.4:
-            fitness5[j][4] = 0
-        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
-    return fitness2
 
 def get_pred_fit(pop2_best,num_indi,num_iter):
     mySapObject_name, ModelPath_name, SapModel_name = mulit_get_sap(num_thread)
@@ -817,7 +823,7 @@ def get_local_global_data(file_time):
             local_memorize_pop.append(global_get_pop[local_num[i-1]:local_num[i]])
             local_memorize_gx.append(global_get_gx[local_num[i-1]:local_num[i]])
 
-    return local_memorize_pop,local_memorize_gx,pop_best
+    return local_memorize_pop,local_memorize_gx,pop_best,global_get_gx
 
 def run_DNN_GA(local_pop,local_gx,pop_best):
     global_pop = []
@@ -837,7 +843,7 @@ def run_DNN_GA(local_pop,local_gx,pop_best):
         all_pop2.append(pop2)
         fit_pred_all.append(fit_best)
         print(f'完成进度{i+1}/{len(local_pop)}')
-    return all_pop2,fit_pred_all,DNN_prediction_fitness
+    return all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best
 
 def get_fitness(all_pop2):
     fit_truth = []
@@ -896,6 +902,8 @@ def draw_min_pop(all_pop2,fit_pred,fit_truth,memorize_gx_no,memorize_gx):
         gx_truth_min.append(gx_nor_divided[i][index[i]])
         gx_min.append(gx_divided[i][index[i]])
     return pop_pred_best,pop_truth_best,gx_truth_min,gx_min
+
+
 
 def output_data(pop2_all,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,time):
     APIPath = os.path.join(os.getcwd(), 'DNN_test_data')
@@ -982,6 +990,102 @@ def draw_fit_truth(data1):
     plt.show()
 
 
+def draw_gx_chayi(gx_truth,gx_pred):
+    gx_truth_div = []
+    gx_pred_div = []
+    for i in range(len(gx_truth[0])):
+        temp1=[]
+        temp2=[]
+        for j in range(len(gx_truth)):
+            temp1.append(gx_truth[j][i])
+            temp2.append(gx_pred[j][i])
+        gx_truth_div.append(temp1)
+        gx_pred_div.append(temp2)
+    return gx_truth_div,gx_pred_div
+def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration", fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel('fitness', fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(4);  ###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    # plt.ylim((150, 400))
+
+
+
+
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration", fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel('fitness', fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(4);  ###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    # plt.ylim((150, 400))
+
+
+    bbb = np.arange(0, len(gx_pred_div[0]))
+    ax2.plot(bbb, gx_pred_div[time], linewidth=6, color='r')
+    ax2.plot(bbb, gx_truth_div[time], linewidth=6, color='blue')
+    ax2.set(xlim=(0, len(gx_pred_div[0])),
+            xticks=np.arange(0, len(gx_pred_div[0]), 10),
+                )
+        # for i in range(7):
+        #     x_te = []
+        #     for j in range(10):
+        #         x_te.append(20 * i - 1)
+        #     x_te = np.array(x_te)
+        #     y_te = np.linspace(0, 1.5, 10)
+        #     ax2.plot(x_te, y_te, linewidth=1, color='black')
+    plt.show()
+    # plt.clf()
+
+#查看gx记忆池中的分布范围
+def gx_dietribute(gx_all):
+    gx_num = []
+    gx_all_memo =copy.deepcopy(gx_all)
+    start_num = 0
+    end_num = 1
+    Jg = np.round(np.arange(start_num, end_num, 0.1),1).tolist()
+    Jg.append(end_num)
+    Jg_1 = []
+    for i in range(len(Jg)-1):
+        Jg_1.append([Jg[i],Jg[i+1]])
+
+    for i in range(len(gx_all[0])):
+        temp = [[] for nu in range(10)]
+        for j in range(len(gx_all)):
+            for z in range(len(Jg_1)):
+                if gx_all[j][i]<=Jg_1[z][1] and gx_all[j][i]>=Jg_1[z][0]:
+                    temp[z].append(gx_all[j][i])
+        gx_num.append(temp)
+
+    gx_eve_num = []
+    for i in range(len(gx_num)):
+        temp = []
+        for j in range(len(gx_num[0])):
+            temp.append(len(gx_num[i][j]))
+        gx_eve_num.append(temp)
+    return gx_num,gx_eve_num
+#绘制统计gx个数分布柱状图
+def gx_column(gx_num,time):
+
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+    plt.rcParams['figure.dpi'] = 100
+    plt.rcParams['figure.figsize'] = (5, 3)
+    data = gx_num[time]
+    x= range(len(gx_num[time]))
+    countries = ['0-0.1', '0.1-0.2', '0.2-0.3', '0.3-0.4', '0.4-0.5','0.5-0.6', '0.6-0.7', '0.7-0.8', '0.8-0.9', '0.9-1']
+    plt.bar(countries, data)
+    plt.tick_params(labelsize=30)
+    plt.show()
+
 modular_length = 8000
 modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
@@ -1046,6 +1150,7 @@ sap_run_time00 = 0
 #新增
 gx_all_truth = []
 
+gx_pred_best=[]#每次预测得到的
 
 #局部记忆池
 
@@ -1085,12 +1190,33 @@ for i in range(group_num):
 # pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num=get_continue_data(file_time,num_continue)
 # fitness_prediction2,fitness,DNN_prediction_fitness,gx_truth_all,gx_pred_all=get_pred_fit(pop2_best,10,400)
 #在线训练神经网络生成最优个体
-local_memorize_pop,local_memorize_gx,pop_best=get_local_global_data(file_time)
-all_pop2,fit_pred_all,DNN_prediction_fitness=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+local_memorize_pop,local_memorize_gx,pop_best,gx_all_read=get_local_global_data(file_time)
+all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+for i in range(len(gx_pred_best)):
+    gx_pred_best[i] = gx_pred_best[i][0].tolist()
 fit_truth = get_fitness(all_pop2)
 sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
 pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
-output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,2)
+output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,3)
 
+#绘制gx差异值
+gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,5)
+#统计gx分布并绘制
+gx_dis,gx_num=gx_dietribute(gx_all_read)
+gx_column(gx_num,0)
+#绘制所有最优个体fit曲线
 draw_fit_truth(memorize_fit)
 
+fit_all_memorize = []
+for i in range(len(local_memorize_gx)):
+    temp= Gx_convert(np.array(local_memorize_gx[i]))
+    fit_all_memorize.append(temp)
+
+fit_xiaoyu = []
+for i in range(len(fit_all_memorize)):
+    temp = []
+    for j in range(len(fit_all_memorize[i])):
+        if fit_all_memorize[i][j]<700:
+            temp.append(fit_all_memorize[i][j])
+    fit_xiaoyu.append(temp)

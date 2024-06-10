@@ -157,21 +157,21 @@ def DNN_fit_draw(data):
         if i == 2:
             ax2.plot(bbb, data[i], linewidth=6, color='g')
     ax2.set(xlim=(0, len(data[0])),
-            xticks=np.arange(0, len(data[0]), 10),
+            xticks=np.arange(0, len(data[0]), 1),
             )
     for i in range(7):
         x_te = []
         for j in range(10):
             x_te.append(10*i)
         x_te = np.array(x_te)
-        y_te = np.linspace(0, 90000, 10)
+        y_te = np.linspace(0, 10, 10)
         ax2.plot(x_te, y_te, linewidth=1, color='black')
     plt.show()
 
 num = 2400
 path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_5_3_3.xlsx"
 path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
-path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_2.xlsx"
+path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_3.xlsx"
 # drwa_loss(path_memo)
 
 #绘制优化后的数据
@@ -182,18 +182,19 @@ path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\o
 
 #绘制DNN预测后的数据
 # fitness_pred_max,fitness_pred_min,fitness_pred_ave,fitness_truth_max,fitness_truth_min,fitness_truth_ave = DNN_fit(path_DNN)
-fit_pred = pd.read_excel(io=path_DNN, sheet_name="DNN_prediction_fitness", header=None)
+# fit_pred = pd.read_excel(io=path_DNN, sheet_name="DNN_prediction_fitness", header=None)
+fit_pred = pd.read_excel(io=path_DNN, sheet_name="fit_truth", header=None)
 fit_pred = fit_pred.values.tolist()
 
 fitness_pred_max = []
 fitness_pred_min = []
 fitness_pred_ave = []
 for i in range(len(fit_pred)):
-    # fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
-    # fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
-    # fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
-    fitness_pred_min.append(min(fit_pred[i]))
-    fitness_pred_max.append(max(fit_pred[i]))
-    fitness_pred_ave.append(np.mean(fit_pred[i]))
+    fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
+    fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
+    fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
+    # fitness_pred_min.append(min(fit_pred[i]))
+    # fitness_pred_max.append(max(fit_pred[i]))
+    # fitness_pred_ave.append(np.mean(fit_pred[i]))
 data = [fitness_pred_max,fitness_pred_min,fitness_pred_ave]
 DNN_fit_draw(data)
