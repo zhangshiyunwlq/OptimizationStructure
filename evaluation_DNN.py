@@ -16,72 +16,122 @@ import sys
 import xlsxwriter
 import matplotlib.pyplot as plt
 #修改区间
-def gx_nonNormalization(gx):
+
+def gx_nonNormalization(gx,gx_data_select):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
-        gx_demo[i][0]=gx_demo[i][0]*3-1
-        gx_demo[i][1] = gx_demo[i][1] * 1.5-1
-        gx_demo[i][2] = gx_demo[i][2] * 0.02
-        gx_demo[i][3] = gx_demo[i][3] * 0.02
-        gx_demo[i][5] = gx_demo[i][5] * 350+350
+        for j in range(len(gx_data_select)):
+            if gx_data_select[j] == 0:
+                gx_demo[i][j] = gx_demo[i][j] * 3 - 1
+            elif gx_data_select[j] == 1:
+                gx_demo[i][j] = gx_demo[i][j] * 4 - 1
+            elif gx_data_select[j] == 2:
+                gx_demo[i][j] = gx_demo[i][j] * 0.1
+            elif gx_data_select[j] == 3:
+                gx_demo[i][j] = gx_demo[i][j] * 0.1
+            elif gx_data_select[j] == 5:
+                gx_demo[i][j] = gx_demo[i][j] * 600
+        # gx_demo[i][1] = gx_demo[i][1] * 1.5-1
+        # gx_demo[i][2] = gx_demo[i][2] * 0.1
+        # gx_demo[i][3] = gx_demo[i][3] * 0.1
+        # gx_demo[i][5] = gx_demo[i][5] * 200+400
+        # gx_demo[i][0] = gx_demo[i][0] * 600
     return gx_demo
 #修改区间
-def Gx_convert(fitness1):
+def Gx_convert(fitness1,gx_data_select):
     fitness3 = copy.deepcopy(fitness1)
     fitness4 = []  # 储存所有gx
     fitness2 = []  # 所有gx的和
     for j in range(len(fitness3)):
         fitness4.append(fitness3[j].tolist())
-    fitness4=gx_nonNormalization(fitness4)
+    fitness4=gx_nonNormalization(fitness4,gx_data_select)
     fitness5 = copy.deepcopy(fitness4)
     for j in range(len(fitness3)):
         # fitness2.append(sum(fitness4[j]))
-        if fitness5[j][0]<=0:
-            fitness5[j][0] =0
-        if fitness5[j][1] <= 0:
-            fitness5[j][1] = 0
-        if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
-            fitness5[j][2] =0
-        else:
-            fitness5[j][2] = abs(fitness5[j][2])
-        if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
-            fitness5[j][3] = 0
-        else:
-            fitness5[j][3] = abs(fitness5[j][3])
-        if fitness5[j][4] <= 0.4:
-            fitness5[j][4] = 0
-        fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
+        for z in range(len(gx_data_select)):
+            if gx_data_select[z] == 0:
+                if fitness5[j][z]<=0:
+                    fitness5[j][z] =0
+            elif gx_data_select[z] == 1:
+                if fitness5[j][z] <= 0:
+                    fitness5[j][z] = 0
+            elif gx_data_select[z] == 2:
+                if fitness5[j][z]<=0.00167 and fitness5[j][z] >= -0.00167:
+                    fitness5[j][z] =0
+                else:
+                    fitness5[j][z] = 100*abs(fitness5[j][z])
+            elif gx_data_select[z] == 3:
+                if fitness5[j][z] <= 0.004 and fitness5[j][z] >= -0.004:
+                    fitness5[j][z] = 0
+                else:
+                    fitness5[j][z] = 100*abs(fitness5[j][z])
+            elif gx_data_select[z] == 4:
+                if fitness5[j][z] <= 0.4:
+                    fitness5[j][z] = 0
+                else:
+                    fitness5[j][z] = 100 * abs(fitness5[j][z])
+        value = 0
+        for z in range(len(gx_data_select)):
+            if gx_data_select[z] != 5:
+                value += 10000*fitness5[j][z]
+            elif gx_data_select[z] == 5:
+                value += fitness5[j][z]
+        fitness2.append(value)
+        # if fitness5[j][0]<=0:
+        #     fitness5[j][0] =0
+        # if fitness5[j][1] <= 0:
+        #     fitness5[j][1] = 0
+        # if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
+        #     fitness5[j][2] =0
+        # else:
+        #     fitness5[j][2] = abs(fitness5[j][2])
+        # if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
+        #     fitness5[j][3] = 0
+        # else:
+        #     fitness5[j][3] = abs(fitness5[j][3])
+        # if fitness5[j][4] <= 0.4:
+        #     fitness5[j][4] = 0
+        # fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
+        # if fitness5[j][0]<=0:
+        #     fitness5[j][0] = abs(fitness5[j][0])*100
+        # fitness2.append(fitness5[j][0])
     return fitness2
 #修改区间
-def gx_Normalization(gx):
+def gx_Normalization(gx,gx_data_select):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
-        if gx_demo[i][0]>=2:
-            gx_demo[i][0]=1
-        elif gx_demo[i][0]<=-1:
-            gx_demo[i][0] = 0
-        elif gx_demo[i][0]<=2 and gx_demo[i][0]>=-1:
-            gx_demo[i][0]=(gx_demo[i][0]+1)/3
-        if gx_demo[i][1]>=0.5:
-            gx_demo[i][1]=1
-        elif gx_demo[i][1]<=-1:
-            gx_demo[i][1] = 0
-        elif gx_demo[i][1]<=0.5 and gx_demo[i][1]>=-1:
-            gx_demo[i][1]=(gx_demo[i][1]+1)/1.5
-        if gx_demo[i][2] >= 0.02:
-            gx_demo[i][2] = 1
-        else:
-            gx_demo[i][2] = gx_demo[i][2] / 0.02
-        if gx_demo[i][3] >= 0.02:
-            gx_demo[i][3] = 1
-        else:
-            gx_demo[i][3] = gx_demo[i][3] / 0.02
-        if gx_demo[i][5] >= 700:
-            gx_demo[i][5] = 1
-        elif gx_demo[i][5] <= 350:
-            gx_demo[i][5] = 0
-        elif gx_demo[i][5] <= 700 and gx_demo[i][5] >= 350:
-            gx_demo[i][5] = (gx_demo[i][5] - 350) / 350
+        for j in range(len(gx_data_select)):
+            if gx_data_select[j] == 0:
+                if gx_demo[i][j]>=2:
+                    gx_demo[i][j]=1
+                elif gx_demo[i][j]<=-1:
+                    gx_demo[i][j] = 0
+                elif gx_demo[i][j]<=2 and gx_demo[i][j]>=-1:
+                    gx_demo[i][j]=(gx_demo[i][j]+1)/3
+            elif gx_data_select[j] == 1:
+                if gx_demo[i][j]>=3:
+                    gx_demo[i][j]=1
+                elif gx_demo[i][j]<=-1:
+                    gx_demo[i][j] = 0
+                elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
+                    gx_demo[i][j]=(gx_demo[i][j]+1)/4
+            elif gx_data_select[j] == 2:
+                if gx_demo[i][j] >= 0.1:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.1
+            elif gx_data_select[j] == 3:
+                if gx_demo[i][j] >= 0.1:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.1
+            elif gx_data_select[j] == 5:
+                if gx_demo[i][j] >= 600:
+                    gx_demo[i][j] = 1
+                elif gx_demo[i][j] <= 0:
+                    gx_demo[i][j] = 0
+                elif gx_demo[i][j] <= 600 and gx_demo[i][j] >= 0:
+                    gx_demo[i][j] = gx_demo[i][j] / 600
     return gx_demo
 def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
@@ -91,6 +141,14 @@ def select_2(pop, fitness):  # nature selection wrt pop's fitness
     sort_num = []
     for i in range(len(fit_ini)):
         sort_num.append(luyi.index(fit_ini[i]))
+    # print(sort_num)
+    # print(f'{len(sort_num)}_{len(pop)}')
+    for i in range(len(sort_num)):
+        if sort_num[i]==0:
+            sort_num[i]+=0.01
+    pop_last.append(pop)
+
+
 
     # for i in range(len(list_new)):
     #     list_new[i] = m.e ** (list_new[i] * 1.5)
@@ -185,7 +243,8 @@ def GA_for_DNN(run_time,pop2,model,fitness_best):
     for i in range(run_time):
         temp = []
         fitness1 = model.predict(pop2,verbose=0)
-        fitness2 = Gx_convert(fitness1)#归一化还原，并将每个染色体对应的gx累加
+        fitness2 = Gx_convert(fitness1,gx_data_select)#归一化还原，并将每个染色体对应的gx累加
+        all_fit_pred_GA.append(fitness2)
         mm = fitness2.index(min(fitness2))
         min1 = min(fitness2)
         temp.append(fitness1[mm])
@@ -196,7 +255,7 @@ def GA_for_DNN(run_time,pop2,model,fitness_best):
         # 交叉变异
         pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE)
         fit_pred = model.predict(pop2,verbose=0)
-        fit_pred2=Gx_convert(fit_pred)
+        fit_pred2=Gx_convert(fit_pred,gx_data_select)
         if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
     gx_pred_best.append(temp)
@@ -365,10 +424,10 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
         x_train_local = x_train1_local#提取用于训练的x_train部分
         gx_local = copy.deepcopy(memorize_gx_local)
         y_train_local = np.array(gx_local)
-        y_train_local= gx_Normalization(y_train_local)#归一化
+        y_train_local= gx_Normalization(y_train_local,gx_data_select)#归一化
         model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
         #verbose取消打印损失
-        model.fit(x_train_local, y_train_local, epochs=100, batch_size=32,verbose=0)#训练模型
+        model.fit(x_train_local, y_train_local, epochs=200, batch_size=32,verbose=0)#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -376,9 +435,9 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     x_train1 = np.array(pool_global)
     x_train = x_train1#提取用于训练的x_train部分
     y_train = np.array(gx_global)
-    y_train = gx_Normalization(y_train)#归一化
+    y_train = gx_Normalization(y_train,gx_data_select)#归一化
     model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
-    history=model.fit(x_train, y_train, epochs=300, batch_size=32,verbose=0)#训练模型
+    history=model.fit(x_train, y_train, epochs=200, batch_size=32,verbose=0)#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -518,38 +577,93 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
         interdis_all_fit = interdis_max
 
     G_value=u * (g_col_fit + g_beam_fit + 100*dis_all_fit + 100*interdis_all_fit +rate_nonzero)
-    gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
+    value_jisuan = [g_col_fit,g_beam_fit,100*dis_all_fit,100*interdis_all_fit,rate_nonzero,weight]
+    # gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
+    gx = []
+    for z in range(len(gx_data_select)):
+        if gx_data_select[z] ==0:
+            gx.append(g_col_max)
+        elif gx_data_select[z] ==1:
+            gx.append(g_beam_max)
+        elif gx_data_select[z] ==2:
+            gx.append(dis_all_max)
+        elif gx_data_select[z] ==3:
+            gx.append(interdis_max)
+        elif gx_data_select[z] ==4:
+            gx.append(rate)
+        elif gx_data_select[z] ==5:
+            gx.append(weight)
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
-    result = weight + G_value
+    # result = weight + G_value
 
+    value = 0
+    for z in range(len(gx_data_select)):
+        if gx_data_select[z] != 5:
+            value += 10000 * value_jisuan[int(gx_data_select[z])]
+        elif gx_data_select[z] == 5:
+            value += weight
+
+    result = value
 
     gx_demo = copy.deepcopy(gx)
-    if gx_demo[0]>=2:
-        gx_demo[0]=1
-    elif gx_demo[0]<=-1:
-        gx_demo[0] = 0
-    elif gx_demo[0]<=2 and gx_demo[0]>=-1:
-        gx_demo[0]=(gx_demo[0]+1)/3
-    if gx_demo[1]>=0.5:
-        gx_demo[1]=1
-    elif gx_demo[1]<=-1:
-        gx_demo[1] = 0
-    elif gx_demo[1]<=0.5 and gx_demo[1]>=-1:
-        gx_demo[1]=(gx_demo[1]+1)/1.5
-    if gx_demo[2] >= 0.02:
-        gx_demo[2] = 1
-    else:
-        gx_demo[2] = gx_demo[2] / 0.02
-    if gx_demo[3] >= 0.02:
-        gx_demo[3] = 1
-    else:
-        gx_demo[3] = gx_demo[3] / 0.02
-    if gx_demo[5] >= 700:
-        gx_demo[5] = 1
-    elif gx_demo[5] <= 350:
-        gx_demo[5] = 0
-    elif gx_demo[5] <= 700 and gx_demo[5] >= 350:
-        gx_demo[5] = (gx_demo[5]-350)/350
+    for j in range(len(gx_demo)):
+        if gx_data_select[j] == 0:
+            if gx_demo[j] >= 2:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= -1:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 2 and gx_demo[j] >= -1:
+                gx_demo[j] = (gx_demo[j] + 1) / 3
+        elif gx_data_select[j] == 1:
+            if gx_demo[j] >= 3:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= -1:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 3 and gx_demo[j] >= -1:
+                gx_demo[j] = (gx_demo[j] + 1) / 4
+        elif gx_data_select[j] == 2:
+            if gx_demo[j] >= 0.1:
+                gx_demo[j] = 1
+            else:
+                gx_demo[j] = gx_demo[j] / 0.1
+        elif gx_data_select[j] == 3:
+            if gx_demo[j] >= 0.1:
+                gx_demo[j] = 1
+            else:
+                gx_demo[j] = gx_demo[j] / 0.1
+        elif gx_data_select[j] == 5:
+            if gx_demo[j] >= 600:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= 0:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 600 and gx_demo[j] >= 0:
+                gx_demo[j] = (gx_demo[j]) / 600
+    # if gx_demo[0]>=2:
+    #     gx_demo[0]=1
+    # elif gx_demo[0]<=-1:
+    #     gx_demo[0] = 0
+    # elif gx_demo[0]<=2 and gx_demo[0]>=-1:
+    #     gx_demo[0]=(gx_demo[0]+1)/3
+    # if gx_demo[1]>=0.5:
+    #     gx_demo[1]=1
+    # elif gx_demo[1]<=-1:
+    #     gx_demo[1] = 0
+    # elif gx_demo[1]<=0.5 and gx_demo[1]>=-1:
+    #     gx_demo[1]=(gx_demo[1]+1)/1.5
+    # if gx_demo[2] >= 0.1:
+    #     gx_demo[2] = 1
+    # else:
+    #     gx_demo[2] = gx_demo[2] / 0.1
+    # if gx_demo[3] >= 0.1:
+    #     gx_demo[3] = 1
+    # else:
+    #     gx_demo[3] = gx_demo[3] / 0.1
+    # if gx_demo[0] >= 600:
+    #     gx_demo[0] = 1
+    # elif gx_demo[0] <= 0:
+    #     gx_demo[0] = 0
+    # elif gx_demo[0] <= 600 and gx_demo[0] >= 0:
+    #     gx_demo[0] = (gx_demo[0])/600
     return result,weight,gx,gx_demo
 def get_analysis(ModelPath_name,mySapObject_name,SapModel_name,pop1,pop2,pop3):
 
@@ -688,9 +802,9 @@ def get_pred_fit(pop2_best,num_indi,num_iter):
     pop2_pred = copy.deepcopy(pop_best)
     pop2_pred = np.array(pop2_pred)
     fitness_prediction = model.predict(pop2_pred, verbose=0)
-    gx_pre_nor = gx_nonNormalization(fitness_prediction)
+    gx_pre_nor = gx_nonNormalization(fitness_prediction,gx_data_select)
 
-    fitness_prediction2 = Gx_convert(fitness_prediction)
+    fitness_prediction2 = Gx_convert(fitness_prediction,gx_data_select)
 
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
@@ -787,8 +901,10 @@ def get_local_global_data(file_time):
     global_get_pop = global_get_pop.values.tolist()
     local_pop = pd.read_excel(io=path_memo, sheet_name="memorize_num",header=None)
     local_pop = local_pop.values.tolist()
-    global_get_gx = pd.read_excel(io=path_memo, sheet_name="memorize_gx_nor",header=None)
+    global_get_gx = pd.read_excel(io=path_memo, sheet_name="memorize_gx",header=None)
     global_get_gx = global_get_gx.values.tolist()
+    # global_get_gx = gx_Normalization(global_get_gx,gx_data_select)
+
     local_num = []
     for i in range(len(local_pop)):
         local_num.append(local_pop[i][0])
@@ -825,7 +941,10 @@ def get_local_global_data(file_time):
 
     return local_memorize_pop,local_memorize_gx,pop_best,global_get_gx
 
-def run_DNN_GA(local_pop,local_gx,pop_best):
+def run_DNN_GA(local_pop1,local_gx1,pop_best1):
+    local_gx = copy.deepcopy(local_gx1)
+    local_pop = copy.deepcopy(local_pop1)
+    pop_best = copy.deepcopy(pop_best1)
     global_pop = []
     global_gx = []
     all_pop2=[]
@@ -839,11 +958,11 @@ def run_DNN_GA(local_pop,local_gx,pop_best):
         local_pop_train = copy.deepcopy(local_pop[i])
         local_gx_train = copy.deepcopy(local_gx[i])
         pop2,model,fit_best=DNN_GA(local_pop_train, local_gx_train, global_pop_train, global_gx_train, num_var, num_room_type, 10,
-               pop_best[i], 400)
+               pop_best[i], 100)
         all_pop2.append(pop2)
         fit_pred_all.append(fit_best)
         print(f'完成进度{i+1}/{len(local_pop)}')
-    return all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best
+    return all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last
 
 def get_fitness(all_pop2):
     fit_truth = []
@@ -959,6 +1078,23 @@ def output_data(pop2_all,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,
         loc += 1
     wb1.close()
 
+def draw_loss(loss_all):
+    fig2 = plt.figure(2)
+    ax2 = fig2.add_subplot()
+    ax2.tick_params(labelsize=30)
+    ax2.set_xlabel("time", fontsize=35)
+    ax2.set_ylabel("gx_sum", fontsize=35)
+    ax2.spines['bottom'].set_linewidth(2);  ###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    dev_x = np.arange(0, len(loss_all))
+    dev_y = loss_all
+    ax2.plot(dev_x, dev_y, linewidth=1, color='r', label='loss')
+    ax2.legend(fontsize=30)
+    plt.show()
+
+
 
 def draw_fit_truth(data1):
     data = copy.deepcopy(data1)
@@ -1032,8 +1168,8 @@ def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
     bbb = np.arange(0, len(gx_pred_div[0]))
     ax2.plot(bbb, gx_pred_div[time], linewidth=6, color='r')
     ax2.plot(bbb, gx_truth_div[time], linewidth=6, color='blue')
-    ax2.set(xlim=(0, len(gx_pred_div[0])),
-            xticks=np.arange(0, len(gx_pred_div[0]), 10),
+    ax2.set(xlim=(0, len(gx_pred_div[0])),ylim=(0, 1),
+            xticks=np.arange(0, len(gx_pred_div[0]), 10),yticks=np.arange(0, 1, 0.1),
                 )
         # for i in range(7):
         #     x_te = []
@@ -1103,6 +1239,9 @@ brace_num = modular_num
 group_num = int(story_num / story_group)
 modular_all = modular_length_num * 2 *story_num
 
+pop_last = []
+fit_last =[]
+
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
                                                                   cfg_file_name="Steel_section_data_I_cube.ini")
@@ -1155,7 +1294,7 @@ gx_pred_best=[]#每次预测得到的
 #局部记忆池
 
 
-
+all_fit_pred_GA = []
 memorize_sum_local=[]
 memorize_pool_local=[]
 memorize_fit_local=[]
@@ -1182,7 +1321,7 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-
+gx_data_select = [0,1,5]
 #获得每隔N代的新种群finess，与真实fitness排序
 # fit_pred,fit_truth,pop_min_pred = get_DNN_GA(file_time,27,20)
 # sort_pred,sort_truth=fit_sort(fit_pred,fit_truth)
@@ -1191,32 +1330,54 @@ for i in range(group_num):
 # fitness_prediction2,fitness,DNN_prediction_fitness,gx_truth_all,gx_pred_all=get_pred_fit(pop2_best,10,400)
 #在线训练神经网络生成最优个体
 local_memorize_pop,local_memorize_gx,pop_best,gx_all_read=get_local_global_data(file_time)
-all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+
+for i in range(len(local_memorize_gx)):
+    for j in range(len(local_memorize_gx[i])):
+        temp =[]
+        for z in gx_data_select:
+            temp.append(local_memorize_gx[i][j][z])
+        local_memorize_gx[i][j] = temp
+for i in range(len(gx_all_read)):
+    temp = []
+    for j in gx_data_select:
+        temp.append(gx_all_read[i][j])
+    gx_all_read[i]=temp
+
+
+all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+
 for i in range(len(gx_pred_best)):
     gx_pred_best[i] = gx_pred_best[i][0].tolist()
 fit_truth = get_fitness(all_pop2)
+
 sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
 pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
-output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,3)
+output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,5)
 
-#绘制gx差异值
-gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-draw_gx_chayi2(gx_truth_div,gx_pred_div,5)
-#统计gx分布并绘制
-gx_dis,gx_num=gx_dietribute(gx_all_read)
-gx_column(gx_num,0)
-#绘制所有最优个体fit曲线
-draw_fit_truth(memorize_fit)
-
-fit_all_memorize = []
-for i in range(len(local_memorize_gx)):
-    temp= Gx_convert(np.array(local_memorize_gx[i]))
-    fit_all_memorize.append(temp)
-
-fit_xiaoyu = []
-for i in range(len(fit_all_memorize)):
-    temp = []
-    for j in range(len(fit_all_memorize[i])):
-        if fit_all_memorize[i][j]<700:
-            temp.append(fit_all_memorize[i][j])
-    fit_xiaoyu.append(temp)
+# #绘制gx差异值0
+# gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
+# draw_gx_chayi2(gx_truth_div,gx_pred_div,2)
+# #统计gx分布并绘制
+# gx_dis,gx_num=gx_dietribute(gx_all_read)
+# gx_column(gx_num,0)
+# #绘制所有最优个体fit曲线
+# draw_fit_truth(memorize_fit)
+#
+# #绘制loss曲线
+# all_loss_data = []
+# for i in range(len(history_loss)):
+#     all_loss_data.extend(history_loss[i])
+# draw_loss(all_loss_data)
+#
+# fit_all_memorize = []
+# for i in range(len(local_memorize_gx)):
+#     temp= Gx_convert(np.array(local_memorize_gx[i]))
+#     fit_all_memorize.append(temp)
+#
+# fit_xiaoyu = []
+# for i in range(len(fit_all_memorize)):
+#     temp = []
+#     for j in range(len(fit_all_memorize[i])):
+#         if fit_all_memorize[i][j]<700:
+#             temp.append(fit_all_memorize[i][j])
+#     fit_xiaoyu.append(temp)

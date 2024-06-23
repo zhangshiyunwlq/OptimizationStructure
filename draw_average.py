@@ -171,7 +171,7 @@ def DNN_fit_draw(data):
 num = 2400
 path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_5_3_3.xlsx"
 path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
-path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_3.xlsx"
+path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_5.xlsx"
 # drwa_loss(path_memo)
 
 #绘制优化后的数据
@@ -190,11 +190,11 @@ fitness_pred_max = []
 fitness_pred_min = []
 fitness_pred_ave = []
 for i in range(len(fit_pred)):
-    fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
-    fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
-    fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
-    # fitness_pred_min.append(min(fit_pred[i]))
-    # fitness_pred_max.append(max(fit_pred[i]))
-    # fitness_pred_ave.append(np.mean(fit_pred[i]))
+    # fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
+    # fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
+    # fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
+    fitness_pred_min.append(min(fit_pred[i]))
+    fitness_pred_max.append(max(fit_pred[i]))
+    fitness_pred_ave.append(np.mean(fit_pred[i]))
 data = [fitness_pred_max,fitness_pred_min,fitness_pred_ave]
 DNN_fit_draw(data)

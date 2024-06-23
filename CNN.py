@@ -2,7 +2,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 from tensorflow import keras
-from keras import layers, models
+from keras import layers, models, regularizers
 import pandas as pd
 import numpy as np
 
@@ -11,16 +11,17 @@ def leaky_relu(x, alpha=0.1):
 # 创建一个简单的神经网络模型
 def create_model(num_joint,num_out):
     model = models.Sequential([
-        layers.Dense(100, activation=leaky_relu, input_shape=(num_joint,)),
-        layers.Dense(100, activation=leaky_relu),
-        layers.Dense(100, activation=leaky_relu),
-        layers.Dense(100, activation=leaky_relu),
-        layers.Dense(num_out)
+        layers.Dense(100, activation=leaky_relu, input_shape=(num_joint,),kernel_regularizer=regularizers.l2(0.0005)),
+        layers.Dense(100, activation=leaky_relu,kernel_regularizer=regularizers.l2(0.0005)),
+        # layers.Dense(100, activation=leaky_relu),
+        # layers.Dense(100, activation=leaky_relu),
+        layers.Dense(num_out,activation='sigmoid',kernel_regularizer=regularizers.l2(0.0005))
     ])
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0005)
     model.compile(optimizer=optimizer,
                   loss='mse',
                   metrics=['mae'])
+    # model.summary()
     return model
 
 def get_data(num,path):
