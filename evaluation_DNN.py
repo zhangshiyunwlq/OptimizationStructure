@@ -26,9 +26,9 @@ def gx_nonNormalization(gx,gx_data_select):
             elif gx_data_select[j] == 1:
                 gx_demo[i][j] = gx_demo[i][j] * 4 - 1
             elif gx_data_select[j] == 2:
-                gx_demo[i][j] = gx_demo[i][j] * 0.1
+                gx_demo[i][j] = gx_demo[i][j] * 0.01
             elif gx_data_select[j] == 3:
-                gx_demo[i][j] = gx_demo[i][j] * 0.1
+                gx_demo[i][j] = gx_demo[i][j] * 0.01
             elif gx_data_select[j] == 5:
                 gx_demo[i][j] = gx_demo[i][j] * 600
         # gx_demo[i][1] = gx_demo[i][1] * 1.5-1
@@ -116,15 +116,15 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
                     gx_demo[i][j]=(gx_demo[i][j]+1)/4
             elif gx_data_select[j] == 2:
-                if gx_demo[i][j] >= 0.1:
+                if gx_demo[i][j] >= 0.01:
                     gx_demo[i][j] = 1
                 else:
-                    gx_demo[i][j] = gx_demo[i][j] / 0.1
+                    gx_demo[i][j] = gx_demo[i][j] / 0.01
             elif gx_data_select[j] == 3:
-                if gx_demo[i][j] >= 0.1:
+                if gx_demo[i][j] >= 0.01:
                     gx_demo[i][j] = 1
                 else:
-                    gx_demo[i][j] = gx_demo[i][j] / 0.1
+                    gx_demo[i][j] = gx_demo[i][j] / 0.01
             elif gx_data_select[j] == 5:
                 if gx_demo[i][j] >= 600:
                     gx_demo[i][j] = 1
@@ -622,15 +622,15 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
             elif gx_demo[j] <= 3 and gx_demo[j] >= -1:
                 gx_demo[j] = (gx_demo[j] + 1) / 4
         elif gx_data_select[j] == 2:
-            if gx_demo[j] >= 0.1:
+            if gx_demo[j] >= 0.01:
                 gx_demo[j] = 1
             else:
-                gx_demo[j] = gx_demo[j] / 0.1
+                gx_demo[j] = gx_demo[j] / 0.01
         elif gx_data_select[j] == 3:
-            if gx_demo[j] >= 0.1:
+            if gx_demo[j] >= 0.01:
                 gx_demo[j] = 1
             else:
-                gx_demo[j] = gx_demo[j] / 0.1
+                gx_demo[j] = gx_demo[j] / 0.01
         elif gx_data_select[j] == 5:
             if gx_demo[j] >= 600:
                 gx_demo[j] = 1
@@ -1321,7 +1321,7 @@ for i in range(group_num):
         labels.extend(temp)
         labels1.append(temp)
 
-gx_data_select = [0,1,5]
+gx_data_select = [0,1,2,3,4,5]
 #获得每隔N代的新种群finess，与真实fitness排序
 # fit_pred,fit_truth,pop_min_pred = get_DNN_GA(file_time,27,20)
 # sort_pred,sort_truth=fit_sort(fit_pred,fit_truth)
@@ -1352,11 +1352,12 @@ fit_truth = get_fitness(all_pop2)
 
 sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
 pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
-output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,5)
+output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,6)
 
 # #绘制gx差异值0
-# gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-# draw_gx_chayi2(gx_truth_div,gx_pred_div,2)
+gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
+
+draw_gx_chayi2(gx_truth_div,gx_pred_div,4)
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)
@@ -1368,7 +1369,7 @@ output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness
 # for i in range(len(history_loss)):
 #     all_loss_data.extend(history_loss[i])
 # draw_loss(all_loss_data)
-#
+
 # fit_all_memorize = []
 # for i in range(len(local_memorize_gx)):
 #     temp= Gx_convert(np.array(local_memorize_gx[i]))
