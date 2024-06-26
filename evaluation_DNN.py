@@ -12,10 +12,18 @@ import threading
 import queue
 import configparser
 import comtypes.client
+
+from keras.callbacks import EarlyStopping,LearningRateScheduler
 import sys
 import xlsxwriter
 import matplotlib.pyplot as plt
 #修改区间
+
+# 定义余弦退火学习率调度函数
+def cosine_annealing(epoch, T_max, eta_min=0, eta_max=0.001):
+    lr = eta_min + (eta_max - eta_min) * (1 + np.cos(np.pi * epoch / T_max)) / 2
+    return lr
+
 
 def gx_nonNormalization(gx,gx_data_select):
     gx_demo = copy.deepcopy(gx)
@@ -26,7 +34,7 @@ def gx_nonNormalization(gx,gx_data_select):
             elif gx_data_select[j] == 1:
                 gx_demo[i][j] = gx_demo[i][j] * 4 - 1
             elif gx_data_select[j] == 2:
-                gx_demo[i][j] = gx_demo[i][j] * 0.01
+                gx_demo[i][j] = gx_demo[i][j] * 0.007
             elif gx_data_select[j] == 3:
                 gx_demo[i][j] = gx_demo[i][j] * 0.01
             elif gx_data_select[j] == 5:
@@ -116,10 +124,10 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
                     gx_demo[i][j]=(gx_demo[i][j]+1)/4
             elif gx_data_select[j] == 2:
-                if gx_demo[i][j] >= 0.01:
+                if gx_demo[i][j] >= 0.007:
                     gx_demo[i][j] = 1
                 else:
-                    gx_demo[i][j] = gx_demo[i][j] / 0.01
+                    gx_demo[i][j] = gx_demo[i][j] / 0.007
             elif gx_data_select[j] == 3:
                 if gx_demo[i][j] >= 0.01:
                     gx_demo[i][j] = 1
@@ -417,6 +425,12 @@ def get_continue_data(file_time,num_continue):
 
 #输入输出修改,
 def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_var,num_room_type,num_ind,best_indivi,run_time):
+    # 早停法训练深度深度网络
+    early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
+    # 定义学习率调度回调
+    T_max = 50  # 余弦退火周期
+    lr_scheduler = LearningRateScheduler(lambda epoch: cosine_annealing(epoch, T_max, eta_min=0.0001, eta_max=0.001))
+
     #局部训练
     if len(memorize_pool_local)!=0:
         pool_local = copy.deepcopy(memorize_pool_local)
@@ -426,8 +440,9 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
         y_train_local = np.array(gx_local)
         y_train_local= gx_Normalization(y_train_local,gx_data_select)#归一化
         model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
+
         #verbose取消打印损失
-        model.fit(x_train_local, y_train_local, epochs=200, batch_size=32,verbose=0)#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -437,7 +452,8 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     y_train = np.array(gx_global)
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
-    history=model.fit(x_train, y_train, epochs=200, batch_size=32,verbose=0)#训练模型
+    # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+    history=model.fit(x_train, y_train, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -622,10 +638,10 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
             elif gx_demo[j] <= 3 and gx_demo[j] >= -1:
                 gx_demo[j] = (gx_demo[j] + 1) / 4
         elif gx_data_select[j] == 2:
-            if gx_demo[j] >= 0.01:
+            if gx_demo[j] >= 0.007:
                 gx_demo[j] = 1
             else:
-                gx_demo[j] = gx_demo[j] / 0.01
+                gx_demo[j] = gx_demo[j] / 0.007
         elif gx_data_select[j] == 3:
             if gx_demo[j] >= 0.01:
                 gx_demo[j] = 1
@@ -1356,8 +1372,7 @@ output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness
 
 # #绘制gx差异值0
 gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-
-draw_gx_chayi2(gx_truth_div,gx_pred_div,4)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,2)
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)

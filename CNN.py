@@ -5,6 +5,7 @@ from tensorflow import keras
 from keras import layers, models, regularizers
 import pandas as pd
 import numpy as np
+from keras.callbacks import EarlyStopping
 
 def leaky_relu(x, alpha=0.1):
     return tf.nn.leaky_relu(x, alpha=alpha)
