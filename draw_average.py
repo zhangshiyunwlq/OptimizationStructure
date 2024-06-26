@@ -169,32 +169,32 @@ def DNN_fit_draw(data):
     plt.show()
 
 num = 2400
-path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_5_3_3.xlsx"
+path = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_5_3_19.xlsx"
 path_memo = "D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_memorize\memorize_infor_14_73.xls"
 path_DNN = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_5.xlsx"
 # drwa_loss(path_memo)
 
 #绘制优化后的数据
-# fitness_max,fitness_ave,fitness_min,fitness_max_local,fitness_ave_local,fitness_min_local = fit_data(num,path)
-# draw = [fitness_max,fitness_ave,fitness_min]
-# draw2 = [fitness_max_local,fitness_ave_local,fitness_min_local]
-# draw_picture(draw)
+fitness_max,fitness_ave,fitness_min,fitness_max_local,fitness_ave_local,fitness_min_local = fit_data(num,path)
+draw = [fitness_max,fitness_ave,fitness_min]
+draw2 = [fitness_max_local,fitness_ave_local,fitness_min_local]
+draw_picture(draw)
 
 #绘制DNN预测后的数据
-# fitness_pred_max,fitness_pred_min,fitness_pred_ave,fitness_truth_max,fitness_truth_min,fitness_truth_ave = DNN_fit(path_DNN)
-# fit_pred = pd.read_excel(io=path_DNN, sheet_name="DNN_prediction_fitness", header=None)
-fit_pred = pd.read_excel(io=path_DNN, sheet_name="fit_truth", header=None)
-fit_pred = fit_pred.values.tolist()
-
-fitness_pred_max = []
-fitness_pred_min = []
-fitness_pred_ave = []
-for i in range(len(fit_pred)):
-    # fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
-    # fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
-    # fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
-    fitness_pred_min.append(min(fit_pred[i]))
-    fitness_pred_max.append(max(fit_pred[i]))
-    fitness_pred_ave.append(np.mean(fit_pred[i]))
-data = [fitness_pred_max,fitness_pred_min,fitness_pred_ave]
-DNN_fit_draw(data)
+# # fitness_pred_max,fitness_pred_min,fitness_pred_ave,fitness_truth_max,fitness_truth_min,fitness_truth_ave = DNN_fit(path_DNN)
+# # fit_pred = pd.read_excel(io=path_DNN, sheet_name="DNN_prediction_fitness", header=None)
+# fit_pred = pd.read_excel(io=path_DNN, sheet_name="fit_truth", header=None)
+# fit_pred = fit_pred.values.tolist()
+#
+# fitness_pred_max = []
+# fitness_pred_min = []
+# fitness_pred_ave = []
+# for i in range(len(fit_pred)):
+#     # fitness_pred_min.append(math.log(min(fit_pred[i]), 2))
+#     # fitness_pred_max.append(math.log(max(fit_pred[i]), 2))
+#     # fitness_pred_ave.append(math.log(np.mean(fit_pred[i]), 2))
+#     fitness_pred_min.append(min(fit_pred[i]))
+#     fitness_pred_max.append(max(fit_pred[i]))
+#     fitness_pred_ave.append(np.mean(fit_pred[i]))
+# data = [fitness_pred_max,fitness_pred_min,fitness_pred_ave]
+# DNN_fit_draw(data)

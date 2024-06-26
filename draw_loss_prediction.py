@@ -122,7 +122,7 @@ def get_info():
 
 num_var = 5
 modular_num = 3
-time = 9
+time = 19
 num_pred = 7
 gx_cha_num = []
 for num in range(num_pred):

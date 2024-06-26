@@ -1663,7 +1663,7 @@ min_genera = []
 num_room_type=1
 
 
-gx_data_select = [0,1,3,4,5]
+gx_data_select = [0,1,2,3,4,5]
 
 
 x = np.linspace(0, 11, 12)

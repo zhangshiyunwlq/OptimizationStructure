@@ -356,18 +356,18 @@ for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
 
 num_var = 5
-al_time = 15
+al_time = 19
 #绘制某个pop中的最有个体
-# all_in=[19]
-# all_indx(all_in)
+all_in=[19,39,79,139]
+all_indx(all_in)
 #数据文件中生成pop2
 # fit1,fit2,pop2 = ed.get_DNN_GA(15,27,20)
 # pop1,pop3=ed.decoding_modular_section(pop2)
 # draw_pred(pop1,pop2,pop3)
 
 #数据文件中获得pop2
-path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_6.xlsx"
-pop2 = pd.read_excel(io=path_memo, sheet_name="pop2_all", header=None)
-pop2 = pop2.values.tolist()
-pop1,pop3=decoding_modular_section(pop2)
-draw_pred(pop1,pop2,pop3)
+# path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\DNN_test_data\\all_data_6.xlsx"
+# pop2 = pd.read_excel(io=path_memo, sheet_name="pop2_all", header=None)
+# pop2 = pop2.values.tolist()
+# pop1,pop3=decoding_modular_section(pop2)
+# draw_pred(pop1,pop2,pop3)

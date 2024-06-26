@@ -246,20 +246,20 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
-data_info = [[140,7,7],[100,7,8]]
+data_info = [[140,5,3],[140,5,4],[140,5,18]]
 # data_info = [[140,3,1]]
 infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
-# infor_all = get_info(data_info)
+infor_all = get_info(data_info)
 #普通遗传算法
 title_name = 'Fitness'
 
 
-# draw_picture(infor_all,infor_name,title_name)
+draw_picture(infor_all,infor_name,title_name)
 # draw_plot_picture(infor_all,data_info)
 
 #绘制连续跑的曲线
-length = [140,100]
-infor_all = get_info_continue(data_info)
-
-draw_picture_continue(infor_all,infor_name,title_name,length)
+# length = [140,100]
+# infor_all = get_info_continue(data_info)
+#
+# draw_picture_continue(infor_all,infor_name,title_name,length)
