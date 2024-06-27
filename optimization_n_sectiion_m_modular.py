@@ -1071,7 +1071,7 @@ def GA_for_DNN(run_time,pop2,model,fitness_best):
         gx_pred.append(fit_pred[0].tolist())
     return pop2,fitness_best
 
-def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
+def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_var,num_room_type,num_ind,best_indivi,run_time,model):
     # 早停法训练深度深度网络
     early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
     # 定义学习率调度回调
@@ -1086,7 +1086,8 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
         gx_local = copy.deepcopy(memorize_gx_local)
         y_train_local = np.array(gx_local)
         y_train_local= gx_Normalization(y_train_local,gx_data_select)#归一化
-        model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
+
+
         #verbose取消打印损失
         his = model.fit(x_train_local, y_train_local, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
 
@@ -1097,7 +1098,8 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     x_train = x_train1#提取用于训练的x_train部分
     y_train = np.array(gx_global)
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
-    model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
+    # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
+    # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
     history=model.fit(x_train, y_train, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
@@ -1105,16 +1107,22 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     # history_mae.append(history.history['mae'][len(history.history['loss'])-1])
     history_loss.append(history.history['loss'])
     history_mae.append(history.history['mae'])
+
+    # #测试机验证
+    # pop_test = copy.deepcopy(pop_test_data)
+    # pop_test=np.array(pop_test)
+    # fitness_test = model.predict(pop_test, verbose=0)
+    # gx_test_data1.append(fitness_test.tolist())
+
     pop_best = []
-    fitness_best= []
+    fitness_best=[]#新增内容
     for i in range(num_ind):
-        pop1 = generation_population_modular_section(best_indivi, 0.25)#根据最好个体生成种群
+        pop1 = generation_population_modular_section(best_indivi, 0.15)#根据最好个体生成种群
         pop2 = copy.deepcopy(pop1)
         pop2,fitness_best = GA_for_DNN(run_time, pop2, model,fitness_best)
         pop_best.append(pop2[0].tolist())
     pop_best = np.array(pop_best)
-    fit_pred.append(fitness_best)
-    return pop_best,model
+    return pop_best,model,fitness_best
 
 def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_coding_modular_section(x)
@@ -1140,6 +1148,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     all_pred = []
     global gx_truth
     global gx_truth_temp
+    model = create_model(len(pop2[0]), 6)
     for run_time in range(N_GENERATIONS):
         pop_zhongqun_all.append(pop1)
         pop_zhongqun_all_2.append(pop2)
@@ -1177,7 +1186,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         # 引入新个体
         run_time +=1
         if run_time % window_step_num == 0:
-            pop2_new,model = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400)
+            pop2_new,model = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400,model)
 
             exchange_num = int(1*len(pop2))
             # for ex_num in range(exchange_num):
@@ -1220,7 +1229,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         if run_time % window_step_num == 0:
             pop_pred.append(pop2)
     out_put_prediction_gx(all_pred, predict_time)
-
+    gx_truth.extend(gx_te1)
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
         SapModel_name[i] = None

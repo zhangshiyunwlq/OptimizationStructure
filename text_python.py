@@ -347,7 +347,10 @@ all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_la
 
 gx_demo1 = copy.deepcopy(gx_test_data1)
 # for i in range(len(gx_test_data1)):
-for i in range(50):
+gx_demo1= np.array(gx_demo1)
+print(gx_demo1[46])
+for i in range(140):
+    print(f'前{i}次——{gx_demo1[i]}')
     if gx_demo1[i][0] >= 2:
         gx_demo1[i][0] = 1
     elif gx_demo1[i][0] <= -1:
@@ -375,6 +378,9 @@ for i in range(50):
     elif gx_demo1[i][5] <= 600 and gx_demo1[i][5] >= 0:
         gx_demo1[i][5] = gx_demo1[i][5] / 600
     print(f'{i}次——{gx_demo1[i]}')
+    print(f'{i}次——{id(gx_demo1[i])}')
+print(gx_test_data1[46])
+print(gx_test_data1)
 
 gounvyangtingting = range(len(gx_test_data1))
 

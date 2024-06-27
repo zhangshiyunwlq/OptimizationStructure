@@ -493,11 +493,11 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     history_loss.append(history.history['loss'])
     history_mae.append(history.history['mae'])
 
-    #测试机验证
-    pop_test = copy.deepcopy(pop_test_data)
-    pop_test=np.array(pop_test)
-    fitness_test = model.predict(pop_test, verbose=0)
-    gx_test_data1.append(fitness_test.tolist())
+    # #测试机验证
+    # pop_test = copy.deepcopy(pop_test_data)
+    # pop_test=np.array(pop_test)
+    # fitness_test = model.predict(pop_test, verbose=0)
+    # gx_test_data1.append(fitness_test.tolist())
 
     pop_best = []
     fitness_best=[]#新增内容
@@ -528,7 +528,7 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
         # model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=600, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -539,7 +539,7 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=600, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1552,26 +1552,26 @@ for i in range(len(gx_all_read)):
     gx_all_read[i]=temp
 
 #测试机验证
-all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA_test(local_memorize_pop,local_memorize_gx,pop_best)
-gx_test_truth_data = gx_Normalization_1(gx_test_data1)
-gx_tzhanjiaqi =gx_Normalization_1(gx_test_data1)
-draw_time = [5]
-draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
+# all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA_test(local_memorize_pop,local_memorize_gx,pop_best)
+# gx_test_data1= np.array(gx_test_data1)
+# gx_test_truth_data = gx_Normalization_1(gx_test_data1)
+# draw_time = [0,1]
+# draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
 
 #预测数据生成
-# all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
-#
-# for i in range(len(gx_pred_best)):
-#     gx_pred_best[i] = gx_pred_best[i][0].tolist()
-# fit_truth = get_fitness(all_pop2)
-#
-# sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
-# pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
-# output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,6)
+all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+
+for i in range(len(gx_pred_best)):
+    gx_pred_best[i] = gx_pred_best[i][0].tolist()
+fit_truth = get_fitness(all_pop2)
+
+sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
+pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
+output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,6)
 #
 # # #绘制gx差异值0
-# gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-# draw_gx_chayi2(gx_truth_div,gx_pred_div,2)
+gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,0)
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)
@@ -1579,10 +1579,10 @@ draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
 # draw_fit_truth(memorize_fit)
 #
 # #绘制loss曲线
-# all_loss_data = []
-# for i in range(len(history_loss)):
-#     all_loss_data.extend(history_loss[i])
-# draw_loss(all_loss_data)
+all_loss_data = []
+for i in range(len(history_loss)):
+    all_loss_data.extend(history_loss[i])
+draw_loss(all_loss_data)
 
 # fit_all_memorize = []
 # for i in range(len(local_memorize_gx)):
