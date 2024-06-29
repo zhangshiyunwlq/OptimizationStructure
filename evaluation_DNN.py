@@ -1350,7 +1350,7 @@ def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
     ax2.spines['top'].set_color('none')
     # plt.ylim((150, 400))
 
-
+    color_data = ['b', 'g', 'r', 'c', 'k', 'm']
 
 
     fig2 = plt.figure(num=1, figsize=(23, 30))
@@ -1366,8 +1366,8 @@ def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
 
 
     bbb = np.arange(0, len(gx_pred_div[0]))
-    ax2.plot(bbb, gx_pred_div[time], linewidth=6, color='r')
-    ax2.plot(bbb, gx_truth_div[time], linewidth=6, color='blue')
+    ax2.plot(bbb, gx_pred_div[time], linewidth=6, color=color_data[time],linestyle="--",marker='x', markersize=8)
+    ax2.plot(bbb, gx_truth_div[time], linewidth=6, color=color_data[time],linestyle="-",marker='o', markersize=8)
     ax2.set(xlim=(0, len(gx_pred_div[0])),ylim=(0, 1),
             xticks=np.arange(0, len(gx_pred_div[0]), 10),yticks=np.arange(0, 1, 0.1),
                 )
@@ -1507,9 +1507,9 @@ history_loss = []
 history_mae = []
 DNN_prediction_fitness= []
 POP_SIZE=30
-num_var = 5
+num_var = 9
 modular_num= 3
-file_time = 15
+file_time = 0
 num_continue = 140
 labels = []
 labels1 = []
@@ -1552,11 +1552,11 @@ for i in range(len(gx_all_read)):
     gx_all_read[i]=temp
 
 #测试机验证
-# all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA_test(local_memorize_pop,local_memorize_gx,pop_best)
-# gx_test_data1= np.array(gx_test_data1)
-# gx_test_truth_data = gx_Normalization_1(gx_test_data1)
-# draw_time = [0,1]
-# draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
+all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA_test(local_memorize_pop,local_memorize_gx,pop_best)
+gx_test_data1= np.array(gx_test_data1)
+gx_test_truth_data = gx_Normalization_1(gx_test_data1)
+draw_time = [0]
+draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
 
 #预测数据生成
 all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
@@ -1571,7 +1571,7 @@ output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness
 #
 # # #绘制gx差异值0
 gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-draw_gx_chayi2(gx_truth_div,gx_pred_div,0)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,5)
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)
@@ -1579,10 +1579,10 @@ draw_gx_chayi2(gx_truth_div,gx_pred_div,0)
 # draw_fit_truth(memorize_fit)
 #
 # #绘制loss曲线
-all_loss_data = []
-for i in range(len(history_loss)):
-    all_loss_data.extend(history_loss[i])
-draw_loss(all_loss_data)
+# all_loss_data = []
+# for i in range(len(history_loss)):
+#     all_loss_data.extend(history_loss[i])
+# draw_loss(all_loss_data)
 
 # fit_all_memorize = []
 # for i in range(len(local_memorize_gx)):
@@ -1596,3 +1596,20 @@ draw_loss(all_loss_data)
 #         if fit_all_memorize[i][j]<700:
 #             temp.append(fit_all_memorize[i][j])
 #     fit_xiaoyu.append(temp)
+#绘制最优个体gx
+# best_gx_truth = []
+# best_gx_pred = []
+# index = []
+# for i in range(len(fit_truth)):
+#     index.append(fit_truth[i].index(min(fit_truth[i])))
+# for i in range(7):
+#     index[i] = index[i]+i*10
+# for i in range(len(gx_truth_div)):
+#     temp1 = []
+#     temp2 = []
+#     for j in index:
+#         temp1.append(gx_truth_div[i][j])
+#         temp2.append(gx_pred_div[i][j])
+#     best_gx_truth.append(temp1)
+#     best_gx_pred.append(temp2)
+# draw_gx_chayi2(best_gx_truth,best_gx_pred,5)

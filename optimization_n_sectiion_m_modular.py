@@ -22,6 +22,7 @@ import gc
 import xlsxwriter
 import csv
 import openpyxl
+import pickle
 from CNN import create_model
 from keras.callbacks import EarlyStopping,LearningRateScheduler
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -1071,7 +1072,7 @@ def GA_for_DNN(run_time,pop2,model,fitness_best):
         gx_pred.append(fit_pred[0].tolist())
     return pop2,fitness_best
 
-def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_var,num_room_type,num_ind,best_indivi,run_time,model):
+def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
     # 早停法训练深度深度网络
     early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
     # 定义学习率调度回调
@@ -1089,7 +1090,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
 
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -1100,7 +1101,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1186,7 +1187,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         # 引入新个体
         run_time +=1
         if run_time % window_step_num == 0:
-            pop2_new,model = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400,model)
+            pop2_new,model,fitness_best = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400,model)
 
             exchange_num = int(1*len(pop2))
             # for ex_num in range(exchange_num):
@@ -1230,6 +1231,11 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             pop_pred.append(pop2)
     out_put_prediction_gx(all_pred, predict_time)
     gx_truth.extend(gx_te1)
+
+    file_name = f'DNN_model_{num_var}_{modular_num}_{time}.pkl'
+    with open(file_name, 'wb') as file:
+        pickle.dump(model, file)
+
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
         SapModel_name[i] = None
@@ -1240,7 +1246,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     out_put_fitness_prediction(DNN_prediction_fitness)
 
 
-    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction
+    return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction,model
 #GA算法
 def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_coding_modular_section(x)
@@ -1524,7 +1530,11 @@ def get_continue_data(file_time,num_continue):
     return pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
 #续跑算法
 def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2,best_individual):
-    pop2, model = DNN_GA(num_var, num_room_type, POP_SIZE, best_individual, 400)
+    file_name = f'DNN_model_{num_var}_{modular_num}_{time}.pkl'
+
+    with open(file_name, 'rb') as f:
+        model = pickle.load(f)
+    pop2, model = DNN_GA(num_var, num_room_type, POP_SIZE, best_individual, 400, model)
     pop2[0] = best_individual
     pop1, pop3 = decoding_modular_section(pop2)
 
@@ -1573,7 +1583,7 @@ def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_ro
         # 引入新个体
         run_time +=1
         if run_time % 20 == 0:
-            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],400)
+            pop2_new, model, fitness_best = DNN_GA(num_var, num_room_type, int(1 * len(pop2)), pop2[0], 400, model)
             exchange_num = int(0.9*len(pop2))
             for ex_num in range(exchange_num):
                 pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
@@ -1613,6 +1623,9 @@ def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_ro
             pop3[0] = mm2_all3
 
     out_put_prediction_gx(all_pred, predict_time)
+    file_name = f'DNN_model_{num_var}_{modular_num}_{time}.pkl'
+    with open(file_name, 'wb') as file:
+        pickle.dump(model, file)
 
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
@@ -1713,6 +1726,7 @@ fit_pred = []
 fit_truth = []
 gx_pred = []
 gx_truth = []
+gx_pred_best = []
 
 gx_truth_temp=[]#暂时存储真实的temp
 
@@ -1730,8 +1744,8 @@ for i in range(group_num):
 
 
 
-for num_var in [5]:
-    for time in range(20,21):
+for num_var in [7]:
+    for time in range(0,1):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1755,7 +1769,7 @@ for num_var in [5]:
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         #跑HIGA用
-        zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
+        zhan, jia, qi,fitness_prediction,model = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
                          memorize_gx_nor, memorize_num, fitness_prediction)
 

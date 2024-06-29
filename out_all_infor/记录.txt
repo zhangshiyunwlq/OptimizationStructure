@@ -32,3 +32,7 @@
 var = 7
 5 续跑3  6续跑5
 7 正常跑
+
+
+va2，mo3,time0,result 445.3631,l2，0.001，epoch 200
+va9，mo3,time0,result 479.47,l2，0.001，epoch 200，运行后第六次
