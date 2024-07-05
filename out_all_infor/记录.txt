@@ -33,6 +33,18 @@ var = 7
 5 续跑3  6续跑5
 7 正常跑
 
+7 5 5 0 1200epoch
+
 
 va2，mo3,time0,result 445.3631,l2，0.001，epoch 200
 va9，mo3,time0,result 479.47,l2，0.001，epoch 200，运行后第六次
+va7，mo3,time0,result 393,l2，0.001，epoch 1200，运行后第六次
+va7，mo3,time1,result 417,l2，0.001，epoch 1200，运行后第六次
+va5，mo3,time19,result 392，0.001，epoch 1200，运行后第六次
+va5，mo3,time0,result 395，0.001，epoch 1200，运行后第六次
+va5，mo5,time0,result 450，0.001，epoch 1200，运行后第六次
+va3，mo3,time0,result 451，0.001，epoch 1200，运行后第六次
+va4，mo3,time0,result 436，0.001，epoch 1200，运行后第六次
+va4，mo2,time0,result 417，0.001，epoch 1200，运行后第六次
+va4，mo4,time0,result 479，0.001，epoch 1200，运行后第六次
+va2，mo3,time1,result 459，0.001，epoch 1200，运行后第六次

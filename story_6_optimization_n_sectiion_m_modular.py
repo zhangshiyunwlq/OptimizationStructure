@@ -1664,10 +1664,10 @@ modular_heigth = 3000
 modular_length_num = 8
 modular_dis = 400
 corridor_width = 4000
-story_num = 12
+story_num = 6
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 4#整个建筑的模块种类
+modular_num = 3#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -1762,7 +1762,7 @@ for i in range(group_num):
 
 
 for num_var in [4]:
-    for time in range(0,1):
+    for time in range(6,7):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

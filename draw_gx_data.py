@@ -58,7 +58,7 @@ def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
     # plt.clf()
 
 
-path_memo = f"D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_truth_pred_data4\\prediction_truth_9_3_0.xlsx"
+path_memo = f"D:\desktop\os\optimization of structure\out_all_truth_pred_data4\\prediction_truth_5_5_0.xlsx"
 gx_pred_all = pd.read_excel(io=path_memo, sheet_name="gx_pred", header=None)
 gx_pred_all = gx_pred_all.values.tolist()
 
@@ -69,4 +69,4 @@ gx_truth_div,gx_pred_div=draw_gx_chayi(gx_truth_all,gx_pred_all)
 gx_truth_div = [a[:180] for a in gx_truth_div]
 gx_pred_div = [a[:180] for a in gx_pred_div]
 
-draw_gx_chayi2(gx_truth_div,gx_pred_div,5)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,0)

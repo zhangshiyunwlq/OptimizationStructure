@@ -20,8 +20,12 @@ import comtypes.client
 import gc
 import openpyxl
 from CNN import create_model
+from keras.callbacks import EarlyStopping,LearningRateScheduler
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
+def cosine_annealing(epoch, T_max, eta_min=0, eta_max=0.001):
+    lr = eta_min + (eta_max - eta_min) * (1 + np.cos(np.pi * epoch / T_max)) / 2
+    return lr
 
 def generate_DNA_coding_story5(num_var,num_room_type,x):
     all_room_num = 2*story_num*5
@@ -68,7 +72,7 @@ def decoding(pop,num_var,num_room_type,labels):
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
     sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                      cfg_file_name="Steel_section_data.ini")
+                                                                      cfg_file_name="Steel_section_data_I_cube.ini")
     modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
     # 按房间分好节点
     modulars_of_building = modular_building.building_modulars
@@ -93,7 +97,7 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
 def mulit_Sap_analy_allroom_low(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
     sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                      cfg_file_name="Steel_section_data.ini")
+                                                                      cfg_file_name="Steel_section_data_I_cube.ini")
     modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
     # 按房间分好节点
     modulars_of_building = modular_building.building_modulars
@@ -1151,7 +1155,7 @@ corridor_width = 4000
 
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                  cfg_file_name="Steel_section_data.ini")
+                                                                  cfg_file_name="Steel_section_data_I_cube.ini")
 
 # generate model
 model_data = dj.generate_model_data(modular_length,modular_width,modular_heigth,modular_length_num,modular_dis,story_num,corridor_width)
@@ -1171,7 +1175,7 @@ N_GENERATIONS = 140
 num_thread =10
 min_genera = []
 
-x = np.linspace(0, 13, 14)
+x = np.linspace(0, 11, 12)
 # x = np.array([2,4,6,8,10,12])
 num_var = 2
 num_room_type=1

@@ -146,7 +146,7 @@ def draw_3d_modular(brace_dis,brace_type,member_section):
 def draw_all():
     member_section = []
     wb = openpyxl.load_workbook(
-        filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{time}.xlsx',
+        filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_{num_var}_{modular_num}_{time}.xlsx',
         )
     for pop_num in all_it:
         #获得梁柱截面编号
@@ -195,7 +195,7 @@ modular_all = modular_length_num * 2 *story_num
 
 
 num_var = 5
-time = 4
+time = 0
 num_room_type = 1
 num_room = 1
 pop_size = 30#种群数量

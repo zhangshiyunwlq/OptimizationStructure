@@ -22,6 +22,9 @@ import xlsxwriter
 import csv
 import openpyxl
 from CNN import create_model
+from keras.callbacks import EarlyStopping,LearningRateScheduler
+
+'''每隔房间随机变化，都不一样'''
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 '''
 功能：指定n种模块，然后整栋建筑的的模块都随机使用指定的模块，优化算法为HIGA
@@ -106,6 +109,9 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
 
     wb1.save(f'{path1}.xls')
 
+def cosine_annealing(epoch, T_max, eta_min=0, eta_max=0.001):
+    lr = eta_min + (eta_max - eta_min) * (1 + np.cos(np.pi * epoch / T_max)) / 2
+    return lr
 
 
 def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num,gx_prediction):
@@ -245,7 +251,7 @@ def generate_coding_modular():
     pop = np.zeros((POP_SIZE,section_num+brace_num+modular_length_num*2*story_num))
     for i in range(len(pop)):
         for j in range(section_num):
-            pop[i][j] = random.randint(0,13)
+            pop[i][j] = random.randint(0,11)
         for j in range(section_num,section_num+brace_num):
             pop[i][j] = randint(1,3)
         for j in range(section_num+brace_num,section_num+brace_num+modular_length_num*2*story_num):
@@ -288,7 +294,7 @@ def decoding_modular(pop2):
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
     sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                      cfg_file_name="Steel_section_data.ini")
+                                                                      cfg_file_name="Steel_section_data_I_cube.ini")
     modular_building = md.ModularBuilding(nodes, room_indx, edges_all, labels, joint_hor, joint_ver, cor_edges)
     # 按房间分好节点
     modulars_of_building = modular_building.building_modulars
@@ -309,95 +315,141 @@ def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_la
     ret = SapModel.SetModelIsLocked(False)
     return aa,bb,cc,dd,ee,ff,gg,hh,ii
 
-def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
-    g_col_all = 0
-    g_beam_all = 0
-    Y_dis_radio_all = 0
-    Y_interdis_all = 0
-    Y_interdis_radio_all = 0
-    floor_radio = 0
-    g_col1 = copy.deepcopy(g_col)
-    g_beam1 = copy.deepcopy(g_beam)
-    dis_all5 = copy.deepcopy(dis_all[5])
-    dis_all7 = copy.deepcopy(dis_all[7])
-    for i in range(len(g_col1)):
-        if g_col1[i]<= 0:
-            g_col1[i] = 0
-        else:
-            g_col1[i] = g_col1[i]
-        g_col_all += g_col1[i]
-    for i in range(len(g_beam1)):
-        if g_beam1[i]<= 0:
-            g_beam1[i] = 0
-        else:
-            g_beam1[i] = g_beam1[i]
-        g_beam_all += g_beam1[i]
-    #y dis ratio
-    for i in range(len(dis_all5)):
-        if dis_all5[i] <= 0.00167 and dis_all5[i] >= -0.00167:
-            dis_all5[i] = 0
-        else:
-            dis_all5[i] = dis_all5[i]
-        # Y_dis_radio_all += dis_all5[i]
-    Y_dis_radio_all = max(dis_all5)
-    Y_dis_radio_all = Y_dis_radio_all*100
-    # y interdis max
-    for i in range(len(dis_all7)):
-        if dis_all7[i] <= 0.004 and dis_all7[i] >= -0.004:
-            dis_all7[i] = 0
-        else:
-            dis_all7[i] = dis_all7[i]
-        # Y_interdis_all += dis_all7[i]
-    Y_interdis_all = max(dis_all7)
-    Y_interdis_all = Y_interdis_all*100
-    # # y interdis radio
-    # for i in range(len(dis_all[11])):
-    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
-    #         dis_all[11][i] = 0
-    #     else:
-    #         dis_all[11][i] = dis_all[11][i]
-    #     Y_interdis_radio_all += dis_all[11][i]
-    # # x interdis ratio
-    # for i in range(len(all_force[10])):
-    #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
-    #         all_force[10][i] = 0
-    #     else:
-    #         all_force[10][i] = all_force[10][i]
-    #     floor_radio += all_force[10][i]
+def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
+
     g_col_max= max(g_col)
     g_beam_max = max(g_beam)
-    dis_all_max = max(dis_all[5])
-    interdis_max = max(dis_all[7])
-    g_all_max = max(g_col_max,g_beam_max)
-    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
-    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
+
+    dis_all5_abs = copy.deepcopy(dis_all[5])
+    for i in range(len(dis_all5_abs)):
+        dis_all5_abs[i] = abs(dis_all5_abs[i])
+
+    dis_all7_abs = copy.deepcopy(dis_all[7])
+    for i in range(len(dis_all7_abs)):
+        dis_all7_abs[i] = abs(dis_all7_abs[i])
+
+    dis_all_max = max(dis_all5_abs)
+    interdis_max = max(dis_all7_abs)
+
+    rate_nonzero = copy.deepcopy(rate)
+    if rate_nonzero<=0.4:
+        rate_nonzero =0
+    else:
+        rate_nonzero=rate_nonzero
+
+    if g_col_max<=0:
+        g_col_fit = 0
+    else:
+        g_col_fit = g_col_max
+
+    if g_beam_max<=0:
+        g_beam_fit =0
+    else:
+        g_beam_fit = g_beam_max
+
+    if dis_all_max<= 0.00167 and dis_all_max >= -0.00167:
+        dis_all_fit = 0
+    else:
+        dis_all_fit = dis_all_max
+
+    if interdis_max<= 0.004 and interdis_max >= -0.004:
+        interdis_all_fit = 0
+    else:
+        interdis_all_fit = interdis_max
+
+    G_value=u * (g_col_fit + g_beam_fit + 100*dis_all_fit + 100*interdis_all_fit +rate_nonzero)
+    value_jisuan = [g_col_fit,g_beam_fit,100*dis_all_fit,100*interdis_all_fit,rate_nonzero,weight]
+    # gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
+    gx = []
+    for z in range(len(gx_data_select)):
+        if gx_data_select[z] ==0:
+            gx.append(g_col_max)
+        elif gx_data_select[z] ==1:
+            gx.append(g_beam_max)
+        elif gx_data_select[z] ==2:
+            gx.append(dis_all_max)
+        elif gx_data_select[z] ==3:
+            gx.append(interdis_max)
+        elif gx_data_select[z] ==4:
+            gx.append(rate)
+        elif gx_data_select[z] ==5:
+            gx.append(weight)
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
-    result = weight + G_value
+    # result = weight + G_value
+
+    value = 0
+    for z in range(len(gx_data_select)):
+        if gx_data_select[z] != 5:
+            value += 10000 * value_jisuan[int(gx_data_select[z])]
+        elif gx_data_select[z] == 5:
+            value += weight
+
+    result = value
 
     gx_demo = copy.deepcopy(gx)
-    if gx_demo[0]>=5:
-        gx_demo[0]=1
-    elif gx_demo[0]<=-1:
-        gx_demo[0] = -1
-    elif gx_demo[0]<=5 and gx_demo[0]>=-1:
-        gx_demo[0]=(gx_demo[0]+1)/6
-    if gx_demo[1]>=2:
-        gx_demo[1]=1
-    elif gx_demo[1]<=-1:
-        gx_demo[1] = -1
-    elif gx_demo[1]<=2 and gx_demo[1]>=-1:
-        gx_demo[1]=(gx_demo[1]+1)/3
-    if gx_demo[2] >= 0.05:
-        gx_demo[2] = 0.05
-    else:
-        gx_demo[2] = gx_demo[2] / 0.05
-    if gx_demo[3] >= 0.05:
-        gx_demo[3] = 0.05
-    else:
-        gx_demo[3] = gx_demo[3] / 0.05
+    for j in range(len(gx_demo)):
+        if gx_data_select[j] == 0:
+            if gx_demo[j] >= 2:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= -1:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 2 and gx_demo[j] >= -1:
+                gx_demo[j] = (gx_demo[j] + 1) / 3
+        elif gx_data_select[j] == 1:
+            if gx_demo[j] >= 3:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= -1:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 3 and gx_demo[j] >= -1:
+                gx_demo[j] = (gx_demo[j] + 1) / 4
+        elif gx_data_select[j] == 2:
+            if gx_demo[j] >= 0.007:
+                gx_demo[j] = 1
+            else:
+                gx_demo[j] = gx_demo[j] / 0.007
+        elif gx_data_select[j] == 3:
+            if gx_demo[j] >= 0.01:
+                gx_demo[j] = 1
+            else:
+                gx_demo[j] = gx_demo[j] / 0.01
+        elif gx_data_select[j] == 5:
+            if gx_demo[j] >= 600:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= 0:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 600 and gx_demo[j] >= 0:
+                gx_demo[j] = (gx_demo[j]) / 600
+    # if gx_demo[0]>=2:
+    #     gx_demo[0]=1
+    # elif gx_demo[0]<=-1:
+    #     gx_demo[0] = 0
+    # elif gx_demo[0]<=2 and gx_demo[0]>=-1:
+    #     gx_demo[0]=(gx_demo[0]+1)/3
+    # if gx_demo[1]>=0.5:
+    #     gx_demo[1]=1
+    # elif gx_demo[1]<=-1:
+    #     gx_demo[1] = 0
+    # elif gx_demo[1]<=0.5 and gx_demo[1]>=-1:
+    #     gx_demo[1]=(gx_demo[1]+1)/1.5
+    # if gx_demo[2] >= 0.1:
+    #     gx_demo[2] = 1
+    # else:
+    #     gx_demo[2] = gx_demo[2] / 0.1
+    # if gx_demo[3] >= 0.1:
+    #     gx_demo[3] = 1
+    # else:
+    #     gx_demo[3] = gx_demo[3] / 0.1
+    # if gx_demo[0] >= 600:
+    #     gx_demo[0] = 1
+    # elif gx_demo[0] <= 0:
+    #     gx_demo[0] = 0
+    # elif gx_demo[0] <= 600 and gx_demo[0] >= 0:
+    #     gx_demo[0] = (gx_demo[0])/600
     return result,weight,gx,gx_demo
 
-def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00):
+
+def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00,gx_te):
+
     while True:
         if q.empty():
             break
@@ -416,25 +468,19 @@ def mulitrun_GA_1(ModelPath,mySapObject, SapModel,pop1,pop_all,pop3,q,result,wei
                     weight_1[time]=memorize_weight[i]
                     col_up[time]=memorize_col[i]
                     beam_up[time]=memorize_beam[i]
+                    gx_te[time] = memorize_gx_nor[i]
+
                     value = 1
                     break
-        # if value ==0:
-        #     if sap_run_time00<num_thread:
-        #         we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
-        #                                                                              pop,
-        #                                                                              pop_room_label)
-        #         sap_run_time00 =sap_run_time00+1
-        #     else:
-        #         we, co, be, r1, r2, r3, r4, dis_all, force_all= mulit_Sap_analy_allroom_low(ModelPath, mySapObject, SapModel,
-        #                                                                              pop,
-        #                                                                              pop_room_label)
+
         if value == 0:
             we, co, be, r1, r2, r3, r4, dis_all, force_all = mulit_Sap_analy_allroom(ModelPath, mySapObject, SapModel,
                                                                                              pop,
                                                                                              pop_room_label)
-
-            res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000)
-
+            num_zero = pop_room_label.count(0)
+            nonzero_rate = (len(pop_room_label)-num_zero)/len(pop_room_label)
+            res1, res2,gx,gx_demo = Fun_1(we, co, be, dis_all, force_all, 10000,nonzero_rate)
+            gx_te[time] = gx_demo
             # num3 += 1
             weight_1[time] = res2
             col_up[time] = co
@@ -511,7 +557,9 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
         # wb2_examine_ind.save('examine_individual.xlsx')
         # pop_all.append(pop)
         we,co,be,r1,r2,r3,r4,dis_all,force_all =mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop,pop_room_label)
-        res1,res2,gx,gx_demo = Fun_1(we, co, be,dis_all,force_all, 10000)
+        num_zero = pop_room_label.count(0)
+        nonzero_rate = (len(pop_room_label) - num_zero) / len(pop_room_label)
+        res1,res2,gx,gx_demo = Fun_1(we, co, be,dis_all,force_all, 10000,nonzero_rate)
         # num3 += 1
         weight_1.append(res2)
         col_up.append(co)
@@ -585,7 +633,7 @@ def SAPanalysis_GA_run2(APIPath):
     # create new blank model
     return mySapObject,ModelPath, SapModel
 
-def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up):
+def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,result,weight_1,col_up,beam_up,gx_te):
 
 
     pop_n = [0 for i in range(len(pop2[0]))]
@@ -601,12 +649,12 @@ def thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num,pop1,pop2,pop3,
                 SapModel_name.append(f"SapModel{j}")
                 ModelPath_name.append(f"ModelPath{j}")
                 mySapObject_name[j], ModelPath_name[j], SapModel_name[j] = SAPanalysis_GA_run2(os.path.join(os.getcwd(), f"cases{j}"))
-        t = threading.Thread(target=mulitrun_GA_1, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00))
+        t = threading.Thread(target=mulitrun_GA_1, args=(ModelPath_name[i],mySapObject_name[i],SapModel_name[i],pop1,pop2,pop3,q,result,weight_1,col_up,beam_up,sap_run_time00,gx_te))
         t.start()
         threads.append(t)
     for i in threads:
         i.join()
-    return result,weight_1,col_up,beam_up
+    return result,weight_1,col_up,beam_up,gx_te
 
 def select_2(pop, fitness):  # nature selection wrt pop's fitness
 
@@ -666,7 +714,7 @@ def mutation_1_stort_modular(child,MUTATION_RATE):
 
     for j in range(section_num):
         if np.random.rand() < MUTATION_RATE:
-            child[j] = randint(0,13)
+            child[j] = randint(0,11)
     for j in range(section_num,section_num+brace_num):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(1,3)
@@ -675,40 +723,63 @@ def mutation_1_stort_modular(child,MUTATION_RATE):
             child[j] = randint(0,modular_num-1)
             # child[j] = 0
 
-def gx_Normalization(gx):
+def gx_Normalization(gx,gx_data_select):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
-        if gx_demo[i][0]>=5:
-            gx_demo[i][0]=1
-        elif gx_demo[i][0]<=-1:
-            gx_demo[i][0] = -1
-        elif gx_demo[i][0]<=5 and gx_demo[i][0]>=-1:
-            gx_demo[i][0]=(gx_demo[i][0]+1)/6
-        if gx_demo[i][1]>=2:
-            gx_demo[i][1]=1
-        elif gx_demo[i][1]<=-1:
-            gx_demo[i][1] = -1
-        elif gx_demo[i][1]<=2 and gx_demo[i][1]>=-1:
-            gx_demo[i][1]=(gx_demo[i][1]+1)/3
-        if gx_demo[i][2] >= 0.05:
-            gx_demo[i][2] = 0.05
-        else:
-            gx_demo[i][2] = gx_demo[i][2] / 0.05
-        if gx_demo[i][3] >= 0.05:
-            gx_demo[i][3] = 0.05
-        else:
-            gx_demo[i][3] = gx_demo[i][3] / 0.05
+        for j in range(len(gx_data_select)):
+            if gx_data_select[j] == 0:
+                if gx_demo[i][j]>=2:
+                    gx_demo[i][j]=1
+                elif gx_demo[i][j]<=-1:
+                    gx_demo[i][j] = 0
+                elif gx_demo[i][j]<=2 and gx_demo[i][j]>=-1:
+                    gx_demo[i][j]=(gx_demo[i][j]+1)/3
+            elif gx_data_select[j] == 1:
+                if gx_demo[i][j]>=3:
+                    gx_demo[i][j]=1
+                elif gx_demo[i][j]<=-1:
+                    gx_demo[i][j] = 0
+                elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
+                    gx_demo[i][j]=(gx_demo[i][j]+1)/4
+            elif gx_data_select[j] == 2:
+                if gx_demo[i][j] >= 0.007:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.007
+            elif gx_data_select[j] == 3:
+                if gx_demo[i][j] >= 0.01:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.01
+            elif gx_data_select[j] == 5:
+                if gx_demo[i][j] >= 600:
+                    gx_demo[i][j] = 1
+                elif gx_demo[i][j] <= 0:
+                    gx_demo[i][j] = 0
+                elif gx_demo[i][j] <= 600 and gx_demo[i][j] >= 0:
+                    gx_demo[i][j] = gx_demo[i][j] / 600
     return gx_demo
 
-def gx_nonNormalization(gx):
+def gx_nonNormalization(gx,gx_data_select):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
-        gx_demo[i][0]=gx_demo[i][0]*6-1
-        gx_demo[i][1] = gx_demo[i][1] * 3-1
-        gx_demo[i][2] = gx_demo[i][2] * 0.05
-        gx_demo[i][3] = gx_demo[i][3] * 0.05
+        for j in range(len(gx_data_select)):
+            if gx_data_select[j] == 0:
+                gx_demo[i][j] = gx_demo[i][j] * 3 - 1
+            elif gx_data_select[j] == 1:
+                gx_demo[i][j] = gx_demo[i][j] * 4 - 1
+            elif gx_data_select[j] == 2:
+                gx_demo[i][j] = gx_demo[i][j] * 0.007
+            elif gx_data_select[j] == 3:
+                gx_demo[i][j] = gx_demo[i][j] * 0.01
+            elif gx_data_select[j] == 5:
+                gx_demo[i][j] = gx_demo[i][j] * 600
+        # gx_demo[i][1] = gx_demo[i][1] * 1.5-1
+        # gx_demo[i][2] = gx_demo[i][2] * 0.1
+        # gx_demo[i][3] = gx_demo[i][3] * 0.1
+        # gx_demo[i][5] = gx_demo[i][5] * 200+400
+        # gx_demo[i][0] = gx_demo[i][0] * 600
     return gx_demo
-
 def generation_population_modular(best_indivi,rate):
     section_num = 3*modular_num
     brace_num = modular_num
@@ -719,7 +790,7 @@ def generation_population_modular(best_indivi,rate):
     for i in range(len(pop)):
         for j in range(section_num):
             if np.random.rand() < rate:
-                pop[i][j] = random.randint(0, 13)
+                pop[i][j] = random.randint(0, 11)
             else:
                 pop[i][j] = best_in[j]
         for j in range(section_num, section_num + brace_num):
@@ -737,16 +808,65 @@ def generation_population_modular(best_indivi,rate):
 
     return pop
 
-def Gx_convert(fitness1):
+def Gx_convert(fitness1,gx_data_select):
     fitness3 = copy.deepcopy(fitness1)
     fitness4 = []  # 储存所有gx
     fitness2 = []  # 所有gx的和
     for j in range(len(fitness3)):
         fitness4.append(fitness3[j].tolist())
-    fitness4=gx_nonNormalization(fitness4)
+    fitness4=gx_nonNormalization(fitness4,gx_data_select)
+    fitness5 = copy.deepcopy(fitness4)
     for j in range(len(fitness3)):
-        fitness2.append(sum(fitness4[j]))
+        # fitness2.append(sum(fitness4[j]))
+        for z in range(len(gx_data_select)):
+            if gx_data_select[z] == 0:
+                if fitness5[j][z]<=0:
+                    fitness5[j][z] =0
+            elif gx_data_select[z] == 1:
+                if fitness5[j][z] <= 0:
+                    fitness5[j][z] = 0
+            elif gx_data_select[z] == 2:
+                if fitness5[j][z]<=0.00167 and fitness5[j][z] >= -0.00167:
+                    fitness5[j][z] =0
+                else:
+                    fitness5[j][z] = 100*abs(fitness5[j][z])
+            elif gx_data_select[z] == 3:
+                if fitness5[j][z] <= 0.004 and fitness5[j][z] >= -0.004:
+                    fitness5[j][z] = 0
+                else:
+                    fitness5[j][z] = 100*abs(fitness5[j][z])
+            elif gx_data_select[z] == 4:
+                if fitness5[j][z] <= 0.4:
+                    fitness5[j][z] = 0
+                else:
+                    fitness5[j][z] = 100 * abs(fitness5[j][z])
+        value = 0
+        for z in range(len(gx_data_select)):
+            if gx_data_select[z] != 5:
+                value += 10000*fitness5[j][z]
+            elif gx_data_select[z] == 5:
+                value += fitness5[j][z]
+        fitness2.append(value)
+        # if fitness5[j][0]<=0:
+        #     fitness5[j][0] =0
+        # if fitness5[j][1] <= 0:
+        #     fitness5[j][1] = 0
+        # if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
+        #     fitness5[j][2] =0
+        # else:
+        #     fitness5[j][2] = abs(fitness5[j][2])
+        # if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
+        #     fitness5[j][3] = 0
+        # else:
+        #     fitness5[j][3] = abs(fitness5[j][3])
+        # if fitness5[j][4] <= 0.4:
+        #     fitness5[j][4] = 0
+        # fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
+        # if fitness5[j][0]<=0:
+        #     fitness5[j][0] = abs(fitness5[j][0])*100
+        # fitness2.append(fitness5[j][0])
     return fitness2
+
 
 def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
     pop = pop2
@@ -778,7 +898,7 @@ def mutation_GA_for_DNN_modular(child,num_var,MUTATION_RATE):
 
     for j in range(section_num):
         if np.random.rand() < MUTATION_RATE:
-            child[j] = random.randint(0,13)
+            child[j] = random.randint(0,11)
     for j in range(section_num,section_num+brace_num):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(1,3)
@@ -790,7 +910,7 @@ def mutation_GA_for_DNN_modular(child,num_var,MUTATION_RATE):
 def GA_for_DNN(run_time,pop2,model):
     for i in range(run_time):
         fitness1 = model.predict(pop2,verbose=0)
-        fitness2 = Gx_convert(fitness1)#归一化还原，并将每个染色体对应的gx累加
+        fitness2 = Gx_convert(fitness1,gx_data_select)#归一化还原，并将每个染色体对应的gx累加
         mm = fitness2.index(min(fitness2))
         min1 = min(fitness2)
         mm2_all = pop2[mm]
@@ -799,22 +919,31 @@ def GA_for_DNN(run_time,pop2,model):
         # 交叉变异
         pop2 = crossover_and_mutation_GA_for_DNN(pop2, num_var,CROSSOVER_RATE,MUTATION_RATE*0.5)
         fit_pred = model.predict(pop2,verbose=0)
-        fit_pred2=Gx_convert(fit_pred)
+        fit_pred2=Gx_convert(fit_pred,gx_data_select)
         if min1 <= fit_pred2[0]:
             pop2[0] = mm2_all
     return pop2
 
-def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
+def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
+    global gx_test_data1,pop_test_data
+    # 早停法训练深度深度网络
+    early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
+    # 定义学习率调度回调
+    T_max = 50  # 余弦退火周期
+    lr_scheduler = LearningRateScheduler(lambda epoch: cosine_annealing(epoch, T_max, eta_min=0.0001, eta_max=0.001))
+
+
+
     #局部训练
     pool_local = copy.deepcopy(memorize_pool_local)
     x_train1_local = np.array(pool_local)
     x_train_local = x_train1_local#提取用于训练的x_train部分
     gx_local = copy.deepcopy(memorize_gx_local)
     y_train_local = np.array(gx_local)
-    y_train_local= gx_Normalization(y_train_local)#归一化
-    model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
+    y_train_local= gx_Normalization(y_train_local,gx_data_select)#归一化
+    # model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
     #verbose取消打印损失
-    model.fit(x_train_local, y_train_local, epochs=100, batch_size=32,verbose=0)#训练模型
+    model.fit(x_train_local, y_train_local, epochs=1200, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -822,9 +951,9 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     x_train1 = np.array(pool_global)
     x_train = x_train1#提取用于训练的x_train部分
     y_train = np.array(gx_global)
-    y_train = gx_Normalization(y_train)#归一化
-    model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
-    history=model.fit(x_train, y_train, epochs=100, batch_size=32,verbose=0)#训练模型
+    y_train = gx_Normalization(y_train,gx_data_select)#归一化
+    # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
+    history=model.fit(x_train, y_train, epochs=1200, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -833,7 +962,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time):
     history_mae.append(history.history['mae'])
     pop_best = []
     for i in range(num_ind):
-        pop1 = generation_population_modular(best_indivi, 0.2)#根据最好个体生成种群
+        pop1 = generation_population_modular(best_indivi, 0.15)#根据最好个体生成种群
         pop2 = pop1
         pop2 = GA_for_DNN(run_time, pop2, model)
         pop_best.append(pop2[0].tolist())
@@ -860,6 +989,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     weight_min=[]
     min_ru = []
     sap_run_time = 0
+    model = create_model(len(pop2[0]), 6)
     for run_time in range(N_GENERATIONS):
         pop_zhongqun_all.append(pop1)
         pop_zhongqun_all_2.append(pop2)
@@ -870,7 +1000,8 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         weight = [0 for i in range(len(pop2))]
         clo_val = [0 for i in range(len(pop2))]
         beam_val = [0 for i in range(len(pop2))]
-        result1,weight_pop,clo_up_1,beam_up_1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val)
+        gx_te = [[] for i in range(len(pop2))]
+        result1,weight_pop,clo_up_1,beam_up_1,gx_te1=thread_sap(ModelPath_name,mySapObject_name,SapModel_name,num_thread, pop1, pop2, pop3, fit, weight, clo_val, beam_val,gx_te)
 
         col_up_all.append(clo_up_1)
         beam_up_all.append(beam_up_1)
@@ -891,11 +1022,12 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
 
         # 引入新个体
         run_time +=1
-        if run_time % 3 == 0:
-            pop2_new,model = DNN_GA(num_var,num_room_type,int(0.9 * len(pop2)),pop2[0],200)
-            exchange_num = int(0.9*len(pop2))
-            for ex_num in range(exchange_num):
-                pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
+        if run_time % 20 == 0:
+            pop2_new,model = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400,model)
+            exchange_num = int(1*len(pop2))
+            # for ex_num in range(exchange_num):
+            #     pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
+            pop2 = copy.deepcopy(pop2_new)
             memorize_num.append(len(memorize_pool))
             memorize_sum_loacl = []
             memorize_pool_loacl = []
@@ -905,7 +1037,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
             memorize_beam_loacl = []
             memorize_gx_loacl = []
 
-        if run_time % 3 == 0:
+        if run_time % 20 == 0:
             print(run_time)
             print(f'记忆池数量:{len(memorize_pool)}')
         pop1, pop3 = decoding_modular(pop2)
@@ -950,10 +1082,10 @@ modular_length_num = 8
 modular_dis = 400
 story_num = 6
 corridor_width = 4000
-modular_num = 6
+modular_num = 3
 # steel section information
 sections_data_c1, type_keys_c1, sections_c1 = ms.get_section_info(section_type='c0',
-                                                                  cfg_file_name="Steel_section_data.ini")
+                                                                  cfg_file_name="Steel_section_data_I_cube.ini")
 
 # generate model
 model_data = dj.generate_model_data(modular_length,modular_width,modular_heigth,modular_length_num,modular_dis,story_num,corridor_width)
@@ -973,10 +1105,17 @@ N_GENERATIONS = 6
 num_thread =3
 min_genera = []
 
-x = np.linspace(0, 13, 14)
+
+gx_data_select = [0,1,2,3,4,5]
+x = np.linspace(0, 11, 12)
 # x = np.array([2,4,6,8,10,12])
 num_var = 2
 num_room_type=1
+
+
+gx_te = []
+
+
 #全局记忆池
 memorize_pool = []
 memorize_fit = []
@@ -1009,7 +1148,7 @@ for i in range(1,story_num+1):
         labels.append(i)
 
 for num_var in [14]:
-    for time in range(941,942):
+    for time in range(1000,1001):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1033,5 +1172,5 @@ for num_var in [14]:
         # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         zhan, jia, qi,fitness_prediction = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx,history_loss,history_mae,memorize_gx_nor,memorize_num,fitness_prediction)
-        draw_loss(num_var, time)
+        # draw_loss(num_var, time)
         gc.collect()

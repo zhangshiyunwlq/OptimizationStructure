@@ -8,7 +8,7 @@ def get_info(name1):
     for i in range(len(name1)):
         value_str = []
         wb = openpyxl.load_workbook(
-            filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_{name1[i][1]}_{modular_num}_{name1[i][2]}.xlsx'
+            filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_{name1[i][1]}_{name1[i][3]}_{name1[i][2]}.xlsx'
             )
         # wb = xlrd.open_workbook(
         #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
@@ -112,6 +112,56 @@ def draw_picture(info2,name,title_name):
            yticks=np.arange(0, 1000, 100))
     plt.show()
 
+def draw_picture3(info2,name,title_name):
+    num1 = 0.8
+    num2 = 0.8
+    num3 = 3
+    num4 = 0
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.tick_params(labelsize=40)
+    ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+    ax2.set_ylabel(title_name, fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(2);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    plt.ylim((150, 400))
+    info = copy.deepcopy(info2)
+
+    for i in range(len(info)):
+        # if name[i] =='GA':
+        #     co = 'r'
+        # elif name[i] =='HIGA':
+        #     co = 'black'
+        # elif name[i] == 'HIGA2':
+        #     co = 'blue'
+
+        bbb = np.arange(0, len(info[i]))
+        ccc = info[i]
+        ax2.plot(bbb, ccc, linewidth=6,label=f'{data_info[i][1]}_{data_info[i][2]}')
+        # legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
+        #                   plt.Line2D([0], [0], color='black', lw=2,linewidth=20),
+        #                   plt.Line2D([0], [0], color='blue', lw=2, linewidth=20)
+        #                   ]
+        # legend_labels = ['200*200', '50*50', '100*100']
+        # plt.legend(legend_handles, legend_labels,fontsize=20)
+
+    for i in range(7):
+        x_te = []
+        for j in range(50):
+            x_te.append(20*i)
+        x_te = np.array(x_te)
+        y_te = np.linspace(0, 1000, 50)
+        ax2.plot(x_te, y_te, linewidth=2, color='black',linestyle="--")
+
+    ax2.set(xlim=(0, 150), ylim=(0, 1000),
+           xticks=np.arange(0, 150, 20),
+           yticks=np.arange(0, 1000, 100))
+    plt.legend(fontsize=35)
+    plt.show()
+
+
 def draw_picture_continue(info2,name,title_name,length):
     num1 = 0.8
     num2 = 0.8
@@ -197,8 +247,8 @@ def draw_plot_picture(info2,data_infor):
 
     fig2 =plt.figure(figsize=(10, 10), dpi=100)
     ax2 = fig2.add_subplot(111)
-    ax2.set(xlim=(0, 14), ylim=(0, 700),
-           xticks=np.arange(0, 14, 1),
+    ax2.set(xlim=(0, 6), ylim=(0, 700),
+           xticks=np.arange(0, 6, 1),
            yticks=np.arange(0, 700, 100))
     # ax2.xticks(range(0, 14, 1))
     # plt.yticks(range(100, 500, 50))
@@ -209,7 +259,7 @@ def draw_plot_picture(info2,data_infor):
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
     z = [433.72,446.06,443.39,436.44]
-    ax2.scatter(num_var, fit, s=18, label='fitness')
+    ax2.scatter(num_var, fit, s=25, label='fitness')
     ax2.set_xlabel("The number of section", fontsize=30)
     ax2.set_ylabel("Fitness", fontsize=30)
     ax2.tick_params(labelsize=25)
@@ -232,6 +282,45 @@ def static_braced(name1):
             pop_room.append(rows)
         braced_st.append(pop_room)
     return  braced_st
+
+def draw_3d_scatter(data_infor,info2):
+    num_var =[]
+    fit = []
+    mod_num =[]
+    for i in range(len(data_infor)):
+        num_var.append(data_infor[i][1])
+        fit.append(info2[i][len(info2[i])-1])
+        mod_num.append(data_infor[i][3])
+    # Creating figure
+    fig = plt.figure(figsize=(10, 7))
+    ax = plt.axes(projection="3d")
+
+    num_var = np.array(num_var)
+    fit = np.array(fit)
+    mod_num = np.array(mod_num)
+    ax.set_xlabel('Number of sectional types', fontweight='bold')
+    ax.set_ylabel('Number of modular types', fontweight='bold')
+    ax.set_zlabel('Frame total weight', fontweight='bold')
+
+
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 5)
+    ax.set_zlim(0, 1000)
+    color = []
+    # Creating plot
+    for i in range(len(num_var)):
+        if mod_num[i] == 3:
+            color.append('blue')
+        elif mod_num[i] == 4:
+            color.append('yellow')
+        elif mod_num[i] == 5:
+            color.append('red')
+    ax.scatter3D(num_var, mod_num, fit, color=color)
+    # plt.title("simple 3D scatter plot")
+
+    # show plot
+    plt.show()
+
 # data_info = [[100,2,0],[100,3,0],[100,3,1],[100,4,0],[100,4,1],[100,5,0],[100,5,1],[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4],[100,7,0],[100,8,0],[100,8,1],[100,8,2],[100,9,0],[100,9,1],[100,9,2],[100,10,0],[100,10,1]]
 # infor_all = get_info(data_info)
 # infor_name = ['2_0','3_0','3_1','4_0','4_1','5_0','5_1','6_0','6_1','6_2','6_3','6_4','7_0','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
@@ -246,7 +335,9 @@ def static_braced(name1):
 #
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
-data_info = [[140,2,0]]
+# data_info = [[140,2,0],[140,5,0],[140,7,0],[140,7,1],[140,9,0]]
+# data_info = [[140,2,0,3],[140,5,0,3],[140,5,0,5],[140,7,0,3],[140,7,1,3],[140,9,0,3]]
+data_info = [[140,2,1,3],[140,5,0,3],[140,3,4,3],[140,4,0,3]]
 # data_info = [[140,3,1]]
 infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
@@ -254,10 +345,10 @@ infor_all = get_info(data_info)
 #普通遗传算法
 title_name = 'Fitness'
 
-
-draw_picture(infor_all,infor_name,title_name)
-# draw_plot_picture(infor_all,data_info)
-
+# draw_picture(infor_all,infor_name,title_name)
+# draw_picture3(infor_all,infor_name,title_name)
+draw_plot_picture(infor_all,data_info)
+# draw_3d_scatter(data_info,infor_all)
 #绘制连续跑的曲线
 # length = [140,100]
 # infor_all = get_info_continue(data_info)

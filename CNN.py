@@ -12,11 +12,11 @@ def leaky_relu(x, alpha=0.1):
 # 创建一个简单的神经网络模型
 def create_model(num_joint,num_out):
     model = models.Sequential([
-        layers.Dense(100, activation=leaky_relu, input_shape=(num_joint,),kernel_regularizer=regularizers.l2(0.0001)),
-        layers.Dense(100, activation=leaky_relu,kernel_regularizer=regularizers.l2(0.0001)),
+        layers.Dense(100, activation=leaky_relu, input_shape=(num_joint,),kernel_regularizer=regularizers.l2(0.00005)),
+        layers.Dense(100, activation=leaky_relu,kernel_regularizer=regularizers.l2(0.00005)),
         # layers.Dense(100, activation=leaky_relu),
         # layers.Dense(100, activation=leaky_relu),
-        layers.Dense(num_out,activation='sigmoid',kernel_regularizer=regularizers.l2(0.0001))
+        layers.Dense(num_out,activation='sigmoid',kernel_regularizer=regularizers.l2(0.00005))
     ])
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
     model.compile(optimizer=optimizer,
