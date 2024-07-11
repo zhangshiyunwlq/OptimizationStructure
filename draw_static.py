@@ -313,7 +313,7 @@ def draw_3d_scatter(data_infor,info2):
             color.append('blue')
         elif mod_num[i] == 4:
             color.append('yellow')
-        elif mod_num[i] == 5:
+        elif mod_num[i] == 2:
             color.append('red')
     ax.scatter3D(num_var, mod_num, fit, color=color)
     # plt.title("simple 3D scatter plot")
@@ -337,7 +337,8 @@ def draw_3d_scatter(data_infor,info2):
 modular_num = 3
 # data_info = [[140,2,0],[140,5,0],[140,7,0],[140,7,1],[140,9,0]]
 # data_info = [[140,2,0,3],[140,5,0,3],[140,5,0,5],[140,7,0,3],[140,7,1,3],[140,9,0,3]]
-data_info = [[140,2,1,3],[140,5,0,3],[140,3,4,3],[140,4,0,3]]
+data_info = [[140,2,1,3],[140,5,0,3],[140,3,4,3],[140,4,0,3],[140,4,1,2],[140,3,0,2]]
+# data_info = [[140,4,0,4],[140,2,7,4],[140,5,7,4]]
 # data_info = [[140,3,1]]
 infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
@@ -347,8 +348,8 @@ title_name = 'Fitness'
 
 # draw_picture(infor_all,infor_name,title_name)
 # draw_picture3(infor_all,infor_name,title_name)
-draw_plot_picture(infor_all,data_info)
-# draw_3d_scatter(data_info,infor_all)
+# draw_plot_picture(infor_all,data_info)
+draw_3d_scatter(data_info,infor_all)
 #绘制连续跑的曲线
 # length = [140,100]
 # infor_all = get_info_continue(data_info)

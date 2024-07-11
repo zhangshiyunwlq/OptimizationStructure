@@ -1090,7 +1090,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
 
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=1800, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=2400, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -1101,7 +1101,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=1800, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=2400, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1667,7 +1667,7 @@ corridor_width = 4000
 story_num = 6
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 3#整个建筑的模块种类
+modular_num = 2#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -1761,8 +1761,8 @@ for i in range(group_num):
 
 
 
-for num_var in [4]:
-    for time in range(6,7):
+for num_var in [2]:
+    for time in range(7,8):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

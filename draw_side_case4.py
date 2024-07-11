@@ -318,7 +318,7 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 3#整个建筑的模块种类
+modular_num = 2#整个建筑的模块种类
 num_room_type =1
 
 
@@ -355,7 +355,7 @@ for i in range(len(fit_ini)):
 for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
 
-num_var = 5
+num_var = 3
 al_time = 0
 #绘制某个pop中的最有个体
 all_in=[139]

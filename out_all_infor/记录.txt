@@ -43,8 +43,18 @@ va7，mo3,time1,result 417,l2，0.001，epoch 1200，运行后第六次
 va5，mo3,time19,result 392，0.001，epoch 1200，运行后第六次
 va5，mo3,time0,result 395，0.001，epoch 1200，运行后第六次
 va5，mo5,time0,result 450，0.001，epoch 1200，运行后第六次
-va3，mo3,time0,result 451，0.001，epoch 1200，运行后第六次
+va3，mo3,time4,result 451，0.001，epoch 1200，运行后第六次
 va4，mo3,time0,result 436，0.001，epoch 1200，运行后第六次
 va4，mo2,time0,result 417，0.001，epoch 1200，运行后第六次
+va4，mo2,time1,result 391，0.001，epoch 1200，运行后第六次
 va4，mo4,time0,result 479，0.001，epoch 1200，运行后第六次
 va2，mo3,time1,result 459，0.001，epoch 1200，运行后第六次
+va3，mo2,time0,result 399.35，0.001，epoch 1200，运行后第六次
+
+六层：
+va4，mo4,time0,result 171.07，0.001，epoch 1200，运行后第六次
+va4，mo3,time6,result 166.07，0.001，epoch 1200，运行后第六次
+va4，mo3,time7,result 190，0.001，epoch 1200，运行后第六次
+va2，mo4,time7,result 177.33.07，0.001，epoch 1200，运行后第六次
+va5，mo4,time7,result 165.59，0.001，epoch 1200，运行后第六次
+va2，mo2,time10,result 166.07，0.001，epoch 1200，运行后第六次

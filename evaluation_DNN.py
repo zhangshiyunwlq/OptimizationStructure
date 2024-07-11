@@ -474,7 +474,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
 
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=4800, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -485,7 +485,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=4800, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -528,7 +528,7 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
         # model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=1800, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=600, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -539,7 +539,7 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=1800, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=600, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1508,7 +1508,7 @@ history_mae = []
 DNN_prediction_fitness= []
 POP_SIZE=30
 num_var = 4
-file_time = 0
+file_time = 1
 num_continue = 140
 labels = []
 labels1 = []
@@ -1570,7 +1570,7 @@ output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness
 # #
 ## # #绘制gx差异值0
 gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-draw_gx_chayi2(gx_truth_div,gx_pred_div,5)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,4)
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)

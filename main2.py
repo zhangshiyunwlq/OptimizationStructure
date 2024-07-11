@@ -2830,7 +2830,7 @@ modular_length_num = 8
 modular_dis = 400
 corridor_width = 4000
 
-story_num = 12
+story_num = 6
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
 modular_num = 6#整个建筑的模块种类
@@ -2941,26 +2941,26 @@ pop_room_label = []
 #使用openxyxl读取信息
 
 wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor_case4\\run_infor_7_3_2.xlsx',
+    filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_7_3_2.xlsx',
     )
-sheet1 = wb['pop1_all']
-for z in range(48):
-    rows = sheet1.cell(4311,z+1).value
-    pop_room.append(rows)
-sheet1 = wb['pop3_all']
-for z in range(modular_length_num*2*story_num):
-    rows = sheet1.cell(4311,z+1).value
-    pop_room_label.append(rows)
+# sheet1 = wb['pop1_all']
+# for z in range(48):
+#     rows = sheet1.cell(4311,z+1).value
+#     pop_room.append(rows)
+# sheet1 = wb['pop3_all']
+# for z in range(modular_length_num*2*story_num):
+#     rows = sheet1.cell(4311,z+1).value
+#     pop_room_label.append(rows)
 
 
 
 # pop_room = []
 # pop_room_label = []
-# for i in range(48):
-#     pop_room.append(12)
-# # pop_room = all_GA_infor[0]
-# for i in range(modular_length_num*2*story_num):
-#     pop_room_label.append(0)
+for i in range(24):
+    pop_room.append(10)
+# pop_room = all_GA_infor[0]
+for i in range(modular_length_num*2*story_num):
+    pop_room_label.append(0)
 
 
 
