@@ -1270,21 +1270,23 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
     #         elif num1 == 1:
     #             result.append(pop_fun_all[num2])
     #             weight_1.append(pop_weight_all[num2])
-    wb2_examine_ind = openpyxl.Workbook()
+    # wb2_examine_ind = openpyxl.Workbook()
     # wb2_examine_ind = openpyxl.load_workbook('examine_individual.xlsx')
-    wb2_pop1_indivi = wb2_examine_ind.create_sheet('pop1_indivi', index=0)
-    wb2_pop3_indivi = wb2_examine_ind.create_sheet('pop3_indivi', index=1)
+    # wb2_pop1_indivi = wb2_examine_ind.create_sheet('pop1_indivi', index=0)
+    # wb2_pop3_indivi = wb2_examine_ind.create_sheet('pop3_indivi', index=1)
     loc_3 = 1
     for time in range(len(pop1)):
         pop = pop1[time]
         pop_room_label = pop3[time]
-        _ = wb2_pop1_indivi.cell(row=loc_3, column=1, value=f'{pop1[time]}')
-        _ = wb2_pop3_indivi.cell(row=loc_3, column=1, value=f'{pop3[time]}')
-        loc_3 += 1
-        wb2_examine_ind.save('examine_individual.xlsx')
+        # _ = wb2_pop1_indivi.cell(row=loc_3, column=1, value=f'{pop1[time]}')
+        # _ = wb2_pop3_indivi.cell(row=loc_3, column=1, value=f'{pop3[time]}')
+        # loc_3 += 1
+        # wb2_examine_ind.save('examine_individual.xlsx')
         # pop_all.append(pop)
         we,co,be,r1,r2,r3,r4,dis_all,force_all =mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop,pop_room_label)
-        res1,res2 = Fun_1(we, co, be,dis_all,force_all, 10000)
+        num_zero = pop_room_label.count(0)
+        nonzero_rate = (len(pop_room_label) - num_zero) / len(pop_room_label)
+        res1,res2,gx,gx_demo = Fun_1(we, co, be,dis_all,force_all, 10000,nonzero_rate)
         # num3 += 1
         weight_1.append(res2)
         col_up.append(co)
@@ -1293,18 +1295,72 @@ def GA_examine(ModelPath,mySapObject, SapModel,pop1,pop3):
         # pop_fun_all.append(res1)
         # pop_weight_all.append(res2)
 
-    wb_clear_in1 = openpyxl.load_workbook('examine_individual.xlsx')
-    ws_clear_in1 = wb_clear_in1['pop1_indivi']
-    for row in ws_clear_in1:
-        for cell in row:
-            cell.value = None
-    ws_clear_in3 = wb_clear_in1['pop3_indivi']
-    for row in ws_clear_in3:
-        for cell in row:
-            cell.value = None
-    wb2_examine_ind.save('examine_individual.xlsx')
+    # wb_clear_in1 = openpyxl.load_workbook('examine_individual.xlsx')
+    # ws_clear_in1 = wb_clear_in1['pop1_indivi']
+    # for row in ws_clear_in1:
+    #     for cell in row:
+    #         cell.value = None
+    # ws_clear_in3 = wb_clear_in1['pop3_indivi']
+    # for row in ws_clear_in3:
+    #     for cell in row:
+    #         cell.value = None
+    # wb2_examine_ind.save('examine_individual.xlsx')
     return result,weight_1,col_up,beam_up
 
+def decoding_modular_section(pop2):
+
+    pop_all = copy.deepcopy(pop2)
+    modular_type1 = [i for i in range(3)]
+    #生成对每个模块的截面编号索引
+    modular_type_all= []
+    for i in range(modular_num):
+        modular_type_temp = []
+        for j in range(len(modular_type1)):
+            modular_type_temp.append(num_var+num_room_type+modular_type1[j]+3*i)
+        modular_type_all.append(modular_type_temp)
+
+
+    #提取截面表
+    pop1_all = []
+    for i in range(len(pop_all)):
+        pop1_section = []
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            for z in range(3):
+                sec = int(pop_all[i][j])
+                pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
+        pop1_all.append(pop1_section)
+
+    #解码pop1_1all
+    pop1_decoding = []
+    for i in range(len(pop1_all)):
+        pop1_temp = []
+        for j in range(len(pop1_all[i])):
+            pop1_temp.append(pop_all[i][int(pop1_all[i][j])])
+        pop1_decoding.append(pop1_temp)
+
+
+    #生成支撑表
+    brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
+    pop3_all = []
+    for i in range(len(pop_all)):
+        pop3_brace = []
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            bra = int(pop_all[i][j])
+            if pop_all[i][int(brace_sort[bra])] ==0:
+                pop3_brace.append(0)
+            else:
+                pop3_brace.append(pop_all[i][num_var])
+        pop3_all.append(pop3_brace)
+    pop_3 =[]
+    for j in range(len(pop_all)):
+        temp2 = pop3_all[j]
+        brace_all = []
+        for i in range(len(labels)):
+            temp1 = int(labels[i])
+            brace_all.append(temp2[temp1])
+        pop_3.append(brace_all)
+
+    return pop1_decoding,pop_3
 
 def GA_1(pop1,pop3):
     result = []
@@ -2708,92 +2764,136 @@ def Run_GA_allstory2_divided_mulit(POP_SIZE_1, DNA_SIZE_1, CROSSOVER_RATE_1, MUT
                  pop_all_weight,col_up_all, beam_up_all,pop2[0],pop3[0],pop_zhongqun_all_3]
     return all_infor
 
-def Fun_1(weight,g_col,g_beam,dis_all,all_force,u):
-    g_col_all = 0
-    g_beam_all = 0
-    Y_dis_radio_all = 0
-    Y_interdis_all = 0
-    Y_interdis_radio_all = 0
-    floor_radio = 0
-    g_col1 = copy.deepcopy(g_col)
-    g_beam1 = copy.deepcopy(g_beam)
-    dis_all5 = copy.deepcopy(dis_all[5])
-    dis_all7 = copy.deepcopy(dis_all[7])
-    for i in range(len(g_col1)):
-        if g_col1[i]<= 0:
-            g_col1[i] = 0
-        else:
-            g_col1[i] = g_col1[i]
-        g_col_all += g_col1[i]
-    for i in range(len(g_beam1)):
-        if g_beam1[i]<= 0:
-            g_beam1[i] = 0
-        else:
-            g_beam1[i] = g_beam1[i]
-        g_beam_all += g_beam1[i]
-    #y dis ratio
-    for i in range(len(dis_all5)):
-        if dis_all5[i] <= 0.00167 and dis_all5[i] >= -0.00167:
-            dis_all5[i] = 0
-        else:
-            dis_all5[i] = dis_all5[i]
-        # Y_dis_radio_all += dis_all5[i]
-    Y_dis_radio_all = max(dis_all5)
-    Y_dis_radio_all = Y_dis_radio_all*100
-    # y interdis max
-    for i in range(len(dis_all7)):
-        if dis_all7[i] <= 0.004 and dis_all7[i] >= -0.004:
-            dis_all7[i] = 0
-        else:
-            dis_all7[i] = dis_all7[i]
-        # Y_interdis_all += dis_all7[i]
-    Y_interdis_all = max(dis_all7)
-    Y_interdis_all = Y_interdis_all*100
-    # # y interdis radio
-    # for i in range(len(dis_all[11])):
-    #     if dis_all[11][i] <= 1.5 and dis_all[11][i] >= -1.5:
-    #         dis_all[11][i] = 0
-    #     else:
-    #         dis_all[11][i] = dis_all[11][i]
-    #     Y_interdis_radio_all += dis_all[11][i]
-    # # x interdis ratio
-    # for i in range(len(all_force[10])):
-    #     if all_force[10][i] <= 1.5 and all_force[10][i] >= -1.5:
-    #         all_force[10][i] = 0
-    #     else:
-    #         all_force[10][i] = all_force[10][i]
-    #     floor_radio += all_force[10][i]
+def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
+
     g_col_max= max(g_col)
     g_beam_max = max(g_beam)
-    dis_all_max = max(dis_all[5])
-    interdis_max = max(dis_all[7])
-    g_all_max = max(g_col_max,g_beam_max)
-    G_value=u * (abs(g_col_all) + abs(g_beam_all) + abs(Y_dis_radio_all) + abs(Y_interdis_all) + abs(Y_interdis_radio_all))
-    gx = [g_col_max,g_beam_max,abs(dis_all_max),abs(interdis_max)]
+
+    dis_all5_abs = copy.deepcopy(dis_all[5])
+    for i in range(len(dis_all5_abs)):
+        dis_all5_abs[i] = abs(dis_all5_abs[i])
+
+    dis_all7_abs = copy.deepcopy(dis_all[7])
+    for i in range(len(dis_all7_abs)):
+        dis_all7_abs[i] = abs(dis_all7_abs[i])
+
+    dis_all_max = max(dis_all5_abs)
+    interdis_max = max(dis_all7_abs)
+
+    rate_nonzero = copy.deepcopy(rate)
+    if rate_nonzero<=0.4:
+        rate_nonzero =0
+    else:
+        rate_nonzero=rate_nonzero
+
+    if g_col_max<=0:
+        g_col_fit = 0
+    else:
+        g_col_fit = g_col_max
+
+    if g_beam_max<=0:
+        g_beam_fit =0
+    else:
+        g_beam_fit = g_beam_max
+
+    if dis_all_max<= 0.00167 and dis_all_max >= -0.00167:
+        dis_all_fit = 0
+    else:
+        dis_all_fit = dis_all_max
+
+    if interdis_max<= 0.004 and interdis_max >= -0.004:
+        interdis_all_fit = 0
+    else:
+        interdis_all_fit = interdis_max
+
+    G_value=u * (g_col_fit + g_beam_fit + 100*dis_all_fit + 100*interdis_all_fit +rate_nonzero)
+    value_jisuan = [g_col_fit,g_beam_fit,100*dis_all_fit,100*interdis_all_fit,rate_nonzero,weight]
+    # gx = [g_col_max,g_beam_max,dis_all_max,interdis_max,rate,weight]
+    gx = []
+    for z in range(len(gx_data_select)):
+        if gx_data_select[z] ==0:
+            gx.append(g_col_max)
+        elif gx_data_select[z] ==1:
+            gx.append(g_beam_max)
+        elif gx_data_select[z] ==2:
+            gx.append(dis_all_max)
+        elif gx_data_select[z] ==3:
+            gx.append(interdis_max)
+        elif gx_data_select[z] ==4:
+            gx.append(rate)
+        elif gx_data_select[z] ==5:
+            gx.append(weight)
     # gx_Normalization = [g_col_all,g_beam_all,Y_dis_radio_all,Y_interdis_all]
-    result = weight + G_value
+    # result = weight + G_value
+
+    value = 0
+    for z in range(len(gx_data_select)):
+        if gx_data_select[z] != 5:
+            value += 10000 * value_jisuan[int(gx_data_select[z])]
+        elif gx_data_select[z] == 5:
+            value += weight
+
+    result = value
 
     gx_demo = copy.deepcopy(gx)
-    if gx_demo[0]>=5:
-        gx_demo[0]=1
-    elif gx_demo[0]<=-1:
-        gx_demo[0] = -1
-    elif gx_demo[0]<=5 and gx_demo[0]>=-1:
-        gx_demo[0]=(gx_demo[0]+1)/6
-    if gx_demo[1]>=2:
-        gx_demo[1]=1
-    elif gx_demo[1]<=-1:
-        gx_demo[1] = -1
-    elif gx_demo[1]<=2 and gx_demo[1]>=-1:
-        gx_demo[1]=(gx_demo[1]+1)/3
-    if gx_demo[2] >= 0.05:
-        gx_demo[2] = 0.05
-    else:
-        gx_demo[2] = gx_demo[2] / 0.05
-    if gx_demo[3] >= 0.05:
-        gx_demo[3] = 0.05
-    else:
-        gx_demo[3] = gx_demo[3] / 0.05
+    for j in range(len(gx_demo)):
+        if gx_data_select[j] == 0:
+            if gx_demo[j] >= 2:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= -1:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 2 and gx_demo[j] >= -1:
+                gx_demo[j] = (gx_demo[j] + 1) / 3
+        elif gx_data_select[j] == 1:
+            if gx_demo[j] >= 3:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= -1:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 3 and gx_demo[j] >= -1:
+                gx_demo[j] = (gx_demo[j] + 1) / 4
+        elif gx_data_select[j] == 2:
+            if gx_demo[j] >= 0.007:
+                gx_demo[j] = 1
+            else:
+                gx_demo[j] = gx_demo[j] / 0.007
+        elif gx_data_select[j] == 3:
+            if gx_demo[j] >= 0.01:
+                gx_demo[j] = 1
+            else:
+                gx_demo[j] = gx_demo[j] / 0.01
+        elif gx_data_select[j] == 5:
+            if gx_demo[j] >= 600:
+                gx_demo[j] = 1
+            elif gx_demo[j] <= 0:
+                gx_demo[j] = 0
+            elif gx_demo[j] <= 600 and gx_demo[j] >= 0:
+                gx_demo[j] = (gx_demo[j]) / 600
+    # if gx_demo[0]>=2:
+    #     gx_demo[0]=1
+    # elif gx_demo[0]<=-1:
+    #     gx_demo[0] = 0
+    # elif gx_demo[0]<=2 and gx_demo[0]>=-1:
+    #     gx_demo[0]=(gx_demo[0]+1)/3
+    # if gx_demo[1]>=0.5:
+    #     gx_demo[1]=1
+    # elif gx_demo[1]<=-1:
+    #     gx_demo[1] = 0
+    # elif gx_demo[1]<=0.5 and gx_demo[1]>=-1:
+    #     gx_demo[1]=(gx_demo[1]+1)/1.5
+    # if gx_demo[2] >= 0.1:
+    #     gx_demo[2] = 1
+    # else:
+    #     gx_demo[2] = gx_demo[2] / 0.1
+    # if gx_demo[3] >= 0.1:
+    #     gx_demo[3] = 1
+    # else:
+    #     gx_demo[3] = gx_demo[3] / 0.1
+    # if gx_demo[0] >= 600:
+    #     gx_demo[0] = 1
+    # elif gx_demo[0] <= 0:
+    #     gx_demo[0] = 0
+    # elif gx_demo[0] <= 600 and gx_demo[0] >= 0:
+    #     gx_demo[0] = (gx_demo[0])/600
     return result,weight,gx,gx_demo
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
@@ -2830,10 +2930,10 @@ modular_length_num = 8
 modular_dis = 400
 corridor_width = 4000
 
-story_num = 6
+story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 6#整个建筑的模块种类
+modular_num = 4#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -2899,6 +2999,21 @@ N_GENERATIONS = 100
 num_thread = 10
 min_genera = []
 x = np.linspace(0, 12, 13)
+
+num_var= 4
+num_room_type=1
+
+labels = []
+labels1 = []
+for i in range(group_num):
+    temp = []
+    for j in range(story_zone):
+        for z in range(int(modular_length_num/story_zone)):
+            temp.append(i*story_zone+j)
+    for j in range(2*story_group):
+        labels.extend(temp)
+        labels1.append(temp)
+
 # for i in range(3):
 #     for num_var in [8,9,10]:
 #         for num_room_type in [1]:
@@ -2941,7 +3056,7 @@ pop_room_label = []
 #使用openxyxl读取信息
 
 wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_7_3_2.xlsx',
+    filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_4_4_1.xlsx',
     )
 # sheet1 = wb['pop1_all']
 # for z in range(48):
@@ -2951,16 +3066,24 @@ wb = openpyxl.load_workbook(
 # for z in range(modular_length_num*2*story_num):
 #     rows = sheet1.cell(4311,z+1).value
 #     pop_room_label.append(rows)
-
-
-
+zhanjiaqi = num_var+num_room_type+section_num+brace_num+zone_num
+gx_data_select = [0,1,2,3,4,5]
+pop2_di = []
+sheet1 = wb['pop2_all']
+for z in range(num_var+num_room_type+section_num+brace_num+zone_num):
+    rows = sheet1.cell(4311,z+1).value
+    pop2_di.append(rows)
+pop2_di= [1, 2, 10, 11, 2, 1, 0, 3, 0, 1, 3, 1, 0, 3, 0, 1, 3, 0, 0, 1, 1, 3, 1, 3, 2, 0, 3, 0, 2, 1, 2, 0, 1, 0, 1, 0, 1]
+pop_room1,pop_room_label1=decoding_modular_section([pop2_di])
+pop_room = pop_room1[0]
+pop_room_label = pop_room_label1[0]
 # pop_room = []
 # pop_room_label = []
-for i in range(24):
-    pop_room.append(10)
-# pop_room = all_GA_infor[0]
-for i in range(modular_length_num*2*story_num):
-    pop_room_label.append(0)
+# for i in range(24):
+#     pop_room.append(10)
+# # pop_room = all_GA_infor[0]
+# for i in range(modular_length_num*2*story_num):
+#     pop_room_label.append(0)
 
 
 
@@ -3012,7 +3135,9 @@ word_3th.append(Y_interdis_radio)
 word_infor.append(word_1th)
 word_infor.append(word_3th)
 
-res1, res2,gx,gx_demo=Fun_1(weight1,g_col,g_beam,Joint_dis,all_force,10000)
+num_zero = pop_room_label.count(0)
+nonzero_rate = (len(pop_room_label) - num_zero) / len(pop_room_label)
+res1, res2, gx, gx_demo = Fun_1(weight1,g_col,g_beam,Joint_dis,all_force, 10000, nonzero_rate)
 
 # yangtingting = [i for i in range(50)]
 # luyiwen = []

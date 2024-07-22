@@ -885,9 +885,9 @@ def gx_nonNormalization(gx,gx_data_select):
             elif gx_data_select[j] == 1:
                 gx_demo[i][j] = gx_demo[i][j] * 4 - 1
             elif gx_data_select[j] == 2:
-                gx_demo[i][j] = gx_demo[i][j] * 0.007
-            elif gx_data_select[j] == 3:
                 gx_demo[i][j] = gx_demo[i][j] * 0.01
+            elif gx_data_select[j] == 3:
+                gx_demo[i][j] = gx_demo[i][j] * 0.007
             elif gx_data_select[j] == 5:
                 gx_demo[i][j] = gx_demo[i][j] * 600
         # gx_demo[i][1] = gx_demo[i][1] * 1.5-1
@@ -915,12 +915,12 @@ def Gx_convert(fitness1,gx_data_select):
                 if fitness5[j][z] <= 0:
                     fitness5[j][z] = 0
             elif gx_data_select[z] == 2:
-                if fitness5[j][z]<=0.00167 and fitness5[j][z] >= -0.00167:
+                if fitness5[j][z]<=0.004 and fitness5[j][z] >= -0.004:
                     fitness5[j][z] =0
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
             elif gx_data_select[z] == 3:
-                if fitness5[j][z] <= 0.004 and fitness5[j][z] >= -0.004:
+                if fitness5[j][z] <= 0.00167 and fitness5[j][z] >= -0.00167:
                     fitness5[j][z] = 0
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
@@ -975,15 +975,15 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
                     gx_demo[i][j]=(gx_demo[i][j]+1)/4
             elif gx_data_select[j] == 2:
-                if gx_demo[i][j] >= 0.007:
-                    gx_demo[i][j] = 1
-                else:
-                    gx_demo[i][j] = gx_demo[i][j] / 0.007
-            elif gx_data_select[j] == 3:
                 if gx_demo[i][j] >= 0.01:
                     gx_demo[i][j] = 1
                 else:
                     gx_demo[i][j] = gx_demo[i][j] / 0.01
+            elif gx_data_select[j] == 3:
+                if gx_demo[i][j] >= 0.007:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.007
             elif gx_data_select[j] == 5:
                 if gx_demo[i][j] >= 600:
                     gx_demo[i][j] = 1
@@ -1345,11 +1345,11 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     g_col_max= max(g_col)
     g_beam_max = max(g_beam)
 
-    dis_all5_abs = copy.deepcopy(dis_all[5])
+    dis_all5_abs = copy.deepcopy(dis_all[4])
     for i in range(len(dis_all5_abs)):
         dis_all5_abs[i] = abs(dis_all5_abs[i])
 
-    dis_all7_abs = copy.deepcopy(dis_all[7])
+    dis_all7_abs = copy.deepcopy(dis_all[6])
     for i in range(len(dis_all7_abs)):
         dis_all7_abs[i] = abs(dis_all7_abs[i])
 
@@ -1761,8 +1761,8 @@ for i in range(group_num):
 
 
 
-for num_var in [4]:
-    for time in range(1,2):
+for num_var in [3]:
+    for time in range(0,1):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

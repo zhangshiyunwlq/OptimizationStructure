@@ -318,7 +318,7 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 2#整个建筑的模块种类
+modular_num = 4#整个建筑的模块种类
 num_room_type =1
 
 

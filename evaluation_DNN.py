@@ -35,9 +35,9 @@ def gx_nonNormalization(gx,gx_data_select):
             elif gx_data_select[j] == 1:
                 gx_demo[i][j] = gx_demo[i][j] * 4 - 1
             elif gx_data_select[j] == 2:
-                gx_demo[i][j] = gx_demo[i][j] * 0.007
-            elif gx_data_select[j] == 3:
                 gx_demo[i][j] = gx_demo[i][j] * 0.01
+            elif gx_data_select[j] == 3:
+                gx_demo[i][j] = gx_demo[i][j] * 0.007
             elif gx_data_select[j] == 5:
                 gx_demo[i][j] = gx_demo[i][j] * 600
         # gx_demo[i][1] = gx_demo[i][1] * 1.5-1
@@ -65,12 +65,12 @@ def Gx_convert(fitness1,gx_data_select):
                 if fitness5[j][z] <= 0:
                     fitness5[j][z] = 0
             elif gx_data_select[z] == 2:
-                if fitness5[j][z]<=0.00167 and fitness5[j][z] >= -0.00167:
+                if fitness5[j][z]<=0.004 and fitness5[j][z] >= -0.004:
                     fitness5[j][z] =0
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
             elif gx_data_select[z] == 3:
-                if fitness5[j][z] <= 0.004 and fitness5[j][z] >= -0.004:
+                if fitness5[j][z] <= 0.00167 and fitness5[j][z] >= -0.00167:
                     fitness5[j][z] = 0
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
@@ -125,15 +125,15 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
                     gx_demo[i][j]=(gx_demo[i][j]+1)/4
             elif gx_data_select[j] == 2:
-                if gx_demo[i][j] >= 0.007:
-                    gx_demo[i][j] = 1
-                else:
-                    gx_demo[i][j] = gx_demo[i][j] / 0.007
-            elif gx_data_select[j] == 3:
                 if gx_demo[i][j] >= 0.01:
                     gx_demo[i][j] = 1
                 else:
                     gx_demo[i][j] = gx_demo[i][j] / 0.01
+            elif gx_data_select[j] == 3:
+                if gx_demo[i][j] >= 0.007:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.007
             elif gx_data_select[j] == 5:
                 if gx_demo[i][j] >= 600:
                     gx_demo[i][j] = 1
@@ -1431,7 +1431,7 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 4#整个建筑的模块种类
+modular_num = 3#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -1507,8 +1507,8 @@ history_loss = []
 history_mae = []
 DNN_prediction_fitness= []
 POP_SIZE=30
-num_var = 4
-file_time = 1
+num_var = 3
+file_time = 5
 num_continue = 140
 labels = []
 labels1 = []
@@ -1570,7 +1570,7 @@ output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness
 # #
 ## # #绘制gx差异值0
 gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-draw_gx_chayi2(gx_truth_div,gx_pred_div,4)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,2)
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)
