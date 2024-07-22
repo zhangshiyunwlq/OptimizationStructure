@@ -885,9 +885,9 @@ def gx_nonNormalization(gx,gx_data_select):
             elif gx_data_select[j] == 1:
                 gx_demo[i][j] = gx_demo[i][j] * 4 - 1
             elif gx_data_select[j] == 2:
-                gx_demo[i][j] = gx_demo[i][j] * 0.01
-            elif gx_data_select[j] == 3:
                 gx_demo[i][j] = gx_demo[i][j] * 0.007
+            elif gx_data_select[j] == 3:
+                gx_demo[i][j] = gx_demo[i][j] * 0.01
             elif gx_data_select[j] == 5:
                 gx_demo[i][j] = gx_demo[i][j] * 600
         # gx_demo[i][1] = gx_demo[i][1] * 1.5-1
@@ -915,12 +915,12 @@ def Gx_convert(fitness1,gx_data_select):
                 if fitness5[j][z] <= 0:
                     fitness5[j][z] = 0
             elif gx_data_select[z] == 2:
-                if fitness5[j][z]<=0.004 and fitness5[j][z] >= -0.004:
+                if fitness5[j][z]<=0.00167 and fitness5[j][z] >= -0.00167:
                     fitness5[j][z] =0
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
             elif gx_data_select[z] == 3:
-                if fitness5[j][z] <= 0.00167 and fitness5[j][z] >= -0.00167:
+                if fitness5[j][z] <= 0.004 and fitness5[j][z] >= -0.004:
                     fitness5[j][z] = 0
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
@@ -975,15 +975,15 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j]<=3 and gx_demo[i][j]>=-1:
                     gx_demo[i][j]=(gx_demo[i][j]+1)/4
             elif gx_data_select[j] == 2:
-                if gx_demo[i][j] >= 0.01:
-                    gx_demo[i][j] = 1
-                else:
-                    gx_demo[i][j] = gx_demo[i][j] / 0.01
-            elif gx_data_select[j] == 3:
                 if gx_demo[i][j] >= 0.007:
                     gx_demo[i][j] = 1
                 else:
                     gx_demo[i][j] = gx_demo[i][j] / 0.007
+            elif gx_data_select[j] == 3:
+                if gx_demo[i][j] >= 0.01:
+                    gx_demo[i][j] = 1
+                else:
+                    gx_demo[i][j] = gx_demo[i][j] / 0.01
             elif gx_data_select[j] == 5:
                 if gx_demo[i][j] >= 600:
                     gx_demo[i][j] = 1

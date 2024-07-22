@@ -3073,7 +3073,9 @@ sheet1 = wb['pop2_all']
 for z in range(num_var+num_room_type+section_num+brace_num+zone_num):
     rows = sheet1.cell(4311,z+1).value
     pop2_di.append(rows)
-pop2_di= [1, 2, 10, 11, 2, 1, 0, 3, 0, 1, 3, 1, 0, 3, 0, 1, 3, 0, 0, 1, 1, 3, 1, 3, 2, 0, 3, 0, 2, 1, 2, 0, 1, 0, 1, 0, 1]
+pop2_di= [1, 2, 3, 11, 1, 1, 0, 3, 0, 1, 3, 2, 1, 3, 0, 1, 3, 0, 0, 1, 1, 3, 0, 3, 2, 0, 3, 0, 2, 2, 0, 0, 1, 0, 0, 0, 1]
+
+# [1, 2, 10, 11, 2, 1, 0, 3, 0, 1, 3, 1, 0, 3, 0, 1, 3, 0, 0, 1, 1, 3, 1, 3, 2, 0, 3, 0, 2, 1, 2, 0, 1, 0, 1, 0, 1]
 pop_room1,pop_room_label1=decoding_modular_section([pop2_di])
 pop_room = pop_room1[0]
 pop_room_label = pop_room_label1[0]
