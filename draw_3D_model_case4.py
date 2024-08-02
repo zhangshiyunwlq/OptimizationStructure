@@ -66,6 +66,7 @@ def area_sort():
         sort_num.append(fit_ini.index(luyi[i]))
     for i in range(len(fit_ini)):
         list_new.append(lst[sort_num[i]])
+    list_new = [0, 3, 4, 5, 8, 1, 2, 6, 7, 9, 10, 11]
     return list_new
 
 
@@ -141,6 +142,8 @@ def draw_3d_modular(brace_dis,brace_type,member_section):
                              z[modular_num_all[j][bottom_beam_num_temp[zz, 1]]]), radius=section_size)
             p.add_mesh(tube2, color=color_member, show_edges=False)
     p.set_background('white')
+    #摄像机位置、焦点、旋转
+    p.camera_position = [(30000, -20000, 12000), (10000, 10000, 0), (0, 0, 10000)]
     p.show()
 
 def draw_all():
@@ -175,7 +178,7 @@ def draw_all():
 
 #模块定位点
 # location = [[0,0,0],[6000,0,0],[12000,0,0],[18000,0,0],[24000,0,0],[0,0,12000],[6000,0,12000],[12000,0,12000],[18000,0,12000],[24000,0,12000]]
-location = [[0,0,0],[6000,0,0],[12000,0,0]]
+location = [[0,0,0],[6000,0,0]]
 #一个模块所有点坐标，柱编号、顶梁编号、底梁编号、所有模块的节点、支撑数据,模块节点编号
 all_point,column_num,top_beam_num,bottom_beam_num,all_draw_node,brace_data,modular_num_all,modular_sectione_all = generative_data()
 #按照截面大小排序
@@ -185,7 +188,7 @@ modular_length_num= 8
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 3#整个建筑的模块种类
+modular_num = 2#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -194,8 +197,8 @@ group_num = int(story_num / story_group)
 modular_all = modular_length_num * 2 *story_num
 
 
-num_var = 5
-time = 0
+num_var = 4
+time = 3
 num_room_type = 1
 num_room = 1
 pop_size = 30#种群数量

@@ -1,5 +1,6 @@
 import xlrd
 import matplotlib.pyplot as plt
+plt.rc('font',family='Times New Roman')
 import copy
 import numpy as np
 import openpyxl
@@ -34,6 +35,40 @@ def get_info(name1):
         #     rows = sheet1.row_values(1)[z]
         #     value_str.append(rows)
         # all_value_str.append(value_str)
+
+    return all_value_str
+
+def get_info_6(name1):
+    all_value_str = []
+    for i in range(len(name1)):
+    #     value_str = []
+    #     wb = openpyxl.load_workbook(
+    #         filename=f'D:\desktop\os\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx'
+    #         )
+        # wb = xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\分析数据\不限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)
+        # wb = xlrd.open_workbook(
+        #     filename=f'E:\C盘默认文件\\run\OptimizationStructure\分析数据\限定范围\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+        #     formatting_info=True)
+        # sheet1 = wb['max_fitness']
+        # for z in range(name1[i][0]):
+        #     rows = sheet1.cell(2,z+1).value
+        #     value_str.append(rows)
+        # all_value_str.append(value_str)
+
+        value_str = []
+        # wb =  xlrd.open_workbook(
+        #     filename=f'D:\desktop\os\optimization of structure\optimization of structure\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xlsx' formatting_info=True)
+        #
+        wb = xlrd.open_workbook(
+            filename=f'D:\desktop\os\optimization of structure\out_all_infor\\run_infor_{name1[i][1]}_{name1[i][2]}.xls',
+            formatting_info=True)
+        sheet1 = wb.sheet_by_index(5)
+        for z in range(name1[i][0]):
+            rows = sheet1.row_values(1)[z]
+            value_str.append(rows)
+        all_value_str.append(value_str)
 
     return all_value_str
 
@@ -82,11 +117,10 @@ def draw_picture(info2,name,title_name):
     ax2.tick_params(labelsize=40)
     ax2.set_xlabel("Iteration",fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
     ax2.set_ylabel(title_name, fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
-    ax2.spines['bottom'].set_linewidth(2);###设置底部坐标轴的粗细
-    ax2.spines['left'].set_linewidth(2)
+    ax2.spines['bottom'].set_linewidth(3);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(3)
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
-    plt.ylim((150, 400))
     info = copy.deepcopy(info2)
 
     for i in range(len(info)):
@@ -106,9 +140,9 @@ def draw_picture(info2,name,title_name):
         #                   ]
         # legend_labels = ['200*200', '50*50', '100*100']
         # plt.legend(legend_handles, legend_labels,fontsize=20)
-
+    ax2.tick_params(labelsize=30, which='major', length=10, width=1)
     ax2.set(xlim=(0, 150), ylim=(0, 1000),
-           xticks=np.arange(0, 150, 20),
+           xticks=np.arange(20, 150, 20),
            yticks=np.arange(0, 1000, 100))
     plt.show()
 
@@ -248,25 +282,52 @@ def draw_plot_picture(info2,data_infor):
     fig2 =plt.figure(figsize=(10, 10), dpi=100)
     ax2 = fig2.add_subplot(111)
     ax2.set(xlim=(0, 6), ylim=(0, 700),
-           xticks=np.arange(0, 6, 1),
+           xticks=np.arange(1, 6, 1),
            yticks=np.arange(0, 700, 100))
     # ax2.xticks(range(0, 14, 1))
     # plt.yticks(range(100, 500, 50))
     # ax2.ylim((0, 700))
     # ax2.xlim((0, 14))
-    ax2.spines['bottom'].set_linewidth(3);###设置底部坐标轴的粗细
-    ax2.spines['left'].set_linewidth(3)
+    ax2.spines['bottom'].set_linewidth(2);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
     z = [433.72,446.06,443.39,436.44]
-    ax2.scatter(num_var, fit, s=25, label='fitness')
-    ax2.set_xlabel("The number of section", fontsize=30)
+    ax2.scatter(num_var, fit, s=80, label='Fitness')
+    ax2.set_xlabel("The number of sections", fontsize=30)
     ax2.set_ylabel("Fitness", fontsize=30)
-    ax2.tick_params(labelsize=25)
+    ax2.tick_params(labelsize=20,which='major', length=10,width=1)
     # ax2.xlabel("The number of variable", fontdict={'size': 16})
     # ax2.ylabel("Fitness", fontdict={'size': 16})
     # plt.title("历年天猫双11总成交额", fontdict={'size': 20})
     plt.show()
+
+def draw_plot_picture_modular(info2,data_infor):
+    num_var =[]
+    fit = []
+    for i in range(len(data_infor)):
+        num_var.append(data_infor[i][3])
+        fit.append(info2[i][len(info2[i])-1])
+
+    fig2 =plt.figure(figsize=(10, 10), dpi=100)
+    ax2 = fig2.add_subplot(111)
+    ax2.set(xlim=(0, 6), ylim=(0, 700),
+           xticks=np.arange(1, 6, 1),
+           yticks=np.arange(0, 700, 100))
+
+    ax2.spines['bottom'].set_linewidth(2);###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    ax2.scatter(num_var, fit, s=80, label='Fitness')
+    ax2.set_xlabel("The number of modular units", fontsize=30)
+    ax2.set_ylabel("Fitness", fontsize=30)
+    ax2.tick_params(labelsize=20,which='major', length=10,width=1)
+    # ax2.xlabel("The number of variable", fontdict={'size': 16})
+    # ax2.ylabel("Fitness", fontdict={'size': 16})
+    # plt.title("历年天猫双11总成交额", fontdict={'size': 20})
+    plt.show()
+
 
 def static_braced(name1):
     braced_st = []
@@ -333,23 +394,41 @@ def draw_3d_scatter(data_infor,info2):
 
 # data_info = [[140,14,74],[140,14,75],[140,14,76],[140,14,77],[140,14,78],[140,14,79],[140,14,81]]
 #
+#6层GA与HIGA对比
+# data_info = [[140,14,74],[140,14,77],[140,14,79],[140,14,81]]
+data_info = [[140,4,8,5]]
+
+#12层GA与HIGA对比
+# data_info = [[140,5,3,3],[140,5,4,3],[140,5,0,3],[140,5,19,3]]
 # infor_name = ['GA','GA','GA','GA','GA','HIGA','HIGA']
 modular_num = 3
 # data_info = [[140,2,0],[140,5,0],[140,7,0],[140,7,1],[140,9,0]]
-# data_info = [[140,2,0,3],[140,5,0,3],[140,5,0,5],[140,7,0,3],[140,7,1,3],[140,9,0,3]]
-data_info = [[140,2,1,3],[140,5,0,3],[140,3,4,3],[140,4,0,3],[140,4,1,2],[140,3,0,2]]
+#四种模块变截面
+# data_info = [[140,2,0,4],[140,3,0,4],[140,4,2,4],[140,5,1,4]]
+#三种模块变截面
+# data_info = [[140,2,1,3],[140,3,5,3],[140,5,19,3],[140,4,0,3]]
+#四种截面变模块
+data_info = [[140,4,0,3],[140,4,2,4],[140,4,3,2],[140,4,0,5]]
+
+# data_info = [[140,2,1,3],[140,5,19,3],[140,4,0,3],[140,4,0,3],[140,4,1,2],[140,3,0,2]]
 # data_info = [[140,4,0,4],[140,2,7,4],[140,5,7,4]]
-# data_info = [[140,3,1]]
+# data_info = [[140,5,1,4]]
 infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
 infor_all = get_info(data_info)
+
+# infor_all = get_info_6(data_info)
 #普通遗传算法
 title_name = 'Fitness'
 
 # draw_picture(infor_all,infor_name,title_name)
 # draw_picture3(infor_all,infor_name,title_name)
+#绘制截面与总重散点
 # draw_plot_picture(infor_all,data_info)
-draw_3d_scatter(data_info,infor_all)
+#绘制模块与总重散点
+draw_plot_picture_modular(infor_all,data_info)
+
+# draw_3d_scatter(data_info,infor_all)
 #绘制连续跑的曲线
 # length = [140,100]
 # infor_all = get_info_continue(data_info)

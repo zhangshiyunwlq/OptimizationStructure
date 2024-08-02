@@ -8,8 +8,8 @@
 55-60 higa 变异率 0.25
 60-68 higa 每20代引入新个体 0.9，200代、变异率0.2、神经元200*200、激活函数leaky——relu、学习率0.001
 69-73 回退 修复pop和fitness对应不上bug
-73 81HIAG
-74-78，772 普通ga对比
+73 81 HIAG
+74-78，772 普通ga对比  232  226  220 232 222
 79-80，82-84 添加支撑之后 HIga
 812,85,86,87 10层优化 80次
 
@@ -55,13 +55,36 @@ va5，mo2,time1,result 421，0.001，epoch 1200，运行后第六次
 
 
 三种模块变截面
-va2，mo3,time1,result 459，0.001，epoch 1200，运行后第六次
-va3，mo3,time5,result 445，0.001，epoch 2400，运行后第六次
-va4，mo3,time0,result 436，0.001，epoch 1200，运行后第六次
-va5，mo3,time19,result 392，0.001，epoch 1200，运行后第六次
-
+va2，mo3,time1,result 459.83，0.001，epoch 1200，运行后第六次
+va2，mo3,time0,result 445.3631,l2，0.001，epoch 200
+va3，mo3,time5,result 445.36，0.001，epoch 2400，运行后第六次
+va3，mo3,time4,result 451，0.001，epoch 1200，运行后第六次
+va4，mo3,time0,result 436.72，0.001，epoch 1200，运行后第六次
+va4，mo3,time1,result 426.23，0.001，epoch 1200，运行后第六次
+va5，mo3,time19,result 392.55，0.001，epoch 1200，运行后第六次
+va5，mo3,time0,result 395，0.001，epoch 1200，运行后第六次
+va5，mo3,time21,result 420，0.001，epoch 1200，运行后第六次
 四种模块变截面
+va2，mo4,time0,result 477.34，0.001，epoch 1200，运行后第六次
+va3，mo4,time0,result 447.47，0.001，epoch 1200，运行后第六次
 va4，mo4,time0,result 479，0.001，epoch 1200，运行后第六次
+va4，mo4,time2,result 428.97，0.001，epoch 1200，运行后第六次
+va5，mo4,time1,result 405.91，0.001，epoch 1200，运行后第六次
+
+
+
+三种截面变模块
+va3，mo2,time0,result 399.35，0.001，epoch 1200，运行后第六次
+va3，mo3,time5,result 445，0.001，epoch 2400，运行后第六次
+va3，mo4,time2,result 447，0.001，epoch 1200，运行后第六次
+
+
+四种截面变模块
+va4，mo2,time3,result 453.18，0.001，epoch 1200，运行后第六次
+va4，mo3,time0,result 436.72，0.001，epoch 1200，运行后第六次
+va4，mo4,time2,result 428.97，0.001，epoch 1200，运行后第六次
+va4，mo5,time0,result 407.73，0.001，epoch 1200，运行后第六次
+
 
 二种模块变截面
 va2，mo2,time0,result 419，0.001，epoch 1200，运行后第六次

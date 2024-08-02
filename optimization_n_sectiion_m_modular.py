@@ -925,7 +925,7 @@ def Gx_convert(fitness1,gx_data_select):
                 else:
                     fitness5[j][z] = 100*abs(fitness5[j][z])
             elif gx_data_select[z] == 4:
-                if fitness5[j][z] <= 0.4:
+                if fitness5[j][z] <= brace_rate:
                     fitness5[j][z] = 0
                 else:
                     fitness5[j][z] = 100 * abs(fitness5[j][z])
@@ -948,7 +948,7 @@ def Gx_convert(fitness1,gx_data_select):
         #     fitness5[j][3] = 0
         # else:
         #     fitness5[j][3] = abs(fitness5[j][3])
-        # if fitness5[j][4] <= 0.4:
+        # if fitness5[j][4] <= brace_rate:
         #     fitness5[j][4] = 0
         # fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
         # if fitness5[j][0]<=0:
@@ -1345,11 +1345,11 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     g_col_max= max(g_col)
     g_beam_max = max(g_beam)
 
-    dis_all5_abs = copy.deepcopy(dis_all[4])
+    dis_all5_abs = copy.deepcopy(dis_all[5])
     for i in range(len(dis_all5_abs)):
         dis_all5_abs[i] = abs(dis_all5_abs[i])
 
-    dis_all7_abs = copy.deepcopy(dis_all[6])
+    dis_all7_abs = copy.deepcopy(dis_all[7])
     for i in range(len(dis_all7_abs)):
         dis_all7_abs[i] = abs(dis_all7_abs[i])
 
@@ -1357,7 +1357,7 @@ def Fun_1(weight,g_col,g_beam,dis_all,all_force,u,rate):
     interdis_max = max(dis_all7_abs)
 
     rate_nonzero = copy.deepcopy(rate)
-    if rate_nonzero<=0.4:
+    if rate_nonzero<=brace_rate:
         rate_nonzero =0
     else:
         rate_nonzero=rate_nonzero
@@ -1667,7 +1667,7 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 4#整个建筑的模块种类
+modular_num = 3#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -1760,9 +1760,9 @@ for i in range(group_num):
         labels1.append(temp)
 
 
-
-for num_var in [3]:
-    for time in range(0,1):
+brace_rate = 0.4
+for num_var in [5]:
+    for time in range(21,22):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []

@@ -21,62 +21,112 @@ import matplotlib.pyplot as plt
 #修改区间
 
 # 定义余弦退火学习率调度函数
-import pickle
-import os
+def generate_coding_modular_section(x):
+
+    room_nu = np.linspace(1, 3, 3)
+
+    pop = np.zeros((POP_SIZE,num_var+num_room_type+section_num+brace_num+zone_num))
+    for i in range(len(pop)):
+        sec = list(map(int, random.sample(x.tolist(), num_var)))
+        sec.sort()
+        for j in range(num_var):
+            pop[i][j] = sec[j]
+
+        for j in range(num_var,num_var+num_room_type):
+            pop[i][j] = random.randint(1,3)
+
+        for j in range(num_var+num_room_type,num_var+num_room_type+section_num):
+            pop[i][j] = random.randint(0,num_var-1)
+
+        for j in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
+            pop[i][j] = randint(0,1)
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            pop[i][j] = randint(0,modular_num-1)
+
+    return pop
+
+def decoding_modular_section(pop2):
+
+    pop_all = copy.deepcopy(pop2)
+    modular_type1 = [i for i in range(3)]
+    #生成对每个模块的截面编号索引
+    modular_type_all= []
+    for i in range(modular_num):
+        modular_type_temp = []
+        for j in range(len(modular_type1)):
+            modular_type_temp.append(num_var+num_room_type+modular_type1[j]+3*i)
+        modular_type_all.append(modular_type_temp)
 
 
-num_var = 10
-modular_num=10
-time = 10
+    #提取截面表
+    pop1_all = []
+    for i in range(len(pop_all)):
+        pop1_section = []
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            for z in range(3):
+                sec = int(pop_all[i][j])
+                pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
+        pop1_all.append(pop1_section)
 
-# # 假设我们有一个要保存的对象，例如一个字典
-data = {'name': 'Alice', 'age': 25, 'city': 'Wonderland'}
-#
-# 指定保存路径
+    #解码pop1_1all
+    pop1_decoding = []
+    for i in range(len(pop1_all)):
+        pop1_temp = []
+        for j in range(len(pop1_all[i])):
+            pop1_temp.append(pop_all[i][int(pop1_all[i][j])])
+        pop1_decoding.append(pop1_temp)
 
-APIPath = os.path.join(os.getcwd(), 'out_DNN_model')
-SpecifyPath = True
-if not os.path.exists(APIPath):
-    try:
-        os.makedirs(APIPath)
-    except OSError:
-        pass
 
-path1 = os.path.join(APIPath, f'DNN_model_{num_var}_{modular_num}_{time}.pkl')
-file_name = 'DNN_model_10_10_10.pkl'
+    #生成支撑表
+    brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
+    pop3_all = []
+    for i in range(len(pop_all)):
+        pop3_brace = []
+        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
+            bra = int(pop_all[i][j])
+            if pop_all[i][int(brace_sort[bra])] ==0:
+                pop3_brace.append(0)
+            else:
+                pop3_brace.append(pop_all[i][num_var])
+        pop3_all.append(pop3_brace)
+    pop_3 =[]
+    for j in range(len(pop_all)):
+        temp2 = pop3_all[j]
+        brace_all = []
+        for i in range(len(labels)):
+            temp1 = int(labels[i])
+            brace_all.append(temp2[temp1])
+        pop_3.append(brace_all)
 
-# 保存对象为PKL文件
-with open(file_name, 'wb') as file:
-    pickle.dump(data, file)
+    return pop1_decoding,pop_3
 
-print(f"Data saved to {path1}")
 
-# # 指定保存路径
-# save_path = r'D:\desktop\os\optimization of structure\out_DNN_model'
-# file_name = 'DNN_model_10_10_10.pkl'
-# full_path = os.path.join(save_path, file_name)
-#
-# file_path = full_path
-# os.chmod(file_path, 0o755)
-#
-# # 确保目录存在
-# try:
-#     os.makedirs(save_path, exist_ok=True)
-# except PermissionError:
-#     print(f"Permission denied: Cannot create directory {save_path}")
-#     raise
-#
-# # 保存对象为PKL文件
-# try:
-#     with open(full_path, 'wb') as file:
-#         pickle.dump(data, file)
-#     print(f"Data saved to {full_path}")
-# except PermissionError:
-#     print(f"Permission denied: Cannot write to file {full_path}")
-#     raise
-# except FileNotFoundError:
-#     print(f"File not found: The system cannot find the path specified {full_path}")
-#     raise
-# except Exception as e:
-#     print(f"An error occurred: {e}")
-#     raise
+story_num =6
+POP_SIZE =30
+DNA_SIZE = story_num*3
+CROSSOVER_RATE = 0.6
+MUTATION_RATE = 0.1
+N_GENERATIONS = 30
+num_thread =10
+min_genera = []
+
+num_room_type = 1
+
+modular_length_num = 8
+
+modular_num = 4
+
+zone_num = 6
+section_num = 3 * modular_num
+brace_num = modular_num
+modular_all = modular_length_num * 2 *story_num
+num_var=4
+x = np.linspace(0, 11, 12)
+
+labels = []
+for i in range(0,story_num):
+    for j in range(modular_length_num*2):
+        labels.append(i)
+
+xingnuzhanjiaqi = generate_coding_modular_section(x)
+xingnuyangtingting,xingnujiangjiaqi = decoding_modular_section(xingnuzhanjiaqi)

@@ -2933,7 +2933,7 @@ corridor_width = 4000
 story_num = 12
 story_zone = 4#每组模块的分区数量
 story_group = 3#每组模块的楼层数
-modular_num = 4#整个建筑的模块种类
+modular_num = 5#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
 section_num = 3 * modular_num
@@ -3056,7 +3056,7 @@ pop_room_label = []
 #使用openxyxl读取信息
 
 wb = openpyxl.load_workbook(
-    filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_4_4_1.xlsx',
+    filename=f'D:\desktop\os\optimization of structure\out_all_infor_case4\\run_infor_4_5_8.xlsx',
     )
 # sheet1 = wb['pop1_all']
 # for z in range(48):
@@ -3073,21 +3073,26 @@ sheet1 = wb['pop2_all']
 for z in range(num_var+num_room_type+section_num+brace_num+zone_num):
     rows = sheet1.cell(4311,z+1).value
     pop2_di.append(rows)
-pop2_di= [1, 2, 3, 11, 1, 1, 0, 3, 0, 1, 3, 2, 1, 3, 0, 1, 3, 0, 0, 1, 1, 3, 0, 3, 2, 0, 3, 0, 2, 2, 0, 0, 1, 0, 0, 0, 1]
 
-# [1, 2, 10, 11, 2, 1, 0, 3, 0, 1, 3, 1, 0, 3, 0, 1, 3, 0, 0, 1, 1, 3, 1, 3, 2, 0, 3, 0, 2, 1, 2, 0, 1, 0, 1, 0, 1]
+yingtingting = []
+for z in range(num_var+num_room_type+section_num+brace_num+zone_num):
+    rows = sheet1.cell(40*31+2,z+1).value
+    yingtingting.append(rows)
+
+pop2_di=[1, 3, 6, 10, 3, 0, 0, 1, 1, 0, 3, 0, 0, 2, 0, 0, 2, 1, 1, 3, 0, 1, 1, 0, 0, 1, 4, 1, 4, 2, 4, 2, 4, 2, 3, 2, 4, 0, 0,0, 0]
+# [1, 3, 7, 10, 3, 0, 0, 1, 2, 1, 2, 2, 1, 2, 0, 0, 2, 1, 1, 3, 1, 1, 1, 0, 0, 1, 4, 1, 4, 1, 4, 1, 4, 1, 3, 1, 4, 3, 4, 3, 3] 434.89675727999804
+# [1, 3, 6, 10, 3, 0, 0, 1, 1, 0, 3, 0, 0, 2, 0, 0, 2, 1, 1, 3, 0, 1, 1, 0, 0, 1, 4, 1, 4, 2, 4, 2, 4, 2, 3, 2, 4, 0, 0,0, 0] 407.7298540799965
 pop_room1,pop_room_label1=decoding_modular_section([pop2_di])
 pop_room = pop_room1[0]
 pop_room_label = pop_room_label1[0]
 # pop_room = []
 # pop_room_label = []
-# for i in range(24):
+# for i in range(story_num*4):
 #     pop_room.append(10)
 # # pop_room = all_GA_infor[0]
 # for i in range(modular_length_num*2*story_num):
 #     pop_room_label.append(0)
-
-
+#
 
 # #
 # pop_room = np.array(pop_room)
@@ -3106,6 +3111,8 @@ weight1,g_col,g_beam,reaction_all,section_all,all_up_name,all_up_data,Joint_dis,
 #
 X_dis = Joint_dis[0]
 Y_dis = Joint_dis[1]
+for i in range(len(Y_dis)):
+    Y_dis[i]=Y_dis[i]/3000/(i+1)
 X_dis_ave = Joint_dis[2]
 Y_dis_ave = Joint_dis[3]
 X_dis_radio = Joint_dis[4]
@@ -3136,11 +3143,11 @@ word_3th.append(Y_interdis_ave)
 word_3th.append(Y_interdis_radio)
 word_infor.append(word_1th)
 word_infor.append(word_3th)
-
+print(Y_dis)
 num_zero = pop_room_label.count(0)
 nonzero_rate = (len(pop_room_label) - num_zero) / len(pop_room_label)
 res1, res2, gx, gx_demo = Fun_1(weight1,g_col,g_beam,Joint_dis,all_force, 10000, nonzero_rate)
-
+print(gx)
 # yangtingting = [i for i in range(50)]
 # luyiwen = []
 # for i in range(len(yangtingting)):

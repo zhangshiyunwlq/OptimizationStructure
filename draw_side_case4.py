@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import openpyxl
 # import evaluation_DNN as ed
 import pandas as pd
+import numpy as np
+
+
 
 def all_modular_infor():
     node1 = [(0, 0), (6, 0), (6, 6), (0, 6)]
@@ -348,15 +351,18 @@ fit_ini = copy.deepcopy(area)
 luyi = copy.deepcopy(area)
 luyi.sort()
 sort_num = []
+a = np.array(area)
+b = np.argsort(a)
+
 lst = list(range(1, len(fit_ini) + 1))
 list_new = []
 for i in range(len(fit_ini)):
     sort_num.append(fit_ini.index(luyi[i]))
 for i in range(len(fit_ini)):
     list_new.append(lst[sort_num[i]])
-
-num_var = 3
-al_time = 0
+list_new = [0,3,4,5,8,1,2,6,7,9,10,11]
+num_var = 4
+al_time = 2
 #绘制某个pop中的最有个体
 all_in=[139]
 all_indx(all_in)

@@ -18,6 +18,7 @@ from keras.callbacks import EarlyStopping,LearningRateScheduler
 import sys
 import xlsxwriter
 import matplotlib.pyplot as plt
+plt.rc('font',family='Times New Roman')
 #修改区间
 
 # 定义余弦退火学习率调度函数
@@ -473,7 +474,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
 
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=4800, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -484,7 +485,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=4800, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1169,7 +1170,7 @@ def draw_min_pop(all_pop2,fit_pred,fit_truth,memorize_gx_no,memorize_gx):
 
 
 
-def output_data(pop2_all,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,time):
+def output_data(pop2_all,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,gx_pred,gx_truth,time):
     APIPath = os.path.join(os.getcwd(), 'DNN_test_data')
     SpecifyPath = True
     if not os.path.exists(APIPath):
@@ -1221,6 +1222,22 @@ def output_data(pop2_all,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,
         for j in range(len(DNN_prediction_fitness[i])):
             DNN_fit_all.write(loc, j, DNN_prediction_fitness[i][j])
         loc += 1
+
+    gx_pred1 = wb1.add_worksheet('gx_pred')
+    loc = 0
+    for i in range(len(gx_pred)):
+        for j in range(len(gx_pred[i])):
+            gx_pred1.write(loc, j, gx_pred[i][j])
+        loc += 1
+
+    gx_truth1 = wb1.add_worksheet('gx_truth')
+    loc = 0
+    for i in range(len(gx_truth)):
+        for j in range(len(gx_truth[i])):
+            gx_truth1.write(loc, j, gx_truth[i][j])
+        loc += 1
+
+
     wb1.close()
 
 def draw_loss(loss_all):
@@ -1356,7 +1373,15 @@ def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
     ax2 = fig2.add_subplot(111)
     ax2.tick_params(labelsize=40)
     ax2.set_xlabel("Iteration", fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
-    ax2.set_ylabel('fitness', fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    if time ==0:
+        y_name  = f'Normalized g{time+1}'
+    elif time ==5:
+        y_name = f'Normalized weight'
+    elif time ==1:
+        y_name = f'Normalized max(g2,g3)'
+    elif time ==2 or time ==3 or time ==4:
+        y_name = f'Normalized g{time+2}'
+    ax2.set_ylabel(y_name, fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
     ax2.spines['bottom'].set_linewidth(4);  ###设置底部坐标轴的粗细
     ax2.spines['left'].set_linewidth(4)
     ax2.spines['right'].set_color('none')
@@ -1367,9 +1392,10 @@ def draw_gx_chayi2(gx_truth_div,gx_pred_div,time):
     bbb = np.arange(0, len(gx_pred_div[0]))
     ax2.plot(bbb, gx_pred_div[time], linewidth=6, color=color_data[time],linestyle="--",marker='x', markersize=8)
     ax2.plot(bbb, gx_truth_div[time], linewidth=6, color=color_data[time],linestyle="-",marker='o', markersize=8)
-    ax2.set(xlim=(0, len(gx_pred_div[0])),ylim=(0, 1),
-            xticks=np.arange(0, len(gx_pred_div[0]), 10),yticks=np.arange(0, 1, 0.1),
+    ax2.set(xlim=(0, len(gx_pred_div[0])+5), ylim=(0, 1),
+            xticks=np.arange(10, len(gx_pred_div[0])+5, 10),yticks=np.arange(0, 1, 0.1),
                 )
+    ax2.tick_params(labelsize=40, which='major', length=10, width=1)
         # for i in range(7):
         #     x_te = []
         #     for j in range(10):
@@ -1506,8 +1532,8 @@ history_loss = []
 history_mae = []
 DNN_prediction_fitness= []
 POP_SIZE=30
-num_var = 3
-file_time = 5
+num_var = 5
+file_time = 0
 num_continue = 140
 labels = []
 labels1 = []
@@ -1565,11 +1591,22 @@ fit_truth = get_fitness(all_pop2)
 
 sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
 pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
-output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,8)
+
 # #
 ## # #绘制gx差异值0
 gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-draw_gx_chayi2(gx_truth_div,gx_pred_div,2)
+output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,gx_pred_div,gx_truth_div,9)
+draw_gx_chayi2(gx_truth_div,gx_pred_div,0)
+
+path_memo = f"D:\desktop\os\optimization of structure\DNN_test_data\\all_data_8.xlsx"
+gx_pred_all = pd.read_excel(io=path_memo, sheet_name="gx_pred", header=None)
+gx_pred_all = gx_pred_all.values.tolist()
+
+#读取文件进行绘图
+# gx_truth_all = pd.read_excel(io=path_memo, sheet_name="gx_truth", header=None)
+# gx_truth_all = gx_truth_all.values.tolist()
+# draw_gx_chayi2(gx_truth_all,gx_pred_all,5)
+
 # #统计gx分布并绘制
 # gx_dis,gx_num=gx_dietribute(gx_all_read)
 # gx_column(gx_num,0)
