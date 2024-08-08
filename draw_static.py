@@ -122,24 +122,24 @@ def draw_picture(info2,name,title_name):
     ax2.spines['right'].set_color('none')
     ax2.spines['top'].set_color('none')
     info = copy.deepcopy(info2)
-
+    color = ['blue','black','red','orange']
     for i in range(len(info)):
         if name[i] =='GA':
-            co = 'r'
-        elif name[i] =='HIGA':
             co = 'black'
+        elif name[i] =='HIGA':
+            co = 'r'
         elif name[i] == 'HIGA2':
             co = 'blue'
 
         bbb = np.arange(0, len(info[i]))
         ccc = info[i]
-        ax2.plot(bbb, ccc, linewidth=6, color=co)
+        ax2.plot(bbb, ccc, linewidth=3, color=color[i],label=f"Optimization{i+1}",)
         # legend_handles = [plt.Line2D([0], [0], color='red', lw=2,linewidth=20),
         #                   plt.Line2D([0], [0], color='black', lw=2,linewidth=20),
         #                   plt.Line2D([0], [0], color='blue', lw=2, linewidth=20)
         #                   ]
         # legend_labels = ['200*200', '50*50', '100*100']
-        # plt.legend(legend_handles, legend_labels,fontsize=20)
+        plt.legend(fontsize=30)
     ax2.tick_params(labelsize=30, which='major', length=10, width=1)
     ax2.set(xlim=(0, 150), ylim=(0, 1000),
            xticks=np.arange(20, 150, 20),
@@ -382,6 +382,46 @@ def draw_3d_scatter(data_infor,info2):
     # show plot
     plt.show()
 
+def draw_boxplot(data):
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    # 模拟数据
+    # results1 = [250, 300, 350, 260, 320, 340, 270, 310, 360]
+    # results2 = [260, 320, 340, 270, 310, 360, 250, 300, 350]
+    # results3 = [270, 310, 360, 250, 300, 350, 260, 320, 340]
+    # data = [results1, results2, results3]
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # 绘制箱型图
+    ax.boxplot(data, vert=True, patch_artist=True)
+
+    # 设置 y 轴断轴范围
+    ax.set_ylim(0, 450)
+
+    # 在 y 轴上添加断轴标记
+    ax.plot([0.5, 3.5], [200, 200], color='k', linestyle='--', linewidth=0.8)  # 横线
+
+    # 设置 y 轴刻度
+    y_ticks = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450]
+    ax.set_yticks(y_ticks)
+    ax.set_yticklabels(['0', '', '', '', '200', '250', '300', '350', '400', '450'])
+
+    # 在 y 轴上添加断轴线条
+    d = .015  # 标记的大小
+    kwargs = dict(transform=ax.transAxes, color='k', clip_on=False)
+    ax.plot((-d, +d), (200 / 450, 200 / 450 + d), **kwargs)  # 左断轴标记
+    ax.plot((1 - d, 1 + d), (200 / 450, 200 / 450 + d), **kwargs)  # 右断轴标记
+
+    plt.xlabel('Variable')
+    plt.ylabel('Results')
+    plt.title('Box Plot with Broken Axis')
+    plt.xticks([1, 2, 3], ['Var1', 'Var2', 'Var3'])
+
+    plt.show()
+
+
 # data_info = [[100,2,0],[100,3,0],[100,3,1],[100,4,0],[100,4,1],[100,5,0],[100,5,1],[100,6,0],[100,6,1],[100,6,2],[100,6,3],[100,6,4],[100,7,0],[100,8,0],[100,8,1],[100,8,2],[100,9,0],[100,9,1],[100,9,2],[100,10,0],[100,10,1]]
 # infor_all = get_info(data_info)
 # infor_name = ['2_0','3_0','3_1','4_0','4_1','5_0','5_1','6_0','6_1','6_2','6_3','6_4','7_0','8_0','8_1','8_2','9_0','9_1','9_2','10_0','10_1']
@@ -406,14 +446,15 @@ modular_num = 3
 #四种模块变截面
 # data_info = [[140,2,0,4],[140,3,0,4],[140,4,2,4],[140,5,1,4]]
 #三种模块变截面
-# data_info = [[140,2,1,3],[140,3,5,3],[140,5,19,3],[140,4,0,3]]
+# data_info = [[140,2,1,3],[140,2,0,3],[140,3,5,3],[140,3,4,3],[140,3,6,3],[140,5,19,3],[140,5,21,3],[140,5,0,3],[140,4,0,3],[140,4,1,3]]
 #四种截面变模块
-data_info = [[140,4,0,3],[140,4,2,4],[140,4,3,2],[140,4,0,5]]
+# data_info = [[140,4,0,3],[140,4,2,4],[140,4,3,2],[140,4,0,5]]
 
 # data_info = [[140,2,1,3],[140,5,19,3],[140,4,0,3],[140,4,0,3],[140,4,1,2],[140,3,0,2]]
 # data_info = [[140,4,0,4],[140,2,7,4],[140,5,7,4]]
-# data_info = [[140,5,1,4]]
-infor_name = ['GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
+
+data_info = [[140,2,0,3],[140,3,5,3],[140,4,1,3],[140,5,19,3]]
+infor_name = ['GA','GA','GA','GA','HIGA','HIGA','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','9-6','50*50','50*50','50*50','100*100','100*100']
 
 infor_all = get_info(data_info)
 
@@ -421,12 +462,12 @@ infor_all = get_info(data_info)
 #普通遗传算法
 title_name = 'Fitness'
 
-# draw_picture(infor_all,infor_name,title_name)
+draw_picture(infor_all,infor_name,title_name)
 # draw_picture3(infor_all,infor_name,title_name)
 #绘制截面与总重散点
 # draw_plot_picture(infor_all,data_info)
 #绘制模块与总重散点
-draw_plot_picture_modular(infor_all,data_info)
+# draw_plot_picture_modular(infor_all,data_info)
 
 # draw_3d_scatter(data_info,infor_all)
 #绘制连续跑的曲线
@@ -434,3 +475,6 @@ draw_plot_picture_modular(infor_all,data_info)
 # infor_all = get_info_continue(data_info)
 #
 # draw_picture_continue(infor_all,infor_name,title_name,length)
+
+
+

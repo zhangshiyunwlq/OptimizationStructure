@@ -55,15 +55,19 @@ va5，mo2,time1,result 421，0.001，epoch 1200，运行后第六次
 
 
 三种模块变截面
-va2，mo3,time1,result 459.83，0.001，epoch 1200，运行后第六次
-va2，mo3,time0,result 445.3631,l2，0.001，epoch 200
-va3，mo3,time5,result 445.36，0.001，epoch 2400，运行后第六次
-va3，mo3,time4,result 451，0.001，epoch 1200，运行后第六次
-va4，mo3,time0,result 436.72，0.001，epoch 1200，运行后第六次
-va4，mo3,time1,result 426.23，0.001，epoch 1200，运行后第六次
-va5，mo3,time19,result 392.55，0.001，epoch 1200，运行后第六次
-va5，mo3,time0,result 395，0.001，epoch 1200，运行后第六次
-va5，mo3,time21,result 420，0.001，epoch 1200，运行后第六次
+Optimization1 va2，mo3,time1,result 459.83，0.001，epoch 1200，运行后第六次
+Optimization2 va2，mo3,time0,result 445.3631,l2，0.001，epoch 200
+Optimization3 va2，mo3,time5,result 486.18,l2，0.001，epoch 200
+Optimization4 va3，mo3,time5,result 445.36，0.001，epoch 2400，运行后第六次
+Optimization5 va3，mo3,time4,result 451.19，0.001，epoch 1200，运行后第六次
+Optimization6 va3，mo3,time6,result 446，0.001，epoch 1200，运行后第六次
+Optimization7 va4，mo3,time0,result 436.72，0.001，epoch 1200，运行后第六次
+Optimization8 va4，mo3,time1,result 426.23，0.001，epoch 1200，运行后第六次
+Optimization9 va4，mo3,time2,result 429.22，0.001，epoch 1200，运行后第六次
+Optimization10 va5，mo3,time19,result 392.55，0.001，epoch 1200，运行后第六次
+Optimization11 va5，mo3,time0,result 395.39，0.001，epoch 1200，运行后第六次
+Optimization12 va5，mo3,time21,result 420.51，0.001，epoch 1200，运行后第六次
+
 四种模块变截面
 va2，mo4,time0,result 477.34，0.001，epoch 1200，运行后第六次
 va3，mo4,time0,result 447.47，0.001，epoch 1200，运行后第六次
@@ -71,6 +75,15 @@ va4，mo4,time0,result 479，0.001，epoch 1200，运行后第六次
 va4，mo4,time2,result 428.97，0.001，epoch 1200，运行后第六次
 va5，mo4,time1,result 405.91，0.001，epoch 1200，运行后第六次
 
+百分比：
+
+va4，mo4,time6,result 550.43，0.001，epoch 1200，运行后第六次 0.2
+va4，mo4,time8,result 627.09，0.001，epoch 1200，运行后第六次 0.2
+va4，mo4,time5,result 530.36，0.001，epoch 1200，运行后第六次 0.2
+va4，mo4,time0,result 479，0.001，epoch 1200，运行后第六次    0.4
+va4，mo4,time1,result 456.03，0.001，epoch 1200，运行后第六次    0.4
+va4，mo4,time3,result 413.40，0.001，epoch 1200，运行后第六次 0.6
+va4，mo4,time9,result 388.94，0.001，epoch 1200，运行后第六次 0.6
 
 
 三种截面变模块

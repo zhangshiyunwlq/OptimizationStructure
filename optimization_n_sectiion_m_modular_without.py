@@ -11,7 +11,6 @@ import os
 import pandas as pd
 import sys
 import xlrd
-import tensorflow as tf
 import matplotlib.pyplot as plt
 import data_to_json as dj
 import modular_utils as md
@@ -24,12 +23,11 @@ import xlsxwriter
 import csv
 import openpyxl
 import pickle
-import time
 from CNN import create_model
 from keras.callbacks import EarlyStopping,LearningRateScheduler
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 '''
-功能：指定n种截面，m种模块然后整栋建筑的的模块都随机使用指定的模块，优化算法为HIGA,案例为case4
+功能：指定n种截面，不限制模块然后整栋建筑的的模块都随机使用指定的截面，优化算法为HIGA,案例为case4
 
 '''
 
@@ -38,7 +36,7 @@ def cosine_annealing(epoch, T_max, eta_min=0, eta_max=0.001):
     return lr
 
 
-def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight,time1):
+def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fitness,pop_all_weight,time):
     APIPath = os.path.join(os.getcwd(), 'out_all_infor_case4')
     SpecifyPath = True
     if not os.path.exists(APIPath):
@@ -47,7 +45,7 @@ def out_put_result(pop1_all,pop2_all,pop3_all,fitness_all,weight_all,pop_all_fit
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'run_infor_{num_var}_{modular_num}_{time1}')
+    path1 = os.path.join(APIPath, f'run_infor_{num_var}_{modular_num}_{time}')
 
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
@@ -128,7 +126,7 @@ def out_put_pred_truth_data(pop_pred,fit_pred,fit_truth,gx_pred,gx_truth):
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'prediction_truth_{num_var}_{modular_num}_{time1}')
+    path1 = os.path.join(APIPath, f'prediction_truth_{num_var}_{modular_num}_{time}')
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
     pop_pred_write = wb1.add_worksheet('pop_pred')
@@ -177,7 +175,7 @@ def out_put_fitness_prediction(DNN_fit_pred):
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'prediction_fitness_{num_var}_{modular_num}_{time1}')
+    path1 = os.path.join(APIPath, f'prediction_fitness_{num_var}_{modular_num}_{time}')
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
     fit_pred = wb1.add_worksheet(f'DNN_fitness')
     loc = 0
@@ -198,7 +196,7 @@ def out_put_prediction_gx(gx_all,time_pr):
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'prediction_infor_{num_var}_{modular_num}_{time1}')
+    path1 = os.path.join(APIPath, f'prediction_infor_{num_var}_{modular_num}_{time}')
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
@@ -221,7 +219,7 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
         except OSError:
             pass
 
-    path1 = os.path.join(APIPath, f'memorize_infor_{num_var}_{modular_num}_{time1}')
+    path1 = os.path.join(APIPath, f'memorize_infor_{num_var}_{modular_num}_{time}')
 
     wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
 
@@ -300,7 +298,7 @@ def out_put_memorize(memorize_pool,memorize_fit,memorize_weight,memorize_gx,memo
 
     wb1.close()
 
-def draw_loss(num_var,time1):
+def draw_loss(num_var,time):
     fig = plt.figure(1)
     ax1 = fig.add_subplot()
     dev_x = np.arange(0, len(history_loss))
@@ -315,7 +313,7 @@ def draw_loss(num_var,time1):
             os.makedirs(APIPath)
         except OSError:
             pass
-    path1 = os.path.join(APIPath, f'loss{num_var}_{time1}')
+    path1 = os.path.join(APIPath, f'loss{num_var}_{time}')
     ax1.plot(dev_x, dev_y)
     plt.savefig(path1, dpi=300)
     plt.close()
@@ -324,7 +322,7 @@ def draw_loss(num_var,time1):
     ax2 = fig2.add_subplot()
     ax2.set_xlabel("Epoch",fontsize=10)
     ax2.set_ylabel("Mae", fontsize=10)
-    path1 = os.path.join(APIPath, f'mae{num_var}_{time1}')
+    path1 = os.path.join(APIPath, f'mae{num_var}_{time}')
     dev_x = np.arange(0, len(history_loss))
     dev_y = history_mae
     ax2.plot(dev_x, dev_y)
@@ -350,7 +348,7 @@ def generate_coding_modular_section(x):
 
     room_nu = np.linspace(1, 3, 3)
 
-    pop = np.zeros((POP_SIZE,num_var+num_room_type+section_num+brace_num+zone_num))
+    pop = np.zeros((POP_SIZE,num_var+num_room_type+section_code+brace_code))
     for i in range(len(pop)):
         sec = list(map(int, random.sample(x.tolist(), num_var)))
         sec.sort()
@@ -360,13 +358,11 @@ def generate_coding_modular_section(x):
         for j in range(num_var,num_var+num_room_type):
             pop[i][j] = random.randint(1,3)
 
-        for j in range(num_var+num_room_type,num_var+num_room_type+section_num):
+        for j in range(num_var+num_room_type,num_var+num_room_type+section_code):
             pop[i][j] = random.randint(0,num_var-1)
 
-        for j in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
+        for j in range(num_var+num_room_type+section_code,num_var+num_room_type+section_code+brace_code):
             pop[i][j] = randint(0,1)
-        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
-            pop[i][j] = randint(0,modular_num-1)
 
     return pop
 
@@ -376,54 +372,37 @@ def decoding_modular_section(pop2):
     modular_type1 = [i for i in range(3)]
     #生成对每个模块的截面编号索引
     modular_type_all= []
-    for i in range(modular_num):
+    for i in range(zone_num):
         modular_type_temp = []
         for j in range(len(modular_type1)):
             modular_type_temp.append(num_var+num_room_type+modular_type1[j]+3*i)
         modular_type_all.append(modular_type_temp)
 
 
-    #提取截面表
-    pop1_all = []
-    for i in range(len(pop_all)):
-        pop1_section = []
-        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
-            for z in range(3):
-                sec = int(pop_all[i][j])
-                pop1_section.append(pop_all[i][int(modular_type_all[sec][z])])
-        pop1_all.append(pop1_section)
-
     #解码pop1_1all
-    pop1_decoding = []
-    for i in range(len(pop1_all)):
-        pop1_temp = []
-        for j in range(len(pop1_all[i])):
-            pop1_temp.append(pop_all[i][int(pop1_all[i][j])])
-        pop1_decoding.append(pop1_temp)
+    pop1_code = pop_all[:,num_var+num_room_type:num_var+num_room_type+section_code]
+
+    for i in range(len(pop1_code)):
+        for j in range(len(pop1_code[0])):
+            pop1_code[i][j]=pop_all[i][int(pop1_code[i][j])]
+    pop1_code=pop1_code.tolist()
 
 
     #生成支撑表
-    brace_sort = [i for i in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num)]
-    pop3_all = []
-    for i in range(len(pop_all)):
-        pop3_brace = []
-        for j in range(num_var+num_room_type+section_num+brace_num,num_var+num_room_type+section_num+brace_num+zone_num):
-            bra = int(pop_all[i][j])
-            if pop_all[i][int(brace_sort[bra])] ==0:
-                pop3_brace.append(0)
-            else:
-                pop3_brace.append(pop_all[i][num_var])
-        pop3_all.append(pop3_brace)
-    pop_3 =[]
-    for j in range(len(pop_all)):
-        temp2 = pop3_all[j]
-        brace_all = []
-        for i in range(len(labels)):
-            temp1 = int(labels[i])
-            brace_all.append(temp2[temp1])
-        pop_3.append(brace_all)
+    brace_sort = pop_all[:,num_var+num_room_type+section_code:num_var+num_room_type+section_code+brace_code]
+    for i in range(len(brace_sort)):
+        for j in range(len(brace_sort[0])):
+            if brace_sort[i][j]!=0:
+                brace_sort[i][j] = pop_all[i][num_var]
 
-    return pop1_decoding,pop_3
+    pop_3 =[]
+    for i in range(len(pop_all)):
+        temp = []
+        for j in range(len(labels)):
+            temp.append(brace_sort[i][int(labels[j])])
+        pop_3.append(temp)
+
+    return pop1_code,pop_3
 
 def mulit_Sap_analy_allroom(ModelPath,mySapObject, SapModel,pop_room,pop_room_label):
     # 建立房间信息
@@ -813,16 +792,12 @@ def mutation_1_stort_modular_section(num_room_type,num_var,child,MUTATION_RATE):
     for j in range(num_var,num_var+num_room_type):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(1,3)
-    for j in range(num_var+num_room_type,num_var+num_room_type+section_num):
+    for j in range(num_var+num_room_type,num_var+num_room_type+section_code):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,num_var-1)
-    for j in range(num_var+num_room_type+section_num,num_var+num_room_type+section_num+brace_num):
+    for j in range(num_var+num_room_type+section_code,num_var+num_room_type+section_code+brace_code):
         if np.random.rand() < MUTATION_RATE:
             child[j] = randint(0,1)
-    for j in range(num_var + num_room_type + section_num+ brace_num, num_var + num_room_type + section_num + brace_num+zone_num):
-        if np.random.rand() < MUTATION_RATE:
-            child[j] = randint(0, modular_num-1)
-            # child[j] = 0
 
 
 def generation_population_modular_section(best_indivi,rate):
@@ -846,20 +821,14 @@ def generation_population_modular_section(best_indivi,rate):
                 pop[i][j] = randint(1, 3)
             else:
                 pop[i][j] = best_in[j]
-        for j in range(num_var + num_room_type, num_var + num_room_type + section_num):
+        for j in range(num_var + num_room_type, num_var + num_room_type + section_code):
             if np.random.rand() < 0.25:
                 pop[i][j] = randint(0, num_var - 1)
             else:
                 pop[i][j] = best_in[j]
-        for j in range(num_var + num_room_type + section_num, num_var + num_room_type + section_num + brace_num):
+        for j in range(num_var + num_room_type + section_code, num_var + num_room_type + section_code + brace_code):
             if np.random.rand() < 0.25:
                 pop[i][j] = randint(0, 1)
-            else:
-                pop[i][j] = best_in[j]
-        for j in range(num_var + num_room_type + section_num + brace_num,
-                       num_var + num_room_type + section_num + brace_num + zone_num):
-            if np.random.rand() < 0.25:
-                pop[i][j] = randint(0, modular_num - 1)
             else:
                 pop[i][j] = best_in[j]
 
@@ -994,7 +963,6 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j] <= 600 and gx_demo[i][j] >= 0:
                     gx_demo[i][j] = gx_demo[i][j] / 600
     return gx_demo
-
 # def crossover_and_mutation_GA_for_DNN(pop2,num_var,CROSSOVER_RATE,MUTATION_RATE):
 #     pop = pop2
 #
@@ -1093,7 +1061,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
 
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=2400, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -1104,7 +1072,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=2400, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -1128,7 +1096,7 @@ def DNN_GA(num_var,num_room_type,num_ind,best_indivi,run_time,model):
     pop_best = np.array(pop_best)
     return pop_best,model,fitness_best
 
-def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time1):
+def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_coding_modular_section(x)
     pop_decoe_1 = copy.deepcopy(pop2)
     pop1,pop3 = decoding_modular_section(pop2)
@@ -1152,10 +1120,7 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     all_pred = []
     global gx_truth
     global gx_truth_temp
-
     model = create_model(len(pop2[0]), 6)
-    start = time.time()
-    test_time = 0
     for run_time in range(N_GENERATIONS):
         pop_zhongqun_all.append(pop1)
         pop_zhongqun_all_2.append(pop2)
@@ -1193,12 +1158,8 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         # 引入新个体
         run_time +=1
         if run_time % window_step_num == 0:
-            end = time.time()
-            test_time +=1
-            print(f'第{test_time}次sap运算时间{end-start}')
             pop2_new,model,fitness_best = DNN_GA(num_var,num_room_type,int(1 * len(pop2)),pop2[0],400,model)
-            end = time.time()
-            print(f'第{test_time}次DNN运算时间{end-start}')
+
             exchange_num = int(1*len(pop2))
             # for ex_num in range(exchange_num):
             #     pop2[len(pop2) - 1 - ex_num] = pop2_new[ex_num]
@@ -1252,9 +1213,9 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
     out_put_prediction_gx(all_pred, predict_time)
     # gx_truth.extend(gx_te1)
 
-    # file_name = f'DNN_model_{num_var}_{modular_num}_{time1}.pkl'
-    # with open(file_name, 'wb') as file:
-    #     pickle.dump(model, file)
+    file_name = f'DNN_model_{num_var}_{modular_num}_{time}.pkl'
+    with open(file_name, 'wb') as file:
+        pickle.dump(model, file)
 
     for i in range(len(mySapObject_name)):
         ret = mySapObject_name[i].ApplicationExit(False)
@@ -1262,13 +1223,13 @@ def GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num
         mySapObject_name[i] = None
 
 
-    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time1)
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
     out_put_fitness_prediction(DNN_prediction_fitness)
 
 
     return pop_zhongqun_all,pop_zhongqun_all_2,pop_zhongqun_all_3,fitness_prediction,model
 #GA算法
-def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time1):
+def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time):
     pop2= generate_coding_modular_section(x)
     pop_decoe_1 = copy.deepcopy(pop2)
     pop1,pop3 = decoding_modular_section(pop2)
@@ -1344,7 +1305,7 @@ def GA_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_roo
         mySapObject_name[i] = None
 
 
-    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time1)
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
 
 
 
@@ -1549,7 +1510,7 @@ def get_continue_data(file_time,num_continue):
     fitness_best = fitness_pool_all[num_continue - 1][0]
     return pop2_best,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num
 #续跑算法
-def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time1,N1,N2,best_individual):
+def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time,N1,N2,best_individual):
     file_name = f'DNN_model_{num_var}_{modular_num}_{pass_time}.pkl'
 
     with open(file_name, 'rb') as f:
@@ -1660,7 +1621,7 @@ def continue_DNN_GA(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_ro
         mySapObject_name[i] = None
 
 
-    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time1)
+    out_put_result(pop_zhongqun_all, pop_zhongqun_all_2, pop_zhongqun_all_3,min_ru,weight_min,pop_all_fitness,pop_all_weight,time)
     out_put_fitness_prediction(DNN_prediction_fitness)
 
 
@@ -1675,13 +1636,13 @@ modular_length_num = 8
 modular_dis = 400
 corridor_width = 4000
 story_num = 12
-story_zone = 4#每组模块的分区数量
-story_group = 3#每组模块的楼层数
-modular_num = 4#整个建筑的模块种类
+story_zone = 1#每组模块的分区数量
+story_group = 2#每组模块的楼层数
+modular_num = 3#整个建筑的模块种类
 
 zone_num = int(story_num / story_group * story_zone)
-section_num = 3 * modular_num
-brace_num = modular_num
+section_code = 3 * zone_num
+brace_code = zone_num
 group_num = int(story_num / story_group)
 modular_all = modular_length_num * 2 *story_num
 
@@ -1759,20 +1720,14 @@ gx_truth_temp=[]#暂时存储真实的temp
 
 
 labels = []
-labels1 = []
-for i in range(group_num):
-    temp = []
-    for j in range(story_zone):
-        for z in range(int(modular_length_num/story_zone)):
-            temp.append(i*story_zone+j)
-    for j in range(2*story_group):
-        labels.extend(temp)
-        labels1.append(temp)
+for i in range(int(story_num/2)):
+    for j in range(modular_length_num*4):
+        labels.append(i)
 
 
-brace_rate = 0.6
+brace_rate = 0.4
 for num_var in [4]:
-    for time1 in range(9,10):
+    for time in range(2,3):
         memorize_pool = []
         memorize_fit = []
         memorize_weight = []
@@ -1794,25 +1749,23 @@ for num_var in [4]:
         history_mae = []
         DNN_prediction_fitness = []
         mySapObject_name, ModelPath_name, SapModel_name =mulit_get_sap(num_thread)
-        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time1)
+        # zhan,jia,qi=run(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         #跑HIGA用
-        zhan, jia, qi,fitness_prediction,model = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time1)
+        zhan, jia, qi,fitness_prediction,model = GA_DNN_run_modular(ModelPath_name,mySapObject_name,SapModel_name,num_var,num_room_type,x,labels,time)
         out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
                          memorize_gx_nor, memorize_num, fitness_prediction)
 
         out_put_pred_truth_data(pop_pred,fit_pred,fit_truth,gx_pred,gx_truth)
         #跑GA用
         # zhan, jia, qi = GA_run_modular(ModelPath_name, mySapObject_name, SapModel_name, num_var,
-        #                                                    num_room_type, x, labels, time1)
+        #                                                    num_room_type, x, labels, time)
         #续跑HIGA用
         # pass_time = 1
         # best_individual,memorize_pool,memorize_fit,memorize_weight,memorize_gx,gx_prediction,memorize_loss,memorize_mae,memorize_gx_nor,memorize_num = get_continue_data(1,140)
-        # zhan, jia, qi,fitness_prediction = continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time1, 140,
+        # zhan, jia, qi,fitness_prediction = continue_DNN_GA(ModelPath_name, mySapObject_name, SapModel_name, num_var, num_room_type, x, labels, time, 140,
         #                 221,np.array(best_individual))
         # out_put_memorize(memorize_pool, memorize_fit, memorize_weight, memorize_gx, history_loss, history_mae,
         #                  memorize_gx_nor, memorize_num, fitness_prediction)
         # out_put_pred_truth_data(pop_pred, fit_pred, fit_truth, gx_pred, gx_truth)
-        # draw_loss(num_var, time1)
+        # draw_loss(num_var, time)
         gc.collect()
-        del model
-

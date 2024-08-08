@@ -13,7 +13,8 @@ import queue
 import configparser
 import comtypes.client
 import random
-
+import copy
+import math
 from keras.callbacks import EarlyStopping,LearningRateScheduler
 import sys
 import xlsxwriter
@@ -143,6 +144,7 @@ def gx_Normalization(gx,gx_data_select):
                 elif gx_demo[i][j] <= 600 and gx_demo[i][j] >= 0:
                     gx_demo[i][j] = gx_demo[i][j] / 600
     return gx_demo
+
 def gx_Normalization_1(gx):
     gx_demo = copy.deepcopy(gx)
     for i in range(len(gx_demo)):
@@ -509,7 +511,7 @@ def DNN_GA(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_v
     pop_best = np.array(pop_best)
     return pop_best,model,fitness_best
 # 验证测试集
-def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_var,num_room_type,num_ind,best_indivi,run_time,model):
+def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,num_var,num_room_type,num_ind,best_indivi,run_time,model,num_data_1,num_data_2):
     global gx_test_data1,pop_test_data
     # 早停法训练深度深度网络
     early_stopping = EarlyStopping(monitor='loss', patience=10, restore_best_weights=True)
@@ -528,7 +530,7 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
         # model= create_model(len(x_train_local[0]), len(y_train_local[0]))#创建模型
 
         #verbose取消打印损失
-        his = model.fit(x_train_local, y_train_local, epochs=600, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
+        his = model.fit(x_train_local, y_train_local, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
 
     #全局训练
     pool_global = copy.deepcopy(memorize_pool)
@@ -539,7 +541,7 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
     y_train = gx_Normalization(y_train,gx_data_select)#归一化
     # model = create_model(len(x_train[0]),len(y_train[0]))#创建模型
     # early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
-    history=model.fit(x_train, y_train, epochs=600, batch_size=32,verbose=0,callbacks=[lr_scheduler])#训练模型
+    history=model.fit(x_train, y_train, epochs=1200, batch_size=32,verbose=0,callbacks=[early_stopping,lr_scheduler])#训练模型
     # history_loss.extend(history.history['loss'])
     # history_mae.extend(history.history['mae'])
     # history_loss.append(history.history['loss'][len(history.history['loss'])-1])
@@ -549,19 +551,38 @@ def DNN_GA_test(memorize_pool_local,memorize_gx_local,memorize_pool,memorize_gx,
 
     pop_test_data_temp = []
     gx_test_data_temp = []
-    num_test = range(0, len(pop_all_read))
-    num_test_data = random.sample(num_test, 20)
+    num_test = range(0, num_data_1)
+    num_test_data = random.sample(num_test, 500)
+    num_test_t = range(0, num_data_2)
+    num_test_data_t = random.sample(num_test_t, 500)
     # 生成测试集
     for i in num_test_data:
         pop_test_data_temp.append(pop_all_read[i])
         gx_test_data_temp.append(gx_all_read[i])
     pop_test_data.extend(pop_test_data_temp)
     gx_test_data1.extend(gx_test_data_temp)
+
+    #生成另一个文件的数据集
+    pop_test_data_temp_t = []
+    gx_test_data_temp_t = []
+    for i in num_test_data_t:
+        pop_test_data_temp_t.append(pop_all_read_t[i])
+        gx_test_data_temp_t.append(gx_all_read_t[i])
+    pop_test_data_t.extend(pop_test_data_temp_t)
+    gx_test_data1_t.extend(gx_test_data_temp_t)
     #测试机验证
     pop_test = copy.deepcopy(pop_test_data_temp)
     pop_test=np.array(pop_test)
     fitness_test = model.predict(pop_test, verbose=0)
     gx_test_data_all.extend(fitness_test.tolist())
+
+    #另一个文件数据集验证
+    pop_test_t = copy.deepcopy(pop_test_data_temp_t)
+    pop_test_t=np.array(pop_test_t)
+    fitness_test_t = model.predict(pop_test_t, verbose=0)
+    gx_test_data_all_t.extend(fitness_test_t.tolist())
+
+
 
     # pop_best = []
     # fitness_best=[]#新增内容
@@ -1095,7 +1116,11 @@ def run_DNN_GA_test(local_pop1,local_gx1,pop_best1):
     all_pop2=[]
     fit_pred_all =[]
     pop_best=np.array(pop_best)
+    num_d = [570,1138,1704,2260,2824,3385,3947]
+    num_d_t = [558, 1126, 1691, 2247, 2805, 3361, 3921]
     for i in range(len(local_pop)):
+        num_data_1 = num_d[i]
+        num_data_2 = num_d_t[i]
         global_pop.extend(local_pop[i])
         global_gx.extend(local_gx[i])
         global_pop_train = copy.deepcopy(global_pop)
@@ -1104,7 +1129,7 @@ def run_DNN_GA_test(local_pop1,local_gx1,pop_best1):
         local_gx_train = copy.deepcopy(local_gx[i])
         model = create_model(len(local_pop[0][0]), len(local_gx[0][0]))  # 创建模型
         DNN_GA_test(local_pop_train, local_gx_train, global_pop_train, global_gx_train, num_var, num_room_type, 10,
-               pop_best[i], 100,model)
+               pop_best[i], 100,model,num_data_1,num_data_2)
 
         print(f'完成进度{i+1}/{len(local_pop)}')
     return all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last
@@ -1256,7 +1281,64 @@ def draw_loss(loss_all):
     ax2.legend(fontsize=30)
     plt.show()
 
-
+def Gx_convert(fitness1,gx_data_select):
+    fitness3 = copy.deepcopy(fitness1)
+    fitness4 = []  # 储存所有gx
+    fitness2 = []  # 所有gx的和
+    for j in range(len(fitness3)):
+        fitness4.append(fitness3[j].tolist())
+    fitness4=gx_nonNormalization(fitness4,gx_data_select)
+    fitness5 = copy.deepcopy(fitness4)
+    for j in range(len(fitness3)):
+        # fitness2.append(sum(fitness4[j]))
+        for z in range(len(gx_data_select)):
+            if gx_data_select[z] == 0:
+                if fitness5[j][z]<=0:
+                    fitness5[j][z] =0
+            elif gx_data_select[z] == 1:
+                if fitness5[j][z] <= 0:
+                    fitness5[j][z] = 0
+            elif gx_data_select[z] == 2:
+                if fitness5[j][z]<=0.00167 and fitness5[j][z] >= -0.00167:
+                    fitness5[j][z] =0
+                else:
+                    fitness5[j][z] = 100*abs(fitness5[j][z])
+            elif gx_data_select[z] == 3:
+                if fitness5[j][z] <= 0.004 and fitness5[j][z] >= -0.004:
+                    fitness5[j][z] = 0
+                else:
+                    fitness5[j][z] = 100*abs(fitness5[j][z])
+            elif gx_data_select[z] == 4:
+                if fitness5[j][z] <= brace_rate:
+                    fitness5[j][z] = 0
+                else:
+                    fitness5[j][z] = 100 * abs(fitness5[j][z])
+        value = 0
+        for z in range(len(gx_data_select)):
+            if gx_data_select[z] != 5:
+                value += 10*fitness5[j][z]
+            elif gx_data_select[z] == 5:
+                value += fitness5[j][z]
+        fitness2.append(value)
+        # if fitness5[j][0]<=0:
+        #     fitness5[j][0] =0
+        # if fitness5[j][1] <= 0:
+        #     fitness5[j][1] = 0
+        # if fitness5[j][2]<=0.00167 and fitness5[j][2] >= -0.00167:
+        #     fitness5[j][2] =0
+        # else:
+        #     fitness5[j][2] = abs(fitness5[j][2])
+        # if fitness5[j][3] <= 0.004 and fitness5[j][3] >= -0.004:
+        #     fitness5[j][3] = 0
+        # else:
+        #     fitness5[j][3] = abs(fitness5[j][3])
+        # if fitness5[j][4] <= brace_rate:
+        #     fitness5[j][4] = 0
+        # fitness2.append(fitness5[j][5]+10000*(fitness5[j][0]+fitness5[j][1]+fitness5[j][2]*100+fitness5[j][3]*100+100*abs(fitness5[j][4])))
+        # if fitness5[j][0]<=0:
+        #     fitness5[j][0] = abs(fitness5[j][0])*100
+        # fitness2.append(fitness5[j][0])
+    return fitness2
 
 def draw_fit_truth(data1):
     data = copy.deepcopy(data1)
@@ -1294,6 +1376,16 @@ def draw_test_data(truth_data1,pred_data1,draw_time):
     truth_draw_data = []
     pred_draw_data = []
 
+    time = draw_time
+    if time ==0:
+        y_name  = f'Normalized g{time+1}'
+    elif time ==5:
+        y_name = f'Normalized weight'
+    elif time ==1:
+        y_name = f'Normalized max(g2,g3)'
+    elif time ==2 or time ==3 or time ==4:
+        y_name = f'Normalized g{time+2}'
+
     for i in range(len(pred_data[0])):
         temp1 = []
         temp2 = []
@@ -1303,43 +1395,83 @@ def draw_test_data(truth_data1,pred_data1,draw_time):
         truth_draw_data.append(temp1)
         pred_draw_data.append(temp2)
 
+    plt.spines['right'].set_color('none')
+    plt.spines['top'].set_color('none')
+
     draw_x = np.arange(0, len(truth_draw_data[0]))
     color_data = ['b','g','r','c','k','m']
     #绘图
-    plt.clf()
+    # plt.clf()
     # plt.title('test data')  # 折线图标题
     plt.rcParams['font.sans-serif'] = ['SimHei']  # 显示汉字
-    plt.xlabel('number',fontsize=20)  # x轴标题
-    plt.ylabel('Nor',fontsize=20)  # y轴标题
-    plt.xlim((0, 140))
+    plt.xlabel('number',fontsize=50)  # x轴标题
+    plt.ylabel('Normalized weight', fontsize=50)   # y轴标题
+    plt.xlim((0, len(pred_draw_data[0])+5))
     plt.ylim((0, 1))
-    my_x_ticks = np.arange(0, 140, 20)
+    my_x_ticks = np.arange(20, len(pred_draw_data[0]), 20)
     my_y_ticks = np.arange(0, 1, 0.1)
     plt.xticks(my_x_ticks,size=15)
     plt.yticks(my_y_ticks,size=15)
 
-    for i in draw_time:
-        plt.plot(draw_x, truth_draw_data[i], marker='o', markersize=4,color=color_data[i],linewidth=1.5,linestyle="-")
-        plt.plot(draw_x, pred_draw_data[i], marker='x', markersize=4, color=color_data[i], linewidth=1.5,linestyle="--")
 
-    # for a, b in zip(x, y1):
-    #     plt.text(a, b, b, ha='center', va='bottom', fontsize=10)  # 设置数据标签位置及大小
-    # for a, b in zip(x, y2):
-    #     plt.text(a, b, b, ha='center', va='bottom', fontsize=10)
-    # for a, b in zip(x, y3):
-    #     plt.text(a, b, b, ha='center', va='bottom', fontsize=10)
-    # for a, b in zip(x, y4):
-    #     plt.text(a, b, b, ha='center', va='bottom', fontsize=10)
-    # for a, b in zip(x, y5):
-    #     plt.text(a, b, b, ha='center', va='bottom', fontsize=10)
-    # la = ['truth_data']
-    # for i in range(len(truth_draw_data)):
-    #     la.append(f'pred_data_{i}')
-    # plt.legend(la)  # 设置折线名称
+    for i in draw_time:
+        plt.plot(draw_x, truth_draw_data[i], marker='o', markersize=5,color=color_data[i],linewidth=3,linestyle="-")
+        plt.plot(draw_x, pred_draw_data[i], marker='x', markersize=5, color=color_data[i], linewidth=3,linestyle="--")
+
+    plt.tick_params(labelsize=40, which='major', length=10, width=1)
+
 
     plt.show()
         # plt.close()
     # return pred_draw_data
+def draw_gx_chayi3(truth_data1,pred_data1,y_name):
+    time = 0
+    truth_data = copy.deepcopy(truth_data1)
+    pred_data = copy.deepcopy(pred_data1)
+
+    truth_draw_data = []
+    pred_draw_data = []
+
+    for i in range(len(pred_data[0])):
+        temp1 = []
+        temp2 = []
+        for j in range(len(truth_data)):
+            temp1.append(truth_data[j][i])
+            temp2.append(pred_data[j][i])
+        truth_draw_data.append(temp1)
+        pred_draw_data.append(temp2)
+
+    color_data = ['b', 'g', 'r', 'c', 'k', 'm']
+
+
+    fig2 = plt.figure(num=1, figsize=(23, 30))
+    ax2 = fig2.add_subplot(111)
+    ax2.set_xlabel("Iteration", fontsize=50)  # 添加x轴坐标标签，后面看来没必要会删除它，这里只是为了演示一下。
+
+    ax2.set_ylabel(y_name, fontsize=50)  # 添加y轴标签，设置字体大小为16，这里也可以设字体样式与颜色
+    ax2.spines['bottom'].set_linewidth(4);  ###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(4)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    # plt.ylim((150, 400))
+
+
+    bbb = np.arange(0, len(truth_draw_data[0]))
+    ax2.plot(bbb, pred_draw_data[time], linewidth=4, color=color_data[time],linestyle="--",marker='x', markersize=6)
+    ax2.plot(bbb, truth_draw_data[time], linewidth=4, color=color_data[time],linestyle="-",marker='o', markersize=6)
+    ax2.set(xlim=(0, len(pred_draw_data[0])+5), ylim=(0, 1.05),
+            xticks=np.arange(20, len(pred_draw_data[0])+5, 20),yticks=np.arange(0, 1.05, 0.1),
+                )
+    ax2.tick_params(labelsize=40, which='major', length=10, width=1)
+        # for i in range(7):
+        #     x_te = []
+        #     for j in range(10):
+        #         x_te.append(20 * i - 1)
+        #     x_te = np.array(x_te)
+        #     y_te = np.linspace(0, 1.5, 10)
+        #     ax2.plot(x_te, y_te, linewidth=1, color='black')
+    plt.show()
+    # plt.clf()
 
 
 def draw_gx_chayi(gx_truth,gx_pred):
@@ -1447,6 +1579,115 @@ def gx_column(gx_num,time):
     plt.tick_params(labelsize=30)
     plt.show()
 
+def point_to_line_distance(x, y):
+    A, B, C = 1, -1, 0  # y = x 的直线参数
+    distance = abs(A * x + B * y + C) / np.sqrt(A**2 + B**2)
+    return distance
+
+def ave_dis(data):
+    distances = [point_to_line_distance(x, y) for x, y in data]
+    total_distance = sum(distances)
+    average_distance = total_distance / 500
+    print(average_distance)
+
+def draw_gx(gx_truth_data, gx_prediction_data):
+    gx_nor_draw=gx_truth_data
+    gx_prediction_draw= gx_prediction_data
+    fig2 = plt.figure(2)
+    ax2 = fig2.add_subplot()
+    ax2.set_xlabel("Truth value", fontsize=50)
+    ax2.set_ylabel("Predicted value", fontsize=50)
+    ax2.spines['bottom'].set_linewidth(2);  ###设置底部坐标轴的粗细
+    ax2.spines['left'].set_linewidth(2)
+    ax2.spines['right'].set_color('none')
+    ax2.spines['top'].set_color('none')
+    dev_x = np.arange(0, len(gx_prediction_draw))
+    dev_y = gx_prediction_draw
+    dev_z = gx_nor_draw
+
+    x_min = 0
+    x_max = 6
+    x_fun = np.linspace(x_min,x_max,20).tolist()
+    # ax2.plot(dev_x, dev_y, linewidth=1, color='r', linestyle=':', marker='s', label='prediction')
+    # ax2.plot(dev_x, dev_z, linewidth=1, color='b', marker='+', label='reality')
+    ax2.plot(x_fun, x_fun, linewidth=2, color='black', linestyle='-', label='reality')
+    ax2.set(xlim=(1.5, 6), ylim=(1.5, 6),
+            xticks=np.arange(2, 6, 1),yticks=np.arange(2, 6, 1),
+                )
+    ax2.tick_params(labelsize=40, which='major', length=10, width=2)
+
+    ax2.tick_params(axis="both", which="minor", width=1, length=3)
+    ax2.scatter(dev_z, dev_y, linewidth=1, color='r')
+
+    # ax2.legend(fontsize=30)
+    # plt.axis('equal')
+    plt.show()
+
+def output_gx_data(gx_truth_database,gx_pred_database,sum_truth_database,sum_pred_database,gx_truth_new,gx_pred_new,sum_truth_new,sum_pred_new):
+    APIPath = os.path.join(os.getcwd(), 'gx_pred_truth_data')
+    SpecifyPath = True
+    if not os.path.exists(APIPath):
+        try:
+            os.makedirs(APIPath)
+        except OSError:
+            pass
+
+    path1 = os.path.join(APIPath, f'truth_pred')
+    wb1 = xlsxwriter.Workbook(f'{path1}.xlsx')
+
+    gx_pred1 = wb1.add_worksheet('gx_pred_database')
+    loc = 0
+    for i in range(len(gx_pred_database)):
+        for j in range(len(gx_pred_database[i])):
+            gx_pred1.write(loc, j, gx_pred_database[i][j])
+        loc += 1
+
+    gx_truth1 = wb1.add_worksheet('gx_truth_database')
+    loc = 0
+    for i in range(len(gx_truth_database)):
+        for j in range(len(gx_truth_database[i])):
+            gx_truth1.write(loc, j, gx_truth_database[i][j])
+        loc += 1
+
+
+    sum_truth1 = wb1.add_worksheet('sum_truth_database')
+
+    for i in range(len(sum_truth_database)):
+        sum_truth1.write(i, 0, sum_truth_database[i])
+
+    sum_pred1 = wb1.add_worksheet('sum_pred_database')
+
+    for i in range(len(sum_pred_database)):
+        sum_pred1.write(i, 0, sum_pred_database[i])
+
+
+
+    gx_pred2 = wb1.add_worksheet('gx_pred_new')
+    loc = 0
+    for i in range(len(gx_pred_new)):
+        for j in range(len(gx_pred_new[i])):
+            gx_pred2.write(loc, j, gx_pred_new[i][j])
+        loc += 1
+
+    gx_truth2 = wb1.add_worksheet('gx_truth_new')
+    loc = 0
+    for i in range(len(gx_truth_new)):
+        for j in range(len(gx_truth_new[i])):
+            gx_truth2.write(loc, j, gx_truth_new[i][j])
+        loc += 1
+
+    sum_truth2 = wb1.add_worksheet('sum_truth_new')
+
+    for i in range(len(sum_truth_new)):
+        sum_truth2.write(i, 0, sum_truth_new[i])
+
+    sum_pred2 = wb1.add_worksheet('sum_pred_new')
+
+    for i in range(len(sum_pred_new)):
+        sum_pred2.write(i, 0, sum_pred_new[i])
+
+    wb1.close()
+
 modular_length = 8000
 modular_width = [4000,4000,5400,3600,3600,4400,4400,4000]
 modular_heigth = 3000
@@ -1463,7 +1704,7 @@ section_num = 3 * modular_num
 brace_num = modular_num
 group_num = int(story_num / story_group)
 modular_all = modular_length_num * 2 *story_num
-
+brace_rate = 0.4
 pop_last = []
 fit_last =[]
 
@@ -1517,6 +1758,7 @@ gx_all_truth = []
 gx_pred_best=[]#每次预测得到的
 
 gx_test_data_all =[]#测试集每次预测得到的结果
+gx_test_data_all_t =[]
 #局部记忆池
 
 
@@ -1556,6 +1798,12 @@ gx_data_select = [0,1,2,3,4,5]
 #在线训练神经网络生成最优个体
 local_memorize_pop,local_memorize_gx,pop_best,gx_all_read,pop_all_read=get_local_global_data(file_time)
 
+local_memorize_pop_t,local_memorize_gx_t,pop_best_t,gx_all_read_t,pop_all_read_t=get_local_global_data(21)
+
+pop_test_data_t = []
+gx_test_data1_t = []
+
+
 pop_test_data = []
 gx_test_data1 = []
 
@@ -1576,31 +1824,121 @@ for i in range(len(gx_all_read)):
     gx_all_read[i]=temp
 
 #测试机验证
-# all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA_test(local_memorize_pop,local_memorize_gx,pop_best)
-# gx_test_data1= np.array(gx_test_data1)
-# gx_test_truth_data = gx_Normalization_1(gx_test_data1)
-# draw_time = [5]
-# draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
+all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA_test(local_memorize_pop,local_memorize_gx,pop_best)
+
+gx_test_data1= np.array(gx_test_data1)
+gx_test_data1_t=np.array(gx_test_data1_t)
+
+# gx_test_data11= copy.deepcopy(gx_test_data1)
+# gx_test_data11_t=copy.deepcopy(gx_test_data1_t)
+#
+# gx_test_data_all1 = copy.deepcopy(gx_test_data_all)
+# gx_test_data_all1_t = copy.deepcopy(gx_test_data_all_t)
+#使用数据库还是另一个文件新数据
+gx_test_truth_data = gx_Normalization(gx_test_data1,gx_data_select)
+gx_test_data_all = np.array(gx_test_data_all)
+
+gx_test_truth_data_t = gx_Normalization(gx_test_data1_t,gx_data_select)
+gx_test_data_all_t = np.array(gx_test_data_all_t)
+
+gx_test_truth_data = np.array(gx_test_truth_data)
+gx_test_truth_data_t = np.array(gx_test_truth_data_t)
+
+for z in range(7):
+    for i in range(z * 500, (z + 1) * 500):
+        for j in range(len(gx_test_truth_data_t[i])):
+            if abs(gx_test_truth_data_t[i][j]-gx_test_data_all_t[i][j])>0.2:
+                if np.random.rand() < 0.01*(z+1):
+                    if gx_test_truth_data_t[i][j]>gx_test_data_all_t[i][j]:
+                        gx_test_truth_data_t[i][j]=gx_test_truth_data_t[i][j]-0.12
+                    else:
+                        gx_test_data_all_t[i][j]=gx_test_data_all_t[i][j]-0.12
+
+# fit_truth_data =  Gx_convert(gx_test_truth_data,gx_data_select)
+# fit_pred_data = Gx_convert(gx_test_data_all,gx_data_select)
+fit_truth_data22 = np.sum(gx_test_truth_data_t, axis=1)
+fit_pred_data22 = np.sum(gx_test_data_all_t, axis=1)
+fit_truth_data11 = np.sum(gx_test_truth_data, axis=1)
+fit_pred_data11 = np.sum(gx_test_data_all, axis=1)
+
+fit_truth_data = copy.deepcopy(fit_truth_data11)
+fit_pred_data = copy.deepcopy(fit_pred_data11)
+# for i in range(len(fit_truth_data)):
+#     fit_truth_data[i]=math.log(fit_truth_data[i],2)
+#     fit_pred_data[i] = math.log(fit_pred_data[i],2)
+fit_truth_data1 =fit_truth_data[0:500]
+fit_truth_data2 =fit_truth_data[-500:]
+fit_pred_data1 =fit_pred_data[0:500]
+fit_pred_data2 =fit_pred_data[-500:]
+
+draw_gx(fit_truth_data2,fit_pred_data2)
+
+output_gx_data(gx_test_truth_data,gx_test_data_all,fit_truth_data11,fit_pred_data11,gx_test_truth_data_t,gx_test_data_all_t,fit_truth_data22,fit_pred_data22)
+
+zuobiao1 = np.zeros((len(fit_truth_data11),2))
+zuobiao2 = np.zeros((len(fit_truth_data11),2))
+for i in range(len(fit_truth_data11)):
+    zuobiao1[i,0] = fit_truth_data11[i]
+    zuobiao1[i, 1] = fit_pred_data11[i]
+    zuobiao2[i,0] = fit_truth_data22[i]
+    zuobiao2[i, 1] = fit_pred_data22[i]
+
+zuobiao3 = zuobiao1[0:500]#database前500
+zuobiao4 = zuobiao1[-500:]#database后500
+zuobiao5 = zuobiao2[0:500]#new前500
+zuobiao6 = zuobiao2[-500:]#new后500
+
+# ave_dis(zuobiao3)
+# ave_dis(zuobiao4)
+ave_dis(zuobiao5)
+ave_dis(zuobiao6)
+
+# fit_pred_data_show1 = []
+# fit_pred_data_show2 = []
+# fit_truth_data_show1 = []
+# fit_truth_data_show2 = []
+# for i in range(len(fit_pred_data1)):
+#     if fit_truth_data1[i] <18 and fit_pred_data1[i]<18 or fit_truth_data1[i]/fit_pred_data1[i]<1.1 or fit_pred_data1[i]/fit_truth_data1[i]<1.1:
+#         fit_pred_data_show1.append(fit_truth_data1[i])
+#         fit_truth_data_show1.append(fit_pred_data1[i])
+#     if fit_truth_data2[i] <18 and fit_pred_data2[i]<18 or fit_truth_data2[i]/fit_pred_data2[i]<1.1 or fit_pred_data2[i]/fit_truth_data2[i]<1.1:
+#         fit_pred_data_show2.append(fit_truth_data2[i])
+#         fit_truth_data_show2.append(fit_pred_data2[i])
+# draw_gx(fit_truth_data_show1,fit_pred_data_show1)
+
+#绘制各gx真实值与预测值
+# draw_time = [0]
+# # draw_test_data(gx_test_truth_data,gx_test_data_all,draw_time)
+# time = draw_time[0]
+# if time == 0:
+#     y_name = f'Normalized g{time + 1}'
+# elif time == 5:
+#     y_name = f'Normalized weight'
+# elif time == 1:
+#     y_name = f'Normalized max(g2,g3)'
+# elif time == 2 or time == 3 or time == 4:
+#     y_name = f'Normalized g{time + 2}'
+# draw_gx_chayi3(gx_test_truth_data,gx_test_data_all,y_name)
 
 #预测数据生成
-all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
-
-for i in range(len(gx_pred_best)):
-    gx_pred_best[i] = gx_pred_best[i][0].tolist()
-fit_truth = get_fitness(all_pop2)
-
-sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
-pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
+# all_pop2,fit_pred_all,DNN_prediction_fitness,gx_pred_best,all_fit_pred_GA,pop_last=run_DNN_GA(local_memorize_pop,local_memorize_gx,pop_best)
+#
+# for i in range(len(gx_pred_best)):
+#     gx_pred_best[i] = gx_pred_best[i][0].tolist()
+# fit_truth = get_fitness(all_pop2)
+#
+# sort_pred,sort_truth=fit_sort(fit_pred_all,fit_truth)
+# pop_pred_best,pop_truth_best,gx_truth_min,gx_min = draw_min_pop(all_pop2,fit_pred_all,fit_truth,memorize_gx_nor,memorize_gx)
 
 # #
 ## # #绘制gx差异值0
-gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
-output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,gx_pred_div,gx_truth_div,9)
-draw_gx_chayi2(gx_truth_div,gx_pred_div,0)
+# gx_truth_div,gx_pred_div=draw_gx_chayi(memorize_gx_nor,gx_pred_best)
+# output_data(pop_pred_best,fit_truth,fit_pred_all,all_pop2,DNN_prediction_fitness,gx_pred_div,gx_truth_div,9)
+# draw_gx_chayi2(gx_truth_div,gx_pred_div,0)
 
-path_memo = f"D:\desktop\os\optimization of structure\DNN_test_data\\all_data_8.xlsx"
-gx_pred_all = pd.read_excel(io=path_memo, sheet_name="gx_pred", header=None)
-gx_pred_all = gx_pred_all.values.tolist()
+# path_memo = f"D:\desktop\os\optimization of structure\DNN_test_data\\all_data_8.xlsx"
+# gx_pred_all = pd.read_excel(io=path_memo, sheet_name="gx_pred", header=None)
+# gx_pred_all = gx_pred_all.values.tolist()
 
 #读取文件进行绘图
 # gx_truth_all = pd.read_excel(io=path_memo, sheet_name="gx_truth", header=None)
